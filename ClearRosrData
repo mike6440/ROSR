@@ -1,0 +1,44 @@
+#!/usr/bin/perl -w
+
+#  1. Call after 'Stoprosr'
+#  2. ArchiveRosr
+#
+#  Wipes clean the ROSR/data folder
+#    Asks permission before
+#  
+#  Call:  perl ClearRosrData
+#  
+#  Output: none
+# 
+
+use lib $ENV{MYLIB};
+use perltools::MRutilities;
+use perltools::MRtime;
+
+	## DATA PATH
+my $datapath="$ENV{HOME}/swmain/apps/ROSR/data";
+print"data path = $datapath\n";
+
+print"
+=========================
+   WARNING
+=========================
+This process will delete everything from the ROSR/data folder.
+Command \"ArchiveRosr\" should be used to backup all collected data.
+
+Proceed to delete?  (y or n): ";
+
+my $ans=<>;
+chomp($ans);
+print"You entered $ans\n";
+
+if($ans =~ /y/i){
+	print"Delete data\n";
+	my $cmd="rm -r $datapath/*";
+	#print"cmd=$cmd\n";
+	system $cmd;
+} else {
+	print"No delete.\n";
+}
+
+exit 0;

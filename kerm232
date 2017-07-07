@@ -1,0 +1,71 @@
+#!/usr/bin/expect --
+#kermit_serial_connect.ex
+#Note: the file .kermrc has the command "prompt k>>"
+
+set log_user 0
+
+## DEFINE THE PORTS
+set argc [llength $argv]
+#	puts "kerm232 [[port] speed]"
+#	puts "Examples:"
+#	puts "   kerm232 /dev/ttyUSB0 9600"
+#	puts "   kerm232 19200"
+#	puts "   kerm232"
+#	puts "--------------------------------"
+
+if {$argc == 0} {
+	set inport [exec FindUSBPort]
+	set bd 9600
+} elseif {$argc == 1} {
+	set inport [exec FindUSBPort]
+	set bd [lindex $argv 0];
+} else {
+	set inport [lindex $argv 0]
+	set bd [lindex $argv 1]
+}
+#puts "INPUT PORT $inport"
+#puts "INPUT BAUD $bd"
+
+
+# START PROCESS -- KERMIT FOR ISAR MODEM
+spawn kermit
+set ISAR $spawn_id
+set timeout 4
+
+expect {
+	-i ISAR
+	timeout {"KERMIT FAILS TO OPEN\n"; exit 1}
+	">>"
+}
+
+set timeout 3
+## OPEN THE PORT
+send "set line $inport\r"
+expect ">>"
+#send_user "set line $inport\n";
+## SPEED
+send "set speed $bd\r"
+## DUPLEX
+send "set duplex full\r"
+expect ">>"
+## LOCAL ECHO
+send "set local-echo on\r"
+expect ">>"
+## FLOW CONTROL
+send "set flow none\r"
+expect ">>"
+## CARRIER WATCH
+send "set carrier-watch off\r"
+expect ">>"
+## CONNECT 
+send "connect\r"
+expect {
+	"Conn*---"  {send_user "TTY CONNECTED\n"}
+	timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
+}
+
+
+set spawn_id $ISAR
+interact
+
+exit 0

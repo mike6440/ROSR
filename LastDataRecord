@@ -1,0 +1,19 @@
+#!/usr/bin/perl -X
+#   ./LastAvg rad_avg (or 'gps_avg', 'wxt_raw', etc)
+
+my $s = `LastDataFolder`;
+chomp $s;
+#print"datafolder = $s\n";
+
+my $a = shift();
+
+my @rw = `ls -1 $s/$a*.txt 2>/dev/null`;
+#foreach(@rw){chomp($_); print"$_\n"}
+
+if ($#rw < 0 ){exit 1}
+else {
+	chomp($fz=$rw[$#rw]); 
+	$fz =~ s/^\s+//;
+	system "tail -1 $fz";
+	exit 0;
+}

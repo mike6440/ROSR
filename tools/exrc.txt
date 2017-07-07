@@ -1,0 +1,21 @@
+" .exrc - dwc - last update: 11/2014
+"  http://grox.net/doc/unix/exrc.php
+
+set autoindent
+"set modeline
+"set nomore
+set number
+"set remap
+"set report=1
+set ruler
+"set scroll=15
+set shiftwidth=4
+"set showcmd
+"set showmatch
+set showmode
+set tabstop=4
+set ts=4
+"set terse
+"set nowrapscan
+set directory=/tmp
+

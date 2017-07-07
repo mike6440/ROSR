@@ -1,0 +1,22 @@
+gtdaq       --  go to the ROSR/sw folder
+
+
+--- SCREEN ---
+isscreen    --  Checks to see if the DAQ screen is on.
+gtscreen    --  Opens the DAQ screen (careful!), "^a d" to end.
+^a d        --  disconnect from screen
+^a 1        --  go to screen 1. Also 2,3,...
+
+
+--- CREATE DATA ARCHIVE ---
+  1.  ../../      --  move up to the apps folder.  (~/swmain/apps/$ )
+  2. cp -R ROSR /home/rmr/rosr_yyyyMMdd  
+  3. tar -zcf /home/rmr/rosr_yyyyMMdd.tar.gz ROSR
+  4. Save to thumb drive or scp to archive.
+
+
+--- WIPE ALL DATA -- !!! DANGER !!! ---
+  1. gtdaq
+  2. rm -r ../data/*   CAREFUL!!
+
+

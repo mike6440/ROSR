@@ -1,0 +1,66 @@
+#!/usr/bin/perl -w
+
+#  Looks at the last available record in gps_raw.
+#  Parses out the $GPRMC sentence.
+#  Uses the gprmc() suproutine to deliver the contents of the sentence.
+#  Prints out results.
+#  
+#  Call:  perl gpsgetraw
+#  
+#  Output: <<$dtgps,$lat,$lon,$sog,$cog>>
+#         gps dt            m/s  degT
+# 
+
+use lib $ENV{MYLIB};
+use perltools::MRutilities;
+
+my ($str,$ir,$is,$str1);
+my @w;
+
+if($#ARGV >= 0 ){
+	my $setupfile = shift();
+	print"setupfile=$setupfile -- ";
+	if(-f $setupfile){
+		print"EXISTS\n";
+		$gpsstatus=FindInfo($setupfile,'GPS HUB COM NUMBER',':');
+		if($gpsstatus==-1){
+			printf"%s,%s,0,0,%s",
+			  FindInfo($setupfile,"GPS FIXED LATITUDE",':'),
+			  FindInfo($setupfile,"GPS FIXED LONGITUDE",':'),
+			  FindInfo($setupfile,"GPS FIXED VARIATION",':');
+			exit;
+		}elsif($gpsstatus==0){
+			print"simulate\n";
+			exit;
+		}
+	}else{
+		print"0,0,0,0";
+		exit;
+	}
+}
+$str=`LastDataRecord gps_raw`;
+chomp($str);
+$ir = index($str,"GPRMC");
+if($ir>10){
+	$is = index($str,"\*");
+	$str1=substr($str,$ir-1,$is-$ir+2);
+	if ( NmeaChecksum( $str1 ) eq substr($str,$is+1,2) ){
+		@w=split /[,\s]+/, $str1;
+		#foreach(@w){print"$_\n"}
+		@x=gprmc($str1,0);
+		#foreach(@x){print"$_\n"}
+		printf"%d,%.6f,%.6f,%.2f,%.0f",$x[0],$x[1],$x[2],$x[3],$x[4];
+	}
+	else {print"0,0,0,0,0"}
+} else {
+	print"0,0,0,0,0"
+}
+
+
+exit;
+
+
+#  ($dtgps, $lat, $lon, $sog, $cog, $var) = gprmc($sentence, $missing);
+# edit 100221
+#
+# $GPRMC,220516,A,5133.82,N,00042.24,W,173.8,231.8,130694,004.2,W*70

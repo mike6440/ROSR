@@ -1,0 +1,56 @@
+#! /usr/bin/perl
+#sbd_simulator.pl
+
+my $str;
+my @wds;
+my $sbddelay = 1; # sec
+# my ($t0);
+
+
+while (1) {
+	chomp ($str = <STDIN>);
+	#print "sbd_simulator input = \"$str\"\n";
+	$t0 = now();
+
+	if ( $str =~ /^quit/i ) { exit 0 }
+	elsif ( $str =~ /^at$/i ) { print "OK\n" }
+	elsif ( $str =~ /^at\+sbdwt=/i ) { 
+		while ( (now() - $t0) < 1 ) {}
+		@wds = split( /=/, $str );
+		print "OK TEXT \"$wds[1]\"\n";
+	}
+	elsif ( $str =~ /^at\+sbdi$/i ) {
+		while ( (now() - $t0) < $sbddelay ) {}
+		if ( now()%2 ) {
+			print "+SBDI:1,8435,0,137,0,0\r\nOK\r\n";
+		} else {
+			print "+SBDI:2,8435,0,137,0,0\r\nOK\r\n";
+		}
+	}
+}
+
+
+#*************************************************************/
+sub now
+{
+# Get gmt time which uses the computer's time zone and daylight savings state,
+# then use $timezone to put the time into local standard time.
+#v101 060629 rmr -- start config control
+	my $tm;
+	use Time::gmtime;
+	$tm = gmtime;	#gmtime 	# CURRENT DATE 
+	my $nowsec = datesec($tm->year+1900, $tm->mon+1, $tm->mday, $tm->hour, $tm->min, $tm->sec);
+	return ( $nowsec);
+}
+
+#*************************************************************/
+sub datesec 
+# Convert yyyy,Mm,dd,hh,mm,ss to epoch secs
+#v101 060629 rmr -- start config control
+#v102 060629 rmr -- add use command
+{
+	use Time::Local;		# v102 use Time module
+	my $dtsec;
+	$dtsec = timelocal($_[5], $_[4], $_[3], $_[2], $_[1]-1, $_[0]-1900);
+	return ($dtsec);
+}

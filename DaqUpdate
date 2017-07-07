@@ -1,0 +1,44 @@
+#!/usr/bin/perl -w
+
+use lib $ENV{MYLIB};
+use perltools::MRtime;
+use perltools::MRutilities;
+
+my @f = ('rosr','gps');
+my @v = ();
+
+printf"NOW = %d\n",now();
+
+	# SELECT STREAM
+my $is;
+for($is=0; $is<=$#f; $is++){
+	my $f=$f[$is];
+	print"$f";
+
+		# LAST RECORD TIME
+	my $cmd = sprintf("LastDataTime %s_raw",$f);
+	my $s = `$cmd`;
+	chomp($s); 
+	my @s = split /[ ]+/, $s;
+	printf"    %d", $s[1];
+
+		# THE AGE OF THE RECORD
+	if($s[1]==0){
+		print"    0 -- RECORD FAILURE.\n",$f;
+		push @v,0;		
+	} else {
+		my $age = now() - $s[1];
+		print"    $age";
+		if ($age > 600){ print"    FAIL\n"; push @v,0}
+		else{ print"    OK\n"; push @v, 1;  }
+	}
+}
+
+#print"Verify = @v\n";
+
+my $good=1;
+foreach(@v){if($_ == 0){$good=0}}
+#print"good = $good\n";
+`echo $good > /tmp/tmpdaq`;
+
+exit 0

@@ -1,0 +1,202 @@
+#!/usr/bin/expect --
+
+# === NOTES ======================
+# Modem needs ATE0 command to suppress echo.
+# === end ========================
+
+
+# === CRONTAB -E ==================
+#MAILTO=""
+#BASH_ENV="$HOME/.bashrc"
+#SHELL=/bin/bash
+#20,50 * * * * $DAQSWFOLDER/sbd_transmit >> /tmp/sbdlog
+#====== END =========================
+
+
+log_user 0
+
+		# SETUP FILE DEFINED
+set Date [exec date -u "+%Y%m%dT%H%M%SZ"];
+set setupfile "$env(HOME)/swmain/apps/ISAR3/sw/setup/su.txt"
+		## SEE IF THE SETUP FILE EXISTS
+if [catch {open $setupfile} sufile] {
+	puts "Setup file, $setupfile, open fails, exit 1"
+	exit 1
+}
+
+global SBD SBDPID
+#===================================
+# PROCEDURE TO CONNECT TO SBD  v13
+#===================================
+proc SpawnSBD { hub_url sbdport }  {
+	global SBD SBDPID
+	set str [spawn_kermit $hub_url $sbdport]
+	set SBD [lindex $str 0];    set SBDPID [lindex $str 1];
+}
+
+#===========================================================================
+# PROCEDURE TO CONNECT TO A PORT USING KERMIT
+# input
+#	serialport = full path name for the serial port, e.g. /dev/tty.usbserial0
+#   baud = desired baud rate, e.g. 9600
+#============================================
+proc spawn_kermit {hub_url portnumber} {
+			# START PROCESS -- KERMIT
+	set pid [spawn kermit]
+	expect {
+		timeout {send_user "KERMIT FAILS TO OPEN\n"; exit 1}
+		">>"
+	}
+	
+	#send_user "test OPEN PORT $hub_url  $portnumber\n";
+			# OPEN THE PORT
+	send "set host $hub_url $portnumber\r"
+	expect ">>"
+	send "set tcp keepalive on 0\r\n"
+	expect ">>"
+	send "set tcp linger OFF\r\n"
+	expect ">>"
+	send "set tcp nodelay on\r\n"
+	expect ">>"
+	send "set telnet echo local\r\n"
+	expect ">>"
+			# this is important for using the rsr menu
+			# raw means send CR by itself, not CRLF and NOT CRNul
+	send "set telnet newline-mode nvt raw\r\n"
+	expect ">>"
+			# CONNECT 
+	send "connect\r"
+	expect {
+		timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
+		"Conn*---"  { }  #v15
+	}
+	#send_user "spawn_kermit spawn_id = $spawn_id,   pid = $pid\n";
+	set out $spawn_id;
+	lappend out $pid
+	return $out
+}
+
+#====================================================================
+		# PROCEDURE TO SEND SBD MESSAGE
+		# input
+		#  str=the string to send
+		#  sbdid = the spawn ID for the sbd modem
+		#  ntries = no. of attempts for a "good" transmission
+#====================================================================
+proc sbdi {str sbdid ntries} {
+	set strlen [string length $str] ;
+	## WAKE UP THE MODEM
+	set timeout 1
+	set i 0
+	#===================
+	# IS MODEM AWAKE?
+	# ==================
+	while {$i < 5} {
+		incr i 1
+		send -i $sbdid "at\r"
+		expect {
+			-i $sbdid "*OK" {
+				break
+			}
+			timeout {
+				send_user "$i: MODEM DOES NOT RESPOND TO AT\n";  
+			}
+		}
+	}
+	
+
+	
+	if { $i >= 5 } {
+		#====================
+		# MODEM FAILS TO RESPOND
+		# ===================
+		send_user "MODEM FAILS TO RESPOND, SKIP SBDI\n"
+		return 0
+	}
+
+	set Ktx 0   ;# initialize the flag to 0
+	set itx 0	;# we try to tx a few times
+	
+	#=====================
+		# KILL ECHO
+	#=====================
+	send -i $sbdid "ate0"
+	expect {
+		-i $sbdid "OK" {
+			#send_user "Kill modem echo\n"
+		}
+	}
+
+	#======================
+	# CLEAR MEMORY
+	#======================
+	send -i $sbdid "at+sbdd2\r"
+	expect {
+		-i $sbdid "OK" {
+		#	send_user "Clear modem memory\n"
+		}
+	}
+	
+	#======================
+	# LOAD STRING
+	#=====================
+	send -i $sbdid "at+sbdwt=$str\r"
+	sleep 1
+	#========================
+	# TRANSMIT THE STRING
+	#=======================
+	while { $itx < 3 } {
+		# REPLY: +SBDI: 1, 66, 0, 0, 0, 0
+		# REPLY: +SBDIX:<MO status>,<MOMSN>,<MT status>,<MTMSN>,<MT length>,<MT queued>
+		send -i $sbdid "at+sbdi\r"
+		#send_user "TX $itx: at+sbdi\n"
+		set timeout 20
+		expect -i $sbdid -re "\\+SBDI:(.*),(.*),(.*),(.*),(.*),(.*)\r\nOK" {
+			set Ktx $expect_out(1,string)
+			set Ntx $expect_out(2,string)
+			set Krx $expect_out(3,string)
+			set Nrx $expect_out(4,string)
+			set Lrx $expect_out(5,string)
+			set Qrx $expect_out(6,string)
+		}
+		set itx [expr $itx + 1]
+		if { $Ktx == 1 } { 
+			break
+		}
+		after 5000     ;# wait one second before retry
+	}
+	send_user "$str == Stat/#/itx  $Ktx/$Ntx/$itx\n"
+	set timeout 10
+	return $Ktx
+}
+#==================== END PROCEDURES =============================================
+
+
+		# PDS SERIAL HUB URL
+spawn -noecho getsetupinfo $setupfile "SERIAL HUB URL"
+expect -re "(\.*)(\r)";
+set hub_url $expect_out(1,string)
+
+
+		## SBDPORT
+spawn -noecho getsetupinfo $setupfile "SBD HUB COM NUMBER"
+expect -re "(\.*)(\r)";
+set sbdport $expect_out(1,string)
+
+SpawnSBD $hub_url $sbdport
+
+		#=====================
+		# SEND SIGNON MESSAGE
+		#====================
+set sbdmessage [ exec head -1 /tmp/sbd ]
+
+if { $sbdport >= 0 } { 
+	set SendFlag [sbdi $sbdmessage $SBD 2]
+#	if {$SendFlag == 0 } {
+#		 send_user "TX SIGNON SBD FAILS\n";
+#	} else {
+#		send_user "TX SIGNON SBD SUCCESS\n"
+#	}
+}
+
+

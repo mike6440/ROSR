@@ -1,0 +1,19 @@
+#!/usr/bin/perl
+
+while(1){
+	$str=`screen -S ROSR -ls`;
+	chomp($str);
+	@w=split /\t/,$str;
+
+	$l=length($w[1]);
+	if ($l <=0) {
+		#print"No ROSR screens.\n";
+		exit 0
+	}
+	else {
+		@d=split /\./,$w[1];
+		print"KILL Screen $d[0]\n";
+		`kill $d[0]`;
+	}
+}
+exit 0

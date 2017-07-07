@@ -1,0 +1,149 @@
+#!/usr/bin/expect
+#get_kt
+
+log_user 1;
+
+global KT KTPID
+#========================================================
+		# PROCEDURE TO CONNECT
+#============================================================
+proc SpawnKT { serialline serialspeed } {
+	global KT KTID
+	if {$serialline == 0} {
+		send_user "SIMULATE KT: SPAWN simulate/kt_simulator\n";
+		set KTID [spawn perl simulate/kt_simulator] 
+		set KT $spawn_id
+	} else {
+		send_user "OPEN KT RS232 $serialline $serialspeed \n";
+		spawn_232 $serialline $serialspeed]
+	}
+}
+
+#============================================
+# CONNECT TO A PORT USING KERMIT
+#============================================
+# proc spawn_kermit {hub_url portnumber} {
+# 	global KT KTID
+# 	set KTID [spawn kermit]
+# 	set KT $spawn_id
+# 	expect {
+# 		">>"
+# 	}
+# 
+# 	send "set host $hub_url $portnumber\r"
+# 	expect ">>"	
+# 	send "set tcp recvbuf 1000\r\n"
+# 	expect ">>"
+# 	send "set tcp keepalive off\r\n"
+# 	expect ">>"
+# 	send "set tcp linger on 100\r\n"
+# 	expect ">>"
+# 	send "set tcp nodelay on\r\n"
+# 	expect ">>"
+# 	send "set telnet echo local\r\n"
+# 	expect ">>"
+# 			# this is important for using the rsr menu
+# 			# raw means send CR by itself, not CRLF and NOT CRNul
+# 	send "set telnet newline-mode nvt raw\r\n"
+# 	expect ">>"
+# 			# CONNECT 
+# 	send "connect\r"
+# 	expect {
+# 		"Conn*---"  {return $spawn_id;}
+# 	}
+# }
+
+#============================================
+# CONNECT TO RS232 USING KERMIT
+#============================================
+proc spawn_232 {serialline serialspeed} {
+	global KT KTID
+	set KTID [spawn kermit]
+	set KT $spawn_id
+	expect {
+		">>"
+	}
+
+	send "set line $serialline\r"
+	expect ">>"	
+	send "set speed $serialspeed\r\n"
+	expect ">>"
+	send "set flow none\r\n"
+	expect ">>"
+	send "set carrier-watch off\r\n"
+	expect ">>"
+			# CONNECT 
+	send "connect\r"
+	expect {
+		"Conn*---"  {return $spawn_id;}
+	}
+}
+
+#=========================== END OF PROCEDURES =====================================
+
+		# SETUP FILE
+set setupfile  [lindex $argv 0]
+send_user "SETUP FILE FROM CMD LINE: $setupfile   "
+		# EXISTS
+if [catch {open $setupfile} sufile] {
+	send_user "DOES NOT EXIST. EXIT.\n"
+	exit 1
+} else {
+	send_user "EXISTS\n"
+}
+
+		# HUB IP
+# spawn -noecho ./getsetupinfo $setupfile "SERIAL HUB URL"
+# expect -re "(\.*)(\r)";
+# set hub_url $expect_out(1,string);
+# send_user "KT HUB IP: $hub_url\n";
+
+		# RS232 LINE
+spawn -noecho ./getsetupinfo $setupfile "SERIAL LINE"
+expect -re "(\.*)(\r)";
+set serialline $expect_out(1,string);
+send_user "SERIAL LINE: $serialline\n";
+
+		# SERIAL SPEED
+spawn -noecho ./getsetupinfo $setupfile "SERIAL SPEED"
+expect -re "(\.*)(\r)";
+set serialspeed $expect_out(1,string)
+puts "SERIAL SPEED = $serialspeed"
+
+		# DEFINE THE PORT
+# spawn -noecho ./getsetupinfo $setupfile "KT HUB COM NUMBER"
+# expect -re "(\.*)(\r)";
+# set ktport $expect_out(1,string)
+# puts "KT HUB PORT NUMBER = $ktport"
+
+		# OPEN TELNET CONNECTIO
+SpawnKT $serialline $serialspeed
+#SpawnKT $hub_url $ktport
+send_user "KT CONNECT, spawn_id = $KT, pid = $KTID\n";
+
+		# QUERY LOOP
+set timeout 1
+set spawn_id $KT
+set replyKY "0"
+
+		# MAIN LOOP
+set looptime 0
+while 1 {
+	set dt [timestamp]
+	if { [expr $dt - $looptime] > 0 } { 
+		if { $serialline == 0 } {
+			send "S\n";  # simulate only
+		} else {
+			send "RAD\r";		# operate
+		}
+		expect {
+			-re "( .*)\r" {
+				set str $expect_out(1,string)
+				send_user "$str\n";
+				#set replyKT [string trimright $str]   ;# remove cr/lf and any spaces
+				#send_user "KTRAW $replyKT\r\n";
+				set looptime [timestamp -gmt]		
+			}
+		}
+	}
+}

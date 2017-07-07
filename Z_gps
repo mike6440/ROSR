@@ -1,0 +1,256 @@
+#!/usr/bin/expect --
+
+set PROGRAMNAME Z_gps
+set VERSION 08
+set EDITDATE 150414;	#150410;	#150214		;#141024  ;#130706
+
+set loguser 0;#   test 0-quiet, 1=verbose
+log_user $loguser;
+
+global GPS GPSPID GPSAV GPSAVPID
+global infoname
+
+#========================================================
+		# PROCEDURE TO CONNECT TO GPS  v3
+#============================================================
+proc SpawnGps { hub_ip gpsport} {
+	global GPS GPSPID infoname
+	if {$gpsport == 0} {
+		set GPSPID [spawn perl simulate_gps] 
+		set GPS $spawn_id
+		write_info $infoname "SPAWN GPS SIMULATE, spawn_id = $GPS,  pid = $GPSPID"
+	} else {
+		write_info $infoname "OPEN GPS PORT $hub_ip $gpsport.";
+		spawn_kermit $hub_ip $gpsport
+		write_info $infoname "SPAWN GPS KERMIT, spawn_id = $GPS,  pid = $GPSPID"
+	}
+}
+
+
+#=====================================
+#   PROCEDURE TO START AVGGPS PROGRAM
+#==================================
+proc SpawnAvgGps { setupfile } {
+	global GPSAV GPSAVPID infoname
+	set GPSAVPID [spawn perl avggps $setupfile]
+	set GPSAV $spawn_id
+	write_info $infoname "SPAWN GPSAV spawn_id = $GPSAV, pid = $GPSAVPID"
+			# PROGRAM REPLY
+	expect {
+		eof {
+			send_user "AVGGPS STARTUP, eof\n"
+			exit 1
+		}
+		"GPS--" {
+			send_user "AVGGPS is ready, spawn_id=$GPSAV,  pid = $GPSAVPID\n"
+		}
+	}
+}
+
+
+#====================================================================
+# PROCEDURE WRITE_INFO
+# input
+#  fname = fullfile name towrite the info string
+#  str=the string to write
+#=============
+proc write_info {fname str} {
+	set str [timestamp -gmt -format "%y%m%d,%H%M%S,"]$str
+	exec echo $str >> $fname
+	return $str
+}
+
+#===========================================================================
+# PROCEDURE TO CONNECT TO A PORT USING KERMIT
+# input
+#	hub_ip = ip#
+#   portnumber
+#Note: .kermrc file line = prompt k>>
+#============================================
+proc spawn_kermit {hub_ip portnumber} {
+	global GPS GPSPID infoname
+			# START PROCESS -- KERMIT
+	set GPSPID [spawn kermit]
+	set GPS $spawn_id;
+	set timeout 4	
+	expect {
+		timeout {send_user "KERMIT FAILS TO OPEN\n"; exit 1}
+		">>"
+	}
+	
+	write_info $infoname "KERMIT PORT $hub_ip  $portnumber";
+			# OPEN THE PORT
+	send "set host $hub_ip $portnumber\r"
+	expect ">>"
+	send "set tcp keepalive on 0\r\n"
+	expect ">>"
+	send "set tcp linger OFF\r\n"
+	expect ">>"
+	send "set tcp nodelay on\r\n"
+	expect ">>"
+	send "set telnet echo local\r\n"
+	expect ">>"
+			# this is important for using the rsr menu
+			# raw means send CR by itself, not CRLF and NOT CRNul
+	send "set telnet newline-mode nvt raw\r\n"
+	expect ">>"
+			# CONNECT 
+	send "connect\r"
+	expect {
+		"Conn*---"  {send_user "PORT $portnumber CONNECTED\n"; return $spawn_id;}
+		timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
+	}
+}
+#==================== END PROCEDURES =============================================
+
+
+set infoname "$env(DAQDATAFOLDER)/info_gps.txt"
+send_user "infoname = $infoname\n";
+
+write_info $infoname "===== $PROGRAMNAME, V $VERSION, $EDITDATE =============="
+
+
+		# SETUP FILE DEFINED
+set setupfile  [lindex $argv 0]
+write_info $infoname "SETUPFILE: $setupfile   "
+## SEE IF THE SETUP FILE EXISTS
+if [catch {open $setupfile} sufile] {
+	send_user "Bad setup file: stop."
+	exit 1
+}
+
+		# DATAPATH
+spawn -noecho getsetupinfo $setupfile "RT OUT PATH"
+expect -re "(\.*)(\r)";
+set datapath $expect_out(1,string)
+write_info $infoname "DATAPATH = $datapath\n";
+
+		# PDS SERIAL HUB URL AND OFFSET
+spawn -noecho getsetupinfo $setupfile "SERIAL HUB URL"
+expect -re "(\.*)(\r)";
+set hub_ip $expect_out(1,string)
+write_info $infoname  "SERIAL HUB URL: $hub_ip"
+
+		## TIME WITH NO GPS
+spawn -noecho getsetupinfo $setupfile "GPS DEAD TIME ALARM"
+expect -re "(\.*)(\r)";
+write_info $infoname  "GPS DEAD TIME ALARM: $expect_out(1,string)"
+set zdeadtime $expect_out(1,string);
+
+		# DEFINE THE PORTS 
+spawn -noecho getsetupinfo $setupfile "GPS HUB COM NUMBER"
+expect -re "(\.*)(\r)";
+set gpsport $expect_out(1,string)
+write_info $infoname  "GPS HUB COM NUMBER: $gpsport"
+
+		# OPEN TELNET CONNECTIO
+SpawnGps $hub_ip $gpsport
+write_info $infoname "GPS = $GPS, PID = $GPSPID\n";
+
+		# GPSAV PROGRAM
+SpawnAvgGps $setupfile
+
+# =====================
+# MAIN LOOP
+#======================
+		# COUNT GOOD RECORDS
+set Nrecs 0
+set day0 0 ;# to initiate the first raw file
+
+set timemsg [timestamp]	;# --- MISSING INPUT TRANSMIT TIME
+set timegps [timestamp]
+set timegpslast 0	      		;# --- TIME OF THE LAST RECEIVED RAD
+
+while 1 {
+	set dt [timestamp]  ;# loop time
+	
+			# TIMEOUT
+	if { [expr $dt - $timegps] > $zdeadtime } {
+		send_user "NO RAW GPS IN $zdeadtime SECS.\n"
+		set timegps $dt
+		set dt0 $dt
+	}
+	
+			# NEW DAY -- NEW FILES
+	set day1 [timestamp -gmt -format "%j" -seconds $dt]
+	if {$day1 != $day0} {
+		set day0 $day1
+		set fname [timestamp -gmt -format "%y%m%d" -seconds $dt]
+		set rawname "$datapath/gps_raw_$fname.txt";
+		puts "RAW FILE NAME = $rawname";
+		if {[file exists $rawname]} {
+		} else {
+			set F [open $rawname w 0600]
+			puts $F "nrec yyyy MM dd hh mm ss lat lon sog cog var"
+			close $F
+		}
+		write_info $infoname "New day: rawname = $rawname"
+	}
+	
+	#================
+	# EXPECT FUNCTION -- WAITING FOR RESPONSE
+	# ===============
+	
+	expect {
+		-i $GPS
+		"\\\$GPRMC*\\*??"  {
+			set rawstr $expect_out(0,string);
+			set rawstr [string trim $rawstr ]
+			set timegps [timestamp] ;# record the time of the last gps
+					# --- TRAP DUP TIMES ----
+			while { $timegps <= $timegpslast } {
+				set timegps [expr $timegps + 1 ]
+			}
+			set timegpslast $timegps;
+			set spawn_id $GPSAV
+			send "$rawstr\r\n"
+			
+					# SAVE TO RAW FILE
+			set F [open $rawname a 0600]
+			set rawstr [timestamp -gmt -format "$Nrecs %Y %m %d %H %M %S " -seconds $timegps]$rawstr
+			puts $F $rawstr
+			close $F
+			
+					# SEND RAW TO AVG AND RCV RESPONSE
+			set timeout 1
+			set spawn_id $GPSAV
+			expect {
+				timeout { send_user "AVG timeout\n" }
+				-re "<<(GPSRW.*)>>"	{send_user "$expect_out(1,string)\n"} 
+			}
+					# RECORD COUNT
+			set Nrecs [expr $Nrecs + 1];
+		}
+
+		-i $GPSAV
+		eof {
+			SpawnAvgGps $setupfile $infoname
+			write_info $infoname "AVGGPS fails.  RE-START AVGGPS, spawn_id = $GPSAV,   pid = $GPSAVPID\n";
+		}
+		-re "<<(GPSAV,.*?)>>\r\n" {send_user "$expect_out(1,string)\n";}
+	
+		
+		#================== USER INPUT =========================================#
+		-i $user_spawn_id  
+		-re ".+" {
+			set userstr $expect_out(0,string)
+			send_user $userstr
+			#=====================
+			# QUIT & SEND SIGNOFF MESSAGE
+			#====================
+			if {[string match "*quit*" "<[string tolower $userstr]>"]} {
+				write_info $infoname "USER QUIT\n";
+				exit 0;
+			}
+			#=====================
+			# WRITE A HEADER LINE
+			#====================
+			if {[string match "*h*" "<[string tolower $userstr]>"]} {
+				send_user "PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE\n";
+						#  >20101226,195812,  41,0,1, -2.5,-1.5, 125,  514,3393,3394,3392,2340,2340,2355, 47.603,-122.288, 0.1,   0
+				send_user " yyyyMMdd,hhmmss ormv sw0 sw1  ptch roll fgaz  kt b11mv b12  b13  b21  b22  b23   lat     lon     sog  cog \n";
+			}
+		}
+	}
+}
+

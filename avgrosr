@@ -1,0 +1,1230 @@
+#!/usr/bin/perl -X
+#avgrosr_v3
+
+my $PROGRAMNAME = 'avgrosr';
+my $VERSION = '4';  
+my $EDITDATE = '160719'; #'151006'; #'150719'; '150209';
+# DAQ PROCESSING OF ROSR DATA 
+#v01 -- taken from avgisar, v17.
+#v01a -- flexible for port and stbd install
+#v2 -- calls socktxx >> line 401:	system "socktxx 10.198.5.1 4025";
+#v3 -- generalize the socktxx command.
+#v4 -- print out avg problem
+
+
+# EXAMPLE OF STRING FROM ROSR
+#2015,04,20,21,41,05,1429566060,47.603382,-122.288127,0.05,170,$WIROS,00.004622,265.05, 156445,17.98,2.836,2.841,0.391,2.469,2.155,2.154,1.730,2.764,4.096,3.558,-0.000,4.096,4.938,17.69,17.71,31.55,31.54,-2.4,-1.1,17.2,200.0,19.1,41.0,14.2,-0.0,  0*79
+#2015,04,20,21,37,42,1429565858,47.603372,-122.288128,0.00,170,$WIROS,00.004300,325.05, 189645,30.31,2.844,2.848,0.432,2.469,2.165,2.164,1.741,2.773,4.096,3.558,-0.000,4.096,4.938,17.55,17.57,31.34,31.33,-2.4,-1.1,29.5,200.0,19.0,40.7,14.2,-0.0,  0*7D
+#2015,04,20,21,43,42,1429566220,47.603385,-122.288128,0.05,170,$WIROS,00.004859, 44.97, 164612,21.15,2.830,2.835,0.402,2.469,2.147,2.146,1.722,2.755,4.096,3.558,-0.000,4.096,4.938,17.81,17.84,31.71,31.70,-2.3,-1.1,20.5,200.0,19.3,41.2,14.2,-0.0,  0*61
+#2015,04,20,21,39,26,1429565965,47.603377,-122.288125,0.00,170,$WIROS,00.004444,135.00, 156510,18.00,2.840,2.844,0.391,2.469,2.159,2.158,1.735,2.768,4.096,3.558,-0.000,4.096,4.938,17.63,17.65,31.46,31.45,-2.3,-1.1,17.4,200.0,19.1,40.9,14.2,-0.0,  0*7E
+
+use lib $ENV{DAQLIB};
+use perltools::MRtime;
+use perltools::MRutilities;
+use perltools::MRsensors;
+use perltools::MRstatistics;
+use perltools::Isar;
+use POSIX;
+
+my ($tb1, $tb1sd, $tb2, $tb2sd); 	# mean BB temps combined
+my (@x, @y);
+
+my $tcxlast;
+$tcxlast='00.000000';
+my $Nrecs=0;
+
+#=======================
+# FIND THE SETUP FILE
+#=======================
+if ( $#ARGV == 0 ) {
+	print "read setup file from command line\n";
+	$setupfile = shift();
+} else {
+	print"read setup file from environment\n";
+	$setupfile = $ENV{SETUPFILE};
+}
+if ( ! -f $setupfile ) {
+	print "ERROR -- NO SETUP FILE, $setupfile\n";
+	exit 1;
+}
+print "SETUPFILE = $setupfile\n";
+my $pgmstart=now();
+printf "Run time = %s\n", dtstr(now(), 'ssv');
+
+my $str;
+
+#===================
+# DEFINE OUT PATH
+#===================
+my $outpath =  FindInfo($setupfile,'RT OUT PATH', ': ');
+if ( ! -d $outpath ) { print"!! RT OUT PATH ERROR, $outpath\n"; die }
+
+
+open TMP, ">/tmp/avgrosr.txt" or die("OPEN TMP FAILS\n");
+print TMP "BEGIN\n";
+close TMP;
+
+#=======================
+#CAL EMIS: 0 = field use, compute e from angle,  ~=1 = calibration mode
+#  During calibration thus is the bath target emissivity. Usually == 1.
+#======================
+$e_cal = FindInfo($setupfile,'CALIBRATION EMISSIVITY', ':');  # black body emissivity
+writeTMP("e_cal = $e_cal");
+if($e_cal == 0){
+	$calflag=0;
+} else {
+	$calflag=1;
+}
+
+#=======================
+# TELNET SERVER
+#======================
+$telnetserverip = FindInfo($setupfile,'TELNET SERVER IP',':');
+print"TELNET SERVER IP = $telnetserverip\n";
+if($telnetserverip==0){print"No telnet socket output\n"}
+else{$telnetserverport = FindInfo($setupfile,'TELNET SERVER PORT',':');
+	print"TELNET SERVER PORT = $telnetserverport\n";
+}
+
+#----------------- HEADER ----------------
+$header = "PROGRAM: $PROGRAMNAME (Version $VERSION, Editdate $EDITDATE)
+RUN TIME: " . dtstr(now()) . "utc
+POINT OF CONTACT: Michael Reynolds, michael\@rmrco.com\n";
+
+$expname = FindInfo($setupfile,'EXPERIMENT NAME', ': ');
+$header = $header."EXPERIMENT NAME: $expname\n";
+
+$rosrsn = FindInfo($setupfile,'ROSR SERIAL NUMBER', ': ');
+$header = $header."ROSR SERIAL NUMBER: $rosrsn\n";
+
+$kt15sn = FindInfo($setupfile,'KT15 SERIAL NUMBER', ': ');  # KT15 SN: $kt15sn
+$header = $header."KT15 SERIAL NUMBER: $kt15sn\n";
+$filterfile = FindInfo($setupfile,'KT15 FILTER FILE', ': ');
+$header = $header."KT15 FILTER FILE: $filterfile\n";
+$filterfile = $ENV{DAQSWFOLDER}.'/'.$filterfile;
+
+if($calflag == 0){
+	$header = $header."CALIBRATION EMISSIVITY: $e_cal\n";
+	$header = $header."NORMAL RUN\n";
+	$header = $header."OUT PATH: $outpath\n";
+	$location = FindInfo($setupfile,'GEOGRAPHIC LOCATION', ': ');
+	$header = $header."GEOGRAPHIC LOCATION: $location\n";
+	$platform = FindInfo($setupfile,'PLATFORM NAME', ': ');
+	$header = $header."PLATFORM NAME: $platform\n";
+	$platformside = FindInfo($setupfile,'PLATFORM SIDE', ': ');
+	if ( $platformside =~ /port/i ) { $platformside = "PORT"; $tiltcorrect=-1; }
+	else { $platformside = "STARBOARD"; $tiltcorrect=1;}
+	$header = $header."PLATFORM SIDE: $platformside\n";
+	$side_location = FindInfo($setupfile,'LOCATION ON PLATFORM', ': ');
+	$header = $header."LOCATION ON PLATFORM: $side_location\n";
+	$ht_above_sealevel = FindInfo($setupfile,'HEIGHT ABOVE SEA LEVEL', ': ');
+	$header = $header."HEIGHT ABOVE SEA LEVEL: $ht_above_sealevel\n";
+	$Acorr = FindInfo($setupfile,'SSST SLOPE', ': ');
+	$header = $header."SSST SLOPE: $Acorr\n";
+	$CalOffset = FindInfo($setupfile,'SSST OFFSET', ': ');  # v05
+	$header = $header."SSST OFFSET: $CalOffset\n";  # v05
+		# 0,1,2,3
+	$str = FindInfo($setupfile,'SCAN VIEW ANGLES', ': ');
+	@view = split(/[, ]+/,$str);
+	$bb1view = 0; $bb2view = 1; $skyview = 2; $seaview = 3; 
+	$header = $header."SCAN VIEW ANGLES: $view[$bb1view], $view[$bb2view], $view[$skyview], $view[$seaview]\n";
+	$e_sea_0 = FindInfo($setupfile,'SEA EMISSIVITY', ':');  # black body emissivity
+	$header = $header."DEFAULT SEA EMISSIVITY: $e_sea_0\n";
+} else {
+	$header = $header."CALIBRATION EMISSIVITY: $e_cal\n";
+	$header = $header."CALIBRATION RUN\n";
+	$header = $header."RT OUT PATH: $outpath\n";
+	$Acorr = FindInfo($setupfile,'CAL SSST SLOPE', ': ');
+	$header = $header."CAL SSST SLOPE: $Acorr\n";
+	$CalOffset = FindInfo($setupfile,'CAL SSST OFFSET', ': ');  # v05
+	$header = $header."CAL SSST OFFSET: $CalOffset\n";  # v05
+		# 0,1,2,3
+	$str = FindInfo($setupfile,'CAL SCAN VIEW ANGLES', ': ');
+	@view = split(/[, ]+/,$str);
+	$bb1view = 0; $bb2view = 1; $skyview = 2; $seaview = 3; 
+	$header = $header."CAL SCAN VIEW ANGLES: $view[$bb1view], $view[$bb2view], $view[$skyview], $view[$seaview]\n";
+	$header = $header."CALIBRATION EMISSIVITY: $e_cal\n";
+	$calview = FindInfo($setupfile,'CALIBRATION VIEW POSITION', ': ');   # v15
+	$header = $header."CALIBRATION VIEW POSITION: $calview\n";
+	$header = $header."CALIBRATION VIEW ANGLE (deg): $view[$calview]\n";
+}
+
+$e_bb = FindInfo($setupfile,'BLACK BODY EMISSIVITY', ':');  # black body emissivity
+$header = $header."BLACK BODY EMISSIVITY: $e_bb\n";
+
+$e_a = FindInfo($setupfile,'APERATURE EMISSIVITY', ': '); # aperature emissivity
+$header = $header."APERTURE EMISSIVITY: $e_a\n";
+
+$avgsecs = FindInfo($setupfile,'ROSR AVERAGING TIME', ': ');
+$header = $header."AVERAGING TIME (secs): $avgsecs\n";
+$header = $header."TIME MARK IS CENTERED ON AVERAGING INTERVAL\n";
+
+$missing = FindInfo($setupfile,'MISSING VALUE', ': ');
+$header = $header."MISSING NUMBER: $missing\n";
+
+$Nsamp_min = FindInfo($setupfile,'MIN SAMPLES FOR AVG', ': ');
+$header = $header."MIN SAMPLES FOR AVG: $Nsamp_min\n";
+
+# v01a Conversion was 273.15.
+$Tabs = 273.15;  # absolute temperature at 0degC
+$header = $header."KELVIN CONVERSION: $Tabs\n";
+
+#========================
+# OPEN THE HEADER FILE
+#========================
+$str = dtstr($pgmstart,'iso');
+my $fnhdr = "$outpath/rosr_hdr_".$str.".txt";
+print"OUTPUT HEADER FILE: $fnhdr\n";
+open HDR,">$fnhdr" or die"OPEN HEADERFILE FAILS";
+MakeHeaderFile();
+close HDR;
+
+#===========================
+# AVG OUTPUT DATA FILE
+#===========================
+my $fn = sprintf "rosr_avg_%s.txt",dtstr(now(),'date');
+$fnavg = $outpath . '/' . $fn;
+print"OUTPUT DATA FILE: $fnavg\n";
+open(AVG, ">$fnavg") or die"OPEN DATA FILE FAILS";	
+if ( $e_cal == 0 ) {
+	print AVG "navg yyyy MM dd hh mm ss lat lon sog cog  ssst  corr T1 T2 k1 k2 ksea ksky esea pitch stdpitch roll stdroll rain\n";
+} else {
+	print AVG "navg  yyyy MM dd hh mm ss  ssst  T1 T2 k1 k2 kcal ecal\n";
+}
+close AVG;
+
+# ============ DATA PROCESSING PARAMETERS ===========
+$SampleFlag = 0;		# 0=standard   1=start at first sample time.
+$drum_jump_tolerance = 1; # degrees tolerance
+$drum_pointing_uncertainty = 0.5;
+
+#====================
+# OTHER GLOBAL VARIABLES
+#====================
+use constant YES => 1;
+use constant NO => 0;
+use constant PI => 3.14159265359;
+
+@sum_kt = ();
+$record{drum}=$missing;
+$Lastdrum = $missing;   # initialize the prior drum position
+$tb1 = $tb2 = $missing;  # mean bb temps
+
+
+# ---- ROUTINE HASH VARIABLES --------
+@VARS = ('dtgps','lat','lon','sog','cog');
+@VARS = (@VARS,'tktd','v0','v1','v2','v3','v4','v5','v6','v7','v8','v9','v10','v11');
+@VARS = (@VARS,'vref','tb11','tb12','tb21','tb22','pitch','roll','tkt','tktx','twin','tpwr','vin','vrain' );
+#'drum','kt',
+
+#==================
+# MAKE THE TEMP - RAD TABLE
+# choose between planck-filter method or tim Nightingale method
+# Test print out optional
+#==================
+#MakeRadTable;   # save table in $Ttable and $Rtable
+# my @Rtablex = @Rtable;
+($ttr,$rtr)=MakeRadTable_planck($filterfile);   # save table in $Ttable and $Rtable
+
+ClearAccumulatorArrays();		# Prepare for averaging first record
+
+##================
+## WAIT FOR THE FIRST RECORD
+## the record subroutine will return NO
+## until the input updates itis time mark.
+##==============
+while ( ReadNextRecord() == NO ) {}
+
+##=================
+##FIRST SAMPLE TIME MARKS
+##==============
+my ($dt_samp,$dt1,$dt2);
+($dt_samp, $dt1, $dt2) = ComputeSampleEndPoints ( $record{dt}, $avgsecs, $SampleFlag);
+printf"<<NEXT SAMPLE: dt_samp=%s, dt1=%s, dt2=%s>>\r\n", dtstr($dt_samp,'short'), dtstr($dt1,'short'), dtstr($dt2,'short');
+
+#==================
+# LOOP TO FIRST GOOD DATA RECORD
+#=================
+$Nrecs++;					# number of records read in the time block
+$Nsamp=0;  # global sample count
+
+AccumulateStats();
+
+#================
+# BEGIN THE MAIN SAMPLING LOOP
+# ===============
+while ( 1 ) {
+	#=====================
+	# LOOP OVER ALL RECORDS IN AVG TIME
+	#=====================
+ 	while ( 1 ) {
+		#---READ NEXT RECORD (loop)---
+		while ( ReadNextRecord() == NO ){}
+		#---NEW RECORD, CHECK FOR END---
+		if ( $record{dt} >= $dt2 ) { last; }
+		else {		
+			$Nrecs++; # the total number of good records read
+			
+			#=================
+			# SKIP THE FIRST RECORD AFTER A CHANGE IN DRUM POSITION
+			#=================
+			if ( $record{drum} != $missing && abs($record{drum} - $Lastdrum) < $drum_jump_tolerance ) {
+				AccumulateStats();
+			}
+			else { 
+				print"test Skip this drum $record{drum}\n";
+			}
+			$Lastdrum = $record{drum};
+		}
+	}
+	
+	#====================
+	# COMPUTE SAMPLE STATS
+	#====================
+	$Nsamp++;
+	
+	ComputeStats();
+
+	#====================
+	# MEAN BB TEMP AND STDEV
+	#====================
+	if($samp_tb11{mn}>-20){
+		$tb1=$samp_tb11{mn}; 
+		$ns=1; 
+		$tb1sd=$samp_tb11{std}*$samp_tb11{std}
+	}
+	else{$tb1=$tb1sd=$ns=0}
+
+	if($samp_tb12{mn}>-20){
+		$tb1 += $samp_tb12{mn}; 
+		$ns++; 
+		$tb1sd+=$samp_tb12{std}*$samp_tb12{std}
+	}
+	if($ns>=1){$tb1=$tb1/$ns; $tb1sd=sqrt($tb1sd/$ns)}
+	#writeTMP(sprintf "BB1 Mean Temp = %.2f +/- %.2f C\n",$tb1,$tb1sd);
+	
+		# MEAN BB2 TEMP AND STDEV
+	if($samp_tb21{mn}>-20){
+		$tb2=$samp_tb21{mn}; 
+		$ns=1; 
+		$tb2sd=$samp_tb21{std}*$samp_tb21{std}
+	}
+	else{$tb2=$tb2sd=$ns=0}
+	if($samp_tb22{mn}>-20){
+		$tb2+=$samp_tb22{mn}; 
+		$ns++; 
+		$tb2sd+=$samp_tb22{std}*$samp_tb22{std}
+	}
+	if($ns>=1){$tb2/=$ns; $tb2sd=sqrt($tb2sd/$ns)}
+	#writeTMP(sprintf "BB2 Mean Temp = %.2f +/- %.2f C\n",$tb2,$tb2sd);
+	
+	
+	#===========================
+	# AVG OUTPUT DATA APPEND
+	#===========================
+	my $fn = sprintf "rosr_avg_%s.txt",dtstr(now(),'date');
+	$fnavg = $outpath . '/' . $fn;
+	open(AVG, ">>$fnavg") or die"OPEN DATA FILE FAILS";	
+	writeTMP("test AVG file open");
+# @VARS = ('dtgps','lat','lon','sog','cog');
+# @VARS = (@VARS,'drum','kt','tktd','v0','v1','v2','v3','v4','v5','v6','v7','v8','v9','v10','v11');
+# @VARS = (@VARS,'vref','tb11','tb12','tb21','tb22','pitch','roll','tkt','tktx','twin','tpwr','vin','vrain' );
+	
+	if ( $e_cal == 0 ) {
+		#================================================
+		# RUN MODE -- COMPUTESSST
+		#================================================
+		# $T1 = black body 1, ambient, temperature, degC
+		# $T2 = heated BB temp, degC
+		# $kt1, $kt2, $ktsea, $ktsky = kt15 readings for the different pointing angles, adc counts or mV
+		# $pointangle = the pointing angle, relative to the rosr, for the sea view, deg. Typ 125 or 135 deg.
+		# $pitch = nose up tilt angle. (connectors facing the bow).
+		# $roll = port side: port up tilt angle.  stbd side: port down tilt angle.
+		# $e0 = nominal emissivity value
+		# $e_bb = estimated emissivity of the black bodies, usually set to 1.
+		# $Acorr = calibration parameter, multiplier of the interpolation slope. Typ = 1 +/- 0.01
+		# $CalOffset = final sst adjustment, deg C. Typ +/-0.1.
+		# $kv = 0 or 1 for nonverbal or verbal. Set to zero during operation.
+		# $missing = value for bad data, usually = -999
+		# $ttr = reference to the planck table temperature, from the MakeRadTable_planck() function.
+		# $rtr = ditto for radiance.
+		@x = ( $tb1, $tb2, $samp_kt[$bb1view * 5], $samp_kt[$bb2view * 5], $samp_kt[$skyview * 5], $samp_kt[$seaview * 5], 
+			$view[3], $samp_pitch{mn}, $samp_roll{mn}, $e_sea_0, $e_bb, $Acorr, $CalOffset, 0, $missing, $ttr, $rtr);
+		print "compute sst, x = @x";
+		($T_skin, $T_uncorr, $T_corr, $e_sea) = ComputeSSST( @x );
+		writeTMP(sprintf "T_skin = %.3f, T_corr=%.3f, T_uncorr=%.3f", $T_skin, $T_corr, $T_uncorr);
+		writeTMP(sprintf "lat=%.6f,   lon=%.6f,   sog=%.1f,   cog=%.1f",$samp_lat{mn},$samp_lon{mn},$samp_sog{mn},$samp_cog{mn});
+		#=========================
+		# AVG OUTPUT
+		#=========================
+		# navg yyyy MM dd hh mm ss lat lon sog  cog  ssst uncorr T1 T2 k1 k2 ksea ksky esea pitch stdpitch roll stdroll rain
+		$str = sprintf "%d %s %.5f %.5f %.1f %.0f   %.3f  %.3f %.3f %.3f %.1f %.1f %.1f %.1f %.5f %.1f %.1f %.1f %.1f %.2f",
+			$Nsamp, dtstr($dt_samp,'ssv'), $samp_lat{mn}, $samp_lon{mn}, $samp_sog{mn}, $samp_cog{mn}, 
+			$T_skin, $T_corr, $tb1, $tb2,
+			maxvalue($samp_kt[$bb1view*5],$missing), maxvalue($samp_kt[$bb2view*5],$missing), 
+			maxvalue($samp_kt[$seaview*5],$missing), maxvalue($samp_kt[$skyview*5],$missing), $e_sea,
+			$samp_pitch{mn}, $samp_pitch{std},	$samp_roll{mn}, $samp_roll{std}, $samp_vrain{mn}; 
+		print"test $str\n";
+		print AVG "$str\n";
+		writeTMP("test2");
+		writeTMP("test2 $str");
+	} else {	
+		#=====================================================
+		# CALIBRATION MODE - COMPUTETARGET
+		#======================================================
+		#    ($Tcal) = ComputeTarget($T1, $T2, $kt1, $kt2, $kttarget, $e_cal, $e_bb, $Acorr, $CalOffset,0, $missing, $ttr, $rtr);
+		#where
+		# $T1 = black body 1, ambient, temperature, degC
+		# $T2 = heated BB temp, degC
+		# $kt1, $kt2, $kttarget = kt15 readings for the different pointing angles, adc counts or mV
+		# $ecal = emissivity of the calibration target, usually set to 1.
+		# $e_bb = estimated emissivity of the black bodies, usually set to 1.
+		# $Acorr = calibration parameter, multiplier of the interpolation slope. Typ = 1 +/- 0.01
+		# $CalOffset = final sst adjustment, deg C. Typ +/-0.1.
+		# $kv = 0 or 1 for nonverbal or verbal. Set to zero during operation.
+		# $missing = value for bad data, usually = -999
+		# $ttr = reference to the planck table temperature, from the MakeRadTable_planck() function.
+		# $rtr = ditto for radiance.
+		$e_sea=$e_cal; # for compatibility with sbd output
+		
+		@x = ( $tb1,$tb2 , $samp_kt[$bb1view * 5], $samp_kt[$bb2view * 5], $samp_kt[$seaview * 5], $e_cal, $e_bb, $Acorr, $CalOffset,
+			 0, $missing, $ttr, $rtr);
+		#writeTMP("cal x = @x");
+		
+		$T_skin = ComputeTarget( @x );
+		#writeTMP(sprintf "cal T_skin = %.3f", $T_skin);
+		
+		#=========================
+		# CALIBRATION OUTPUT 
+		#==========================
+		#navg  yyyy MM dd hh mm ss ssst T1 T2 k1 k2 kcal ecal
+		$str = sprintf "%d  %s  %.3f %.3f %.3f %.1f %.1f %.1f %.5f",
+			$Nsamp, dtstr($dt_samp,'ssv'), $T_skin, $tb1, $tb2,
+			maxvalue($samp_kt[$bb1view*5],$missing), maxvalue($samp_kt[$bb2view*5],$missing), 
+			maxvalue($samp_kt[$calview*5],$missing), $e_cal;
+		print AVG "$str\n";
+		#writeTMP("cal $str");
+	}
+	close AVG;
+	
+	if($telnetserverip == 0){}
+	else{system "socktxx $telnetserverip $telnetserverport"}
+	
+	##===========================
+	## SBD OUTPUT
+	## ==========================
+	#$WISBD,09/15/06 08:25:26,0.00000,  0.0000,00298.36,  1.60,  0.00,  1.27,  0.05,0.98710, 0.6937, 0.7093, 0.000, 0.000,     nan, 0.000,0.0505,1#
+	# 				$WISBD,TIME,LAT,LON,SSSTC,P,SDP,R,SDR,EMIS,KSEA,KSKY,K1,K2,T1,T2,ORG#
+	# 			
+	# 			$WISBD 	: Header
+	# 			TIME	: SCS Time, MM-DD-YY HH:MM:SS
+	# 			LAT		: ($I5SST/15) : %.5f : Latitude
+	# 			LON		: ($I5SST/16) : %.5f : Longiture
+	#			SOG		: 			  : %.1 : m/s
+	#			COG		: 			  : %.0 : degT
+	# 			SSTC	: ($I5SST/02)*: %.2f : SSST derived variable (* note 1 below)
+	# 			P		: ($I5SST/13) : %.1f : Pitch mean 
+	# 			SDP		: ($I5SST/14) : %.1f : Standard deviation of pitch
+	# 			R		: ($I5SST/11) : %.1f : Roll mean 
+	# 			SDR		: ($I5SST/12) : %.1f : Standard deviation of roll
+	# 			EMIS	: ($I5SST/23) : %.5f : Emissivity used to compute SSST
+	# 			KSEA	: ($I5SST/12) : %.4f : KT15 avg ADC count for sea view
+	# 			KSKY	: ($I5SST/08) : %.4f : KT15 avg ADC count for sky view
+	# 			K1		: ($I5CAL/07) : %.4f : KT15 avg ADC count for BB1 view
+	# 			K2		: ($I5CAL/16) : %.4f : KT15 avg ADC count for BB2 view
+	# 			T1		: ($I5CAL/04) : %.4f : BB1 ADC avg count
+	# 			T2		: ($I5CAL/13) : %.4f : BB2 ADC avg count
+	# 			VRAIN	: ($WIROS/03) : %.4f : ORG ADC count, most recent reading.
+	# 			# : END CHARACTER
+	
+	$str = sprintf "\$WISBD,%s", dtstr($dt_samp,'short');
+	# LAT AND LON
+	if ( $samp_lat{mn} == $missing || $samp_lon{mn} == $missing ) { $str = sprintf("%s,-999,-999", $str) }
+	else { $str = sprintf("%s,%.5f,%.5f", $str, $samp_lat{mn}, $samp_lon{mn}) }
+	# SOG
+	if ( $samp_sog{mn} == $missing ) { $str = sprintf("%s,-999", $str) }
+	else { $str = sprintf("%s,%.1f", $str,$samp_sog{mn}) }
+	#COG
+	if ( $samp_cog{mn} == $missing ) { $str = sprintf("%s,-999", $str) }
+	elsif($samp_sog{mn}<0.1){ $str = sprintf("%s,0", $str) }
+	else { $str = sprintf("%s,%.1f", $str,$samp_cog{mn}) }
+	# SSST
+	if ( $T_skin == $missing ) { $str = sprintf("%s,-999", $str) }
+	else { $str = sprintf("%s,%.2f", $str,$T_skin) }
+	# PNI
+	if ( $samp_pitch{mn} == $missing || $samp_roll{mn} == $missing ) { $str = sprintf("%s,-999,0,-999,0", $str) }
+	else { $str = sprintf("%s,%.1f,%.1f,%.1f,%.1f",$str, $samp_pitch{mn},$samp_pitch{std}, $samp_roll{mn},$samp_roll{std}) }
+	# EMISSIVITY
+	$str = sprintf("%s,%.5f",$str,$e_sea);
+	# KT15 SEAVIEW
+	if ( $samp_kt[$seaview*5] == $missing ) { $str = sprintf("%s,-999", $str) }
+	else { $str = sprintf("%s,%d",$str, 1000*$samp_kt[$seaview*5]) }
+	# KT15 SKYVIEW
+	if ( $samp_kt[$skyview*5] == $missing ) { $str = sprintf("%s,-999", $str) }
+	else { $str = sprintf("%s,%d",$str, 1000*$samp_kt[$skyview*5]) }
+	# KT15 BB1VIEW
+	if ( $samp_kt[$bb1view*5] == $missing ) { $str = sprintf("%s,-999", $str) }
+	else { $str = sprintf("%s,%d",$str, 1000*$samp_kt[$bb1view*5]) }
+	# KT15 BB2VIEW
+	if ( $samp_kt[$bb2view*5] == $missing ) { $str = sprintf("%s,-999", $str) }
+	else { $str = sprintf("%s,%d",$str, 1000*$samp_kt[$bb2view*5]) }
+	# BB TEMPS
+	$str = sprintf("%s,%.2f,%.2f",$str,$tb1, $tb2);
+	# RAIN and *
+	$str = sprintf("%s,%.2f*",$str,$samp_vrain{mn});
+	
+	# CHECK SUM
+	$chksum=NmeaChecksum($str);
+	$str=$str.$chksum;
+			
+	print "$str\r\n";	
+	#writeTMP("sbd $str\n");
+	open SBD, ">/tmp/sbd" or die("OPEN SBD FAILS\n");
+	print SBD "$str\n";
+	close SBD;
+
+	
+	#=================================
+	# PREPARE FOR THE NEXT AVERAGE
+	#==================================
+	ClearAccumulatorArrays();		# Prepare for averaging first record
+	
+	($dt_samp, $dt1, $dt2) = ComputeSampleEndPoints( $record{dt}, $avgsecs, 0);	#increment $dt1 and $dt2 
+	#writeTMP(sprintf "NEXT SAMPLE: dt_samp=%s, dt1=%s, dt2=%s\n", dtstr($dt_samp,'short'), dtstr($dt1,'short'), dtstr($dt2,'short'));
+	
+	AccumulateStats(); 			# deals with the current record
+}
+
+exit(0);
+
+
+# NOTES -- PLANK TABLES
+
+
+#*************************************************************/
+sub ReadNextRecord
+{	
+	my ($str, $str1,$strx, $cmd, $Nfields, $ftmp, $ioffset);
+	my @dat;
+	my $flag = 0;
+	my @dt;
+	##==================
+	## WAIT FOR INPUT
+	## Send out a prompt --
+	## Loop checking for input, 5 sec
+	## send another prompt
+	##==================
+	print "$PROGRAMNAME--\n";
+	chomp($str=<STDIN>);
+		## COMMANDS
+	if ( $str =~ /quit/i ) {print"QUIT\n"; exit 0 }
+	if($str =~ /\$WIROS/ )	{									# identifies a data string
+		$str1=$str;
+		$str1 =~ s/^.*\$/\$/;
+		#print"Received packet: $str1\n";
+ 		my $strchk=substr($str,-2);
+ 		my $nmeachk=NmeaChecksum( substr($str1,0,-3));
+ 			# CHECKSUMS AGREE
+ 		if($strchk eq $nmeachk){
+			@dat = split(/[,\/:*]+/, $str);							# parse the data record
+ 			#$i=0; foreach (@dat) { printf "%d %s\n",$i, $_; $i++  } #test
+			$Nfields = 30;
+			
+			## CHECK TIMECODE -- SKIP REPEATS
+			#writeTMP(sprintf"tcxlast=%s,  tmcode=%s",$tcxlast,$dat[12]);
+			if ( $dat[12] =~ /[^,0-9\-\s\.TZ]+/ || $tcxlast eq $dat[12] ) {
+				#writeTMP( "Skip repeats");
+				#xxx return (NO);
+			}
+			$tcxlast=$dat[12];
+			#=============
+			#PARSE THE RECORD
+			#=============
+		# 		0 2015			yyyy
+		# 		1 04			MM
+		# 		2 17			dd
+		# 		3 18			hh
+		# 		4 09			mm
+		# 		5 39			ss
+		# 		6 1294393295	dtgps
+		# 		7 30.001042		lat
+		# 		8 -145.394240	lon
+		# 		9 7.41			sogmps
+		# 		10 275			cog
+		# 		11 $WIROS
+		#-->    12 time elapsed
+		# 		13 279.98		drum
+		# 		14  155715		kt
+		# 		15 17.69		tkt
+		# 		16 2.836		v0
+		# 		17 2.840		v1
+		# 		18 0.390		v2
+		# 		19 2.470		v3
+		# 		20 2.838		v4
+		# 		21 2.837		v5
+		# 		22 1.730		v6
+		# 		23 2.768		v7
+		# 		24 4.096		v8
+		# 		25 3.569		v9
+		# 		26 -0.000		v10
+		# 		27 2.652		v11
+		# 		28 4.939		vref
+		# 		29 17.71		tb11
+		# 		30 17.74		tb12
+		# 		31 17.77		tb21
+		# 		32 17.78		tb22
+		# 		33 -1.3			pitch
+		# 		34 -1.8			roll
+		# 		35 17.0			tkt
+		# 		36 21.4			tktx
+		# 		37 19.1			twin
+		# 		38 41.0			tpwr
+		# 		39 14.3			vin
+		# 		40 -0.0			vrain
+		# 		41   0			sectoopen
+		# 		42 43			checksum
+		
+
+			if ( $#dat >= $Nfields -1 ) {          # PROCESS DOS OR UNIX
+				#================
+				# SAVE THE PRIOR DRUM AND SWITCH POSITIONS
+				#================
+				
+				%record = (
+					dt => now(),			# the actual record time is the DAQ time
+					dtgps => $dat[6],
+					lat => $dat[7],
+					lon => $dat[8],
+					sog => $dat[9],  # m/s
+					cog => $dat[10],
+					drum => $dat[13],
+					kt => $dat[14],
+					tktd => $dat[15],
+					v0 => $dat[16],
+					v1 => $dat[17],
+					v2 => $dat[18],
+					v3 => $dat[19],
+					v4 => $dat[20],
+					v5 => $dat[21],
+					v6 => $dat[22],
+					v7 => $dat[23],
+					v8 => $dat[24],
+					v9 => $dat[25],
+					v10 => $dat[26],
+					v11 => $dat[27],
+					vref => $dat[28],
+					tb11 => $dat[29],
+					tb12 => $dat[30],
+					tb21 => $dat[31],
+					tb22 => $dat[32],
+					pitch => $dat[33],
+					roll => $dat[34],
+					tkt => $dat[35],
+					tktx => $dat[36],
+					twin => $dat[37],
+					tpwr => $dat[38],
+					vin => $dat[39],
+					vrain => $dat[40],
+				);
+				if($record{sog}<0.1){$record{cog}=0}
+				#======================
+				# CHECK ALL VARIABLES FOR BAD VALUES
+				#======================
+				if ( $record{lat} < -90 || $record{lat} > 90 ) { $record{lat} = $missing; }
+				if ( $record{lon} < -180 || $record{lon} > 360 ) { $record{lon} = $missing; }
+				if ( $record{sog} < 0 || $record{sog} > 30 ) { $record{sog} = $missing; }
+				if ( $record{cog} < 0 || $record{cog} > 360 ) { $record{cog} = $missing; }
+				if ( $record{drum} < 0 || $record{drum} > 360 ) { $record{drum} = $missing; }
+				if ( $record{kt} < 0 || $record{kt} > 1000000 ) { $record{kt} = $missing; }
+				if ( $record{tktd} < -20 || $record{tktd} > 50 ) { $record{tktd} = $missing; }
+				if ( $record{v0} < 0 || $record{v0} > 5 ) { $record{v0} = $missing; }
+				if ( $record{v1} < 0 || $record{v1} > 5 ) { $record{v1} = $missing; }
+				if ( $record{v2} < 0 || $record{v2} > 5 ) { $record{v2} = $missing; }
+				if ( $record{v3} < 0 || $record{v3} > 5 ) { $record{v3} = $missing; }
+				if ( $record{v4} < 0 || $record{v4} > 5 ) { $record{v4} = $missing; }
+				if ( $record{v5} < 0 || $record{v5} > 5 ) { $record{v5} = $missing; }
+				if ( $record{v6} < 0 || $record{v6} > 5 ) { $record{v6} = $missing; }
+				if ( $record{v7} < 0 || $record{v7} > 5 ) { $record{v7} = $missing; }
+				if ( $record{v8} < 0 || $record{v8} > 5 ) { $record{v8} = $missing; }
+				if ( $record{v9} < 0 || $record{v9} > 5 ) { $record{v9} = $missing; }
+				if ( $record{v10} < 0 || $record{v10} > 5 ) { $record{v10} = $missing; }
+				if ( $record{v11} < 0 || $record{v11} > 5 ) { $record{v11} = $missing; }
+				if ( $record{vref} < 3.0 || $record{vref} > 6.0 ) { $record{vref} = $missing; } 
+				if ( $record{tb11} < 0 || $record{tb11} > 50 ) { $record{tb11} = $missing; }
+				if ( $record{tb12} < 0 || $record{tb12} > 50 ) { $record{tb12} = $missing; }
+				if ( $record{tb21} < 0 || $record{tb21} > 50 ) { $record{tb21} = $missing; }
+				if ( $record{tb22} < 0 || $record{tb22} > 50 ) { $record{tb22} = $missing; }
+				if ( $record{pitch} < -20 || $record{pitch} > 20 ) { $record{pitch} = $missing; }
+				if ( $record{roll} < -20 || $record{roll} > 20 ) { $record{roll} = $missing; }
+				if ( $record{tkt} < 0 || $record{tkt} > 50 ) { $record{tkt} = $missing; }
+				if ( $record{tktx} < 0 || $record{tktx} > 50 ) { $record{tktx} = $missing; }
+				if ( $record{twin} < 0 || $record{twin} > 50 ) { $record{twin} = $missing; }
+				if ( $record{tpwr} < 0 || $record{tpwr} > 50 ) { $record{tpwr} = $missing; }
+				if ( $record{vin} < 9 || $record{vin} > 20 ) { $record{vin} = $missing; }
+				if ( $record{vrain} < -.5 || $record{vrain} > 5 ) { $record{vrain} = $missing; }
+				printf "<<%s>>\n",$str;
+				return( YES );  # means we like the data here.
+			}
+		}
+	}
+	return ( NO );
+}
+
+#*************************************************************/
+sub MakeHeaderFile 
+{
+	
+	print HDR "$header\n";
+	if ( $e_cal == 0 ) { print HDR "
+==========================
+NAVG = sample counter.
+yyyy MM dd hh mm ss = timestamp with date(yyyy MM dd) and time of day (hh mm ss) in UTC (Zulu) time. 
+LAT -- latitude, decimal degrees, +=N  -=S
+LON -- longitude, decimal degrees, +=E, -=W
+SSST -- Computed sample skin temperature, degC
+CORR -- Sky correction, contribution of sky reflection to Tskin, degC
+BB1 -- Ambient black body mean temperature, degC
+BB2 -- Heated black body mean temperature, degC
+KT1 -- KT15 BB1 mean radiation
+KT2 -- KT15 BB2 mean radiation
+KTSEA -- KT15 sea view mean radiation
+KTSKY -- KT15 sky view mean radiation
+E-SEA -- ocean emissivity used to compute Tskin
+PITCH -- mean pitch angle, deg
+PITCH-STD -- standard deviation of pitch angle, deg
+ROLL -- mean roll angle, deg
+ROLL-STD -- standard deviation of roll angle, deg
+RAIN -- mean rain sensor voltage
+==========================";
+	}
+	else {
+		print HDR "RAW SSST DATA   CALIBRATION MODE
+==========================
+NAVG = sample counter.
+yyyyMMddThhmmssZ = timestamp with date(yyMMdd), T, time of day (hhmmss), and Z meaning UTC (Zulu) time. 
+SSST -- Computed target temperature, degC
+BB1 -- Ambient black body mean temperature, degC
+BB2 -- Heated black body mean temperature, degC
+KT1 -- KT15 BB1 mean radiation
+KT2 -- KT15 BB2 output mean voltage, mV
+KTCAL -- KT15 calibration view mean output voltage, mV
+ECAL -- emissivity of the calibration target. Usually = 1.
+=============================\n";
+	}
+	close(HDR);
+}
+#navg  yyyyMMddThhmmssZ    ssst      t1       t2       kt1    kt2    ktcal  ecal	
+
+
+
+#*************************************************************/
+sub ClearAccumulatorArrays 
+{
+	my $i; my @x;  my @y;
+	#================
+	# INITIALIZE THE KT15 ARRAY
+	#================
+	#--we need to have bins for the different kt15 views--
+	@x = (0,0,0,1e99,-1e99);  # set up for accumulating
+	@y = ($missing, 0, 0, 0, 0);  # set up for sample out
+	@sum_drum = @sum_kt = @x;
+	@samp_drum = @samp_kt = @y;
+	for ( $i=0; $i<$#view; $i++ ) { 
+		@sum_drum = (@sum_drum, @x); 	# flat array, 5 items/view
+		@sum_kt = (@sum_kt, @x); 		# flat array, 5 items/view
+		@samp_drum = (@samp_drum, @y);
+		@samp_kt = (@samp_kt, @y);
+	}			
+
+	#=================
+	#	SET UP THE HASHES
+	#=================
+	my %xx = ( sum => 0, sumsq => 0, n => 0, min => 1e99, max => -1e99 );
+	my %yy = ( mn => $missing, std => $missing, n => 0, min => $missing, max => $missing );
+	# ---- INITIALIZE HASHES -------
+	foreach ( @VARS ) {
+		eval "%sum_$_ = %xx;   %samp_$_ = %yy;";
+	}
+}
+
+#*************************************************************/
+sub AccumulateStats
+# Add to the sums for statistical averages
+{
+	my ($d1, $d2, $ii);
+	my ($x, $y, $s);
+	
+	#=========================
+	#-- ACCUM ONLY IF DRUM MEAS IS PRSENT--
+	#=========================
+	if ( $record{drum} != $missing ) {
+		$x = $record{drum}; 
+		$y = $record{kt};
+		#print "drum=$x,   kt=$y\n";
+		## SCAN EACH VIEW FOR THE CURRENT DRUM ANGLE
+		foreach $iv ( 0..$#view ) {
+			#writeTMP("test iv = $iv");
+			$d1 = $view[$iv] - $drum_pointing_uncertainty;  $d2 = $view[$iv] + $drum_pointing_uncertainty;  # sector limits
+			#printf "d1=%.2f,  d2=%.2f\n",$d1,$d2; 
+			if ( $x >= $d1 && $x <= $d2 ) {
+				#writeTMP(sprintf"Accumulate kt, iv = $iv, view=%.2f, kt=%.0f", $x, $y);
+				#==================
+				# Put kt15 into in the correct bin
+				# Skip the first record in each view
+				# There are five variables in each view block (sum, sumsq, n, min, max)  #v2
+				#==================
+				$ii = $iv * 5;						# pointer to this view block  #v2
+				$sum_kt[$ii] +=   $y;					# sum
+				$sum_drum[$ii] += $x;					# sum
+				$ii++; $sum_kt[$ii] += ($y * $y);		# sum of squares
+				$sum_drum[$ii] += ($x * $x);			# sum of squares
+				$ii++; $sum_kt[$ii]++;					# count
+				$sum_drum[$ii]++;						# count
+				$ii++; $sum_kt[$ii] = minvalue($sum_kt[$ii], $y);	# min
+				$sum_drum[$ii] = minvalue($sum_drum[$ii], $x);		# min
+				$ii++; $sum_kt[$ii] = maxvalue($sum_kt[$ii], $y);	# max
+				$sum_drum[$ii] = maxvalue($sum_drum[$ii], $x);		# max
+				last;
+			}
+		}
+	}
+	#========================
+	# NOW FOR THE REST OF THE SCALARS
+	#========================
+	foreach ( @VARS ) {
+		my $zstr = sprintf("\@s = %%sum_%s;  %%sum_%s = Accum (\$record{%s}, \@s);", $_, $_, $_);
+		eval $zstr;
+	}
+}
+
+
+#*************************************************************/
+sub Accum
+# Accum(%hash, $datum);   global: $missing
+{
+	my ($x, @a) = @_;
+	my %r = @a;
+	#printf("Accum : %.5f\n", $x);
+	if ( $x > $missing )
+	{
+		$r{sum} += $x;
+		$r{sumsq} += $x * $x;
+		$r{n}++;
+		$r{min} = minvalue($r{min}, $x);
+		$r{max} = maxvalue($r{max}, $x);
+		@a = %r;
+	}
+	return( @a );
+}
+
+#*************************************************************/
+sub ComputeStats
+# @VARS = ('dtgps','lat','lon','sog','cog');
+# @VARS = (@VARS,'tktd','v0','v1','v2','v3','v4','v5','v6','v7','v8','v9','v10','v11');
+# @VARS = (@VARS,'vref','tb11','tb12','tb21','tb22','pitch','roll','tkt','tktx','twin','tpwr','vin','vrain' );
+
+# ComputeStats();
+#  xx = (drum, kt, bb2t3, bb2t2, bb2t1, bb1t3, bb1t2, bb1t1, Vref, bb1ap1, bb1bb2ap2, bb2ap3, kttempcase,
+#	wintemp, tt8temp, Vpwr, sw1, sw2, pitch, roll, sog, cog, az, pnitemp, lat, lon, sog, var, kttemp )
+{
+	my $i;
+	my ($mean, $stdev, $n, $x, $xsq);
+	
+	
+	#===================
+	# VIEW DEPENDENT ARRAYS
+	#===================
+	foreach ( 0..$#view ){
+		$i = $_ * 5;  # start index, five scalars in accum #v2
+		
+		# -- kt view data -----------			
+		( $samp_kt[$i], $samp_kt[$i+1], $samp_kt[$i+2], $samp_kt[$i+3], $samp_kt[$i+4] ) =
+			stats1 ( $sum_kt[$i], $sum_kt[$i+1], $sum_kt[$i+2], $sum_kt[$i+3], $sum_kt[$i+4], $Nsamp_min, $missing);	
+		# -- drumpos view data ---	
+		( $samp_drum[$i], $samp_drum[$i+1], $samp_drum[$i+2], $samp_drum[$i+3], $samp_drum[$i+4] ) =
+			stats1 ( $sum_drum[$i], $sum_drum[$i+1], $sum_drum[$i+2], $sum_drum[$i+3], $sum_drum[$i+4], $Nsamp_min, $missing);	
+		#printf "VIEW AVERAGES: i = %d, view = %.1f, drum=%.2f,  kt mn samp = %.4f\n", $_, $view[$_], $samp_drum[$i], $samp_kt[$i];
+	}
+	
+	#====================
+	# SCALARS
+	# sub (mn, stdpcnt, n, min, max) = stats1(sum, sumsq, N, min, max, Nsamp_min);
+	#=====================
+	foreach ( @VARS ) {
+		my $zz = sprintf( "( \$samp_\%s{mn}, \$samp_\%s{std}, \$samp_\%s{n}, \$samp_\%s{min}, \$samp_\%s{max}) =
+			stats1 ( \$sum_\%s{sum},  \$sum_\%s{sumsq},  \$sum_\%s{n},  \$sum_\%s{min},  \$sum_\%s{max}, \$Nsamp_min, \$missing );",
+			$_,$_,$_,$_,$_,$_,$_,$_,$_,$_);
+		eval $zz ;
+	}
+	
+	xxx
+}
+
+#=========================================================================
+sub MakeRadTable_planck
+
+# CALL::   ($ttr, $rtr) = MakeRadTable_planck( $kt15file )
+
+# MakeRadTable_planck($filterfile, $kv)
+#INPUT
+#   $filterfile points to the file.
+#
+# OUTPUT:
+# $ttr = table temperature array.
+# $rtr = table radiance array
+#
+#  globals ==> @Ttable, @Rtable
+# Globals: Tabs
+#
+# Parameters: $kt15sn, $filterpath
+{
+	$fnm = shift();  # v101
+	
+	@Ttable = ();  # output temperature vector
+	@Rtable = (); # output normalized radiance vector
+	#writeTMP( "MakeRadTable_planck: Make T-R table -- Using Planck Equation");
+	#writeTMP( "MakeRadTable_planck: Filter file at $fnm");
+	
+	#==================
+	# GET THE FILTER FUNCTION
+	#=================
+	my @lambda = ();
+	my @resp = ();
+	my $i;
+	my $str;
+	# -- OPEN THE FILTER FILE ---
+	#writeTMP(sprintf "Filter file = $fnm");
+	open(FILTER, "< $fnm") or die "Open filter file fails\n";
+	printf "Filter file open: %s\n", $fnm;
+	# --- READ EACH LINE, skip header lines ---
+	# Make a table of @lambda and @response
+	my $iline = 0;
+	while ( <FILTER> )
+	{
+		chomp($str = $_);
+		#if ( $iline < 2 ) { printf("%6d: %s\n", $iline, $str); }
+		if ( $iline >= 7 )
+		{
+			@w = split;
+			push ( @lambda, $w[0]);  # test
+			push ( @resp, $w[1]  * $w[0]/10);
+		}
+		$iline++;
+	}
+	
+	# --- ADD ZERO TERMS TO THE END -- IT HELPS ---
+	push ( @resp, 0 );   # zeros at the end
+	push ( @lambda, $lambda[$#lambda]+0.1 );
+	unshift ( @resp, 0 );   # zeros at the beginning
+	unshift ( @lambda, $lambda[0]-0.1 );
+	#$ii = 0;
+	#foreach(@lambda){print"$ii        $lambda[$ii]        $resp[$ii]\n"; $ii++}
+	
+	# --- NORMALIZE BY MAXIMUM VALUE ---
+	my $respmax = -1e99;
+	foreach (@resp) { if($_ > $respmax){ $respmax = $_ }}
+	foreach  (0..$#resp) { $resp[$_] /= $respmax; }
+	
+	# --- COMPUTE THE INTEGRATED RADIANCE FOR EACH TEMPERATURE ---
+	my @r;
+	my $x;
+	my $t = -80.0;
+	my $R0;
+	
+	while ( $t <= 60.0 ) {
+		push ( @Ttable, $t );  # temperature column
+		@r = ();				# clear r vector;
+		#-- bb radiances for all lambda and temperature t ----
+		foreach $i (0..$#lambda) 
+		{ 
+			# --- vector of filtered bb radiance ---
+			push ( @r, $resp[$i] * planck( $t, $lambda[$i] ) );  # black body radiance for t,lambda 
+		}
+		# -- weighted area --
+		$x = trapz(\@lambda, \@r, 0,0) / trapz(\@lambda, \@resp, 0,0);
+		if ( $t > -0.00001 && $t < 0.00001 ) { $R0 = $x; }
+		push ( @Rtable, $x );
+		# -- increment temperature --
+		$t+=0.1;
+	}
+	# --- Normalize ---
+	foreach $i (0..$#Ttable) {
+		$Rtable[$i] /= $R0;
+	}
+	return ( \@Ttable, \@Rtable );
+}
+#=====================================================
+sub planck
+# function B = plank(t,lambda),
+# % where t is in degC or K
+# % and lambda is in microns.
+# global: Tabs
+#constants  PI => 3.14159265359
+# % Plank's law can be written:
+# % \begin{equation}
+# % B(\lambda; T)= \frac{c1} {\lambda^5(exp(c_2/\lambda T)-1)}
+# % \end{equation}
+# % \noindent where
+# % B units are W/m^2 assuming an isotropic radiation where
+# %  B = πL = pi * L
+# % $T$ is expressed in \degK, 
+# % $	c_1 = 3.74\times10^{-16}$ w\,m$^{-2}$, and 	$c_2 = 1.44\times 10^{-2}$ m\,K.
+# % Actually, c1 = 2hc^2 where h = planck's constant and c = speed of light.
+# % and c2 = hc/k where k = Boltzmann constant
+# % c_0 = 2.99792458e+8 m/s,  h = 6.626076e-34 Js,  k = 1.380658e-23 J/K
+# TEST
+#  T      LAMBDA       Rplanck
+# 20		10		27.7805
+# 40		10		38.1179
+# 60		10		50.3974
+# -20		12		13.2758
+# -20		10		12.7362
+#
+#v3 110506 rmr -- moved to perl module Isar.pm
+{
+	my $t = $_[0];
+	my $lambda = $_[1];
+	my $T = $t;
+	my $Tabs=273.15;
+	
+	# CHECK IF TEMPERATURE IS IN DEGC OR K
+	if ( $t < 200 )	{ $T = $t + $Tabs }
+	
+	# c = 2.99792458e+8;  h = 6.626076e-34; k = 1.380658e-23;
+	my $c = 2.99793e+8;  
+	my $h = 6.6262e-34; 
+	my $k = 1.380e-23;  # Liou p.11 and Wallace & Hobbs, p287
+	
+	# CONSTANTS
+	my $c1 = 2 * $h * $c * $c;
+	my $c2 = $h * $c / $k;
+	
+	# B(\lambda; T)= \frac{c1} {\lambda^5 (exp(c_2 / \lambda T)-1)}
+	my $lx = $lambda / 1e6;
+	my $a1 = ($lx ** 5) * ( exp ( $c2 / ( $lx * $T ) ) -1 );
+	my $L = 1e-6 *  $c1 / $a1;  # per micron wavelength
+	
+	my $B = $L * PI;
+	return ($B);	
+}
+
+sub NmeaChecksum
+# $cc = NmeaChecksum($str) where $str is the NMEA string that starts with '$' and ends with '*'.
+{
+    my ($line) = @_;
+    my $csum = 0;
+#    $csum ^= unpack("C",(substr($line,$_,1))) for(1..length($line)-2);
+    $csum ^= unpack("C",(substr($line,$_,1))) for(1..length($line)-1);
+    return (sprintf("%2.2X",$csum));
+}
+
+#*************************************************************/
+sub ComputeSSST
+#
+#CALL:
+#    ($T_skin, $T_corr, $T_uncorr, $e_sea) = ComputeSSST($T1, $T2, $kt1, $kt2, $ktsea, $ktsky,$pointangle, 
+#		$pitch, $roll, $e0, $e_bb, $Acorr, $CalOffset, $kv, $missing, $ttr, $rtr, $fhTMP);
+#where
+	# $T1 = black body 1, ambient, temperature, degC
+	# $T2 = heated BB temp, degC
+	# $kt1, $kt2, $ktsea, $ktsky = kt15 readings for the different pointing angles, adc counts or mV
+	# $pointangle = the pointing angle, relative to the isar, for the sea view, deg. Typ 125 or 135 deg.
+	# $pitch = nose up tilt angle. (connectors facing the bow).
+	# $roll = port side: port up tilt angle.  stbd side: port down tilt angle.
+	# $e0 = nominal emissivity value
+	# $e_bb = estimated emissivity of the black bodies, usually set to 1.
+	# $Acorr = calibration parameter, multiplier of the interpolation slope. Typ = 1 +/- 0.01
+	# $CalOffset = final sst adjustment, deg C. Typ +/-0.1.
+	# $kv = 0 or 1 for nonverbal or verbal. Set to zero during operation.
+	# $missing = value for bad data, usually = -999
+	# $ttr = reference to the planck table temperature, from the MakeRadTable_planck() function.
+	# $rtr = ditto for radiance.
+# example
+#		use lib "/Users/rmr/swmain/perl";
+#		use perltools::Isar;
+#		my $ktfile= "/Users/rmr/swmain/apps/isardaq4/kt15/kt15_filter_15854832.dat";
+#		my ($ttr, $rtr) = MakeRadTable_planck($ktfile);
+# 		@xx1=(8.789, 28.131, 530.6, 588.3, 529.6, 323.5, 135, 0.0, 0.5, 0.98667, 1.0, 1.0175, 0.060, 1, -999, $ttr, $rtr);
+# 		$ss = ComputeSSST(@xx1);
+# gives Tskin=9.508, Tcorr=-0.3312, Tuncorr=9.1770  
+#v3 110506 rmr -- moved to perl module Isar.pm
+{
+	my ($tb1, $tb2, $kt1, $kt2, $ktsky, $ktsea, $pointangle, $pitch, $roll, $e_sea_0, $e_bb, $Acorr, $CalOffset, $kv, $missing, $ttr, $rtr) = @_;
+	my ($e_sea, $S_1, $S_2, $S_k, $S_1v, $S_2v, $S_upwelling, $Ad, $S_dv, $Au, $S_uv, $S_skin, $T_uncorr, $T_skin);
+	if ( $ktsky != $missing && $ktsea != $missing &&
+	$kt1 != $missing && $kt2 != $missing && $kt2 >0 && $kt1 > 0 && $kt2 > $kt1 && $tb1 > 0 &&  #v4
+	$tb1 != $missing && $tb2 != $missing && abs($tb2-$tb1) > 5 ) {
+		# v4.0 check if we have pitch and roll data.  For this first effort we will use
+		# only roll.  A positive roll decreases the isar view angle.  i.e. if the view angle is 
+		# 125 deg and the roll is +2 deg then the corrected view angle is 123 deg.  And the nadir
+		# angle is 57 deg.
+		if ( $pitch == $missing || $roll == $missing ) {
+			$e_sea = $e_sea_0;
+		} else {
+			$e_sea = GetEmis( $pointangle - $roll );
+			if ($kv == 1 ) { 
+				printf "pitch = $pitch,  roll = $roll, ActualViewAngle = %.3f\n", $pointangle - $roll;
+				print  "e_sea = $e_sea, e_sea_0 = $e_sea_0,   viewangle = $pointangle\n";
+			}
+		}
+		
+		#===================
+		# BB RADIANCES
+		#
+		$S_1 = GetRadFromTemp ($ttr, $rtr, $tb1);
+		if ($kv == 1 ) { printf  "tb1 = %.3f,  S_1 = %.4e\n", $tb1, $S_1}
+		$S_2 = GetRadFromTemp($ttr, $rtr, $tb2);
+		if ($kv == 1 ) { printf  "tb2 = %.3f,  S_2 = %.4e\n", $tb2, $S_2}
+		$S_k = $S_1;  # planck radiance from the kt15 lens
+		
+		# VIEW IRRADIANCES DEPEND ON THE EMISSIVITIES OF THE BB'S AND SOURCE
+		$S_1v = $e_bb * $S_1 - ( 1 - $e_bb ) * $S_k;
+		$S_2v = $e_bb * $S_2 - ( 1 - $e_bb) *  $S_k;
+		if ($kv == 1 ) { printf  "S_1 = %.3f,  S_2 = %.3f\n", $S_1v, $S_2v}
+
+		#-------------------------------
+		# --- FIELD EXPERIMENT WITH SKY CORRECTION
+		#--------------------------------
+		# ---DOWN VIEW RADIANCE---
+		# Ad = (kd-k1) ./ (k2-k1);
+		if ($kv == 1 ) { printf  "kt1= %.4f, kt2=%.4f, ktsky=%.4f, ktsea=%.4f\n", $kt1, $kt2, $ktsky, $ktsea}
+		
+		$Ad = ( $ktsea - $kt1 ) / ( $kt2 - $kt1 );
+		if ($kv == 1 ) { printf  "Ad = %.4f\n", $Ad}
+		
+		# Correct for the irt beam spread
+		$Ad = $Acorr * $Ad;
+		if ($kv == 1 ) { printf "Ad = %.4f\n", $Ad}
+		
+		# DOWN VIEW INCOMING IRRADIANCE BY INTERPOLATION
+		my $S_dv = $S_1v + ($S_2v - $S_1v) * $Ad;
+		if ($kv == 1 ) { printf "S_dv = %.4f\n", $S_dv}
+
+		# --- UP VIEW RADIANCE ---
+		# interpolation constant
+		my $Au = ( $ktsky - $kt1 ) / ( $kt2 - $kt1 );
+		if ($kv == 1 ) { printf  "slope Au = %.4f,   ", $Au}
+		$Au = $Acorr * $Au;
+		if ($kv == 1 ) { printf  "corrected Au = %.4f\n", $Au}
+		
+		my $S_uv = $S_1v + ( $S_2v - $S_1v) * $Au;
+		if ($kv == 1 ) { printf  "sky view radiance S_uv = %.4f\n", $S_uv}
+		
+		#======================
+		# UPWELLING SKY IRRADIANCE
+		#=======================
+		$S_upwelling = $S_uv * ( 1 - $e_sea );
+		if ($kv == 1 ) { printf  "S_upwelling = %.4f\n", $S_upwelling}
+		
+		#======================
+		# SEA SURFACE RADIANCE
+		# view radiance minus the upwelling
+		#=====================
+		$S_skin = ( $S_dv - $S_upwelling) / $e_sea;
+		if ($kv == 1 ) { printf  "S_skin = %.4f\n", $S_skin}
+		
+		# ===================
+		# COMPUTE SSST FROM THE TABLE
+		#====================
+		if ($kv == 1){printf  "Rad2Temp: S_dv=%.3f, e_sea=%.5f\n", $S_dv, $e_sea}
+		$T_uncorr = $CalOffset + GetTempFromRad( $ttr, $rtr, $S_dv / $e_sea);  # without sky correction
+		$T_skin = $CalOffset + GetTempFromRad($ttr, $rtr, $S_skin);
+		
+		$T_corr = $T_uncorr - $T_skin;   # the correction for sky reflection
+		if($kv == 1){printf  "T_uncorr = %.3f, T_skin = %.3f  T_corrdiff = %.3f\n", $T_uncorr, $T_skin,  $T_corr}
+	}
+	else {
+		$T_uncorr = $T_skin = $T_corr = $missing;
+		$e_sea = 0;
+	}
+	return ($T_skin, $T_corr, $T_uncorr, $e_sea);
+}
+
+#*************************************************************/
+sub ComputeTarget
+#
+#CALL:
+#    $T_cal = ComputeTarget($T1, $T2, $kt1, $kt2, $kttarget, $ecal, $e_bb, $Acorr, $CalOffset, $kv, $missing, $ttr, $rtr);
+#where
+	# $T1 = black body 1, ambient, temperature, degC
+	# $T2 = heated BB temp, degC
+	# $kt1, $kt2, $kttarget = kt15 readings for the different pointing angles, adc counts or mV
+	# $ecal = emissivity of the calibration target, usually set to 1.
+	# $e_bb = estimated emissivity of the black bodies, usually set to 1.
+	# $Acorr = calibration parameter, multiplier of the interpolation slope. Typ = 1 +/- 0.01
+	# $CalOffset = final sst adjustment, deg C. Typ +/-0.1.
+	# $kv = 0 or 1 for nonverbal or verbal. Set to zero during operation.
+	# $missing = value for bad data, usually = -999
+	# $ttr = reference to the planck table temperature, from the MakeRadTable_planck() function.
+	# $rtr = ditto for radiance.
+# example
+#		use lib "/Users/rmr/swmain/perl";
+#		use perltools::Isar;
+#		my $ktfile= "/Users/rmr/swmain/apps/isardaq4/kt15/kt15_filter_15854832.dat";
+#		my ($ttr, $rtr) = MakeRadTable_planck($ktfile);
+# 		@xx1=(8.789, 28.131, 530.6, 588.3, 529.6, 0.0,0.5, 0.98667, 1.0, 1.0175, 0.060, $kv, -999, $ktfile, $ttr, $rtr);
+# 		$ss = perltools::Isar::ComputeSSST(@xx1);
+# gives Tskin=9.508, Tcorr=-0.3312, Tuncorr=9.1770  
+#v3 110506 rmr -- moved to perl module Isar.pm
+{
+	my ($tb1, $tb2, $kt1, $kt2, $kttarget, $e_cal, $e_bb, $Acorr, $CalOffset, $kv, $missing, $ttr, $rtr) = @_;
+	my ($S_1, $S_2, $S_k, $S_1v, $S_2v, $S_upwelling, $Ad, $S_dv, $Au, $S_uv, $S_skin, $T_uncorr, $T_skin);
+	#print "test ComputeTarget: @_\n";
+	#=======================
+	# COMPUTE ONLY IF WE HAVE ALL THE DATA
+	#======================
+	if ( $kttarget != $missing && $kt1 != $missing && $kt2 != $missing &&
+		$tb1 != $missing && $tb2 != $missing) {
+		# BB RADIANCES
+		#
+		$S_1 = GetRadFromTemp ($ttr, $rtr, $tb1);
+		if ($kv == 1 ) { writeTMP(sprintf  ("tb1 = %.3f,  S_1 = %.4e", $tb1, $S_1)); }
+		$S_2 = GetRadFromTemp($ttr, $rtr, $tb2);
+		if ($kv == 1 ) { writeTMP(sprintf  ("tb2 = %.3f,  S_2 = %.4e", $tb2, $S_2)); }
+		$S_k = $S_1;  # planck radiance from the kt15 lens
+		# VIEW IRRADIANCES DEPEND ON THE EMISSIVITIES OF THE BB'S AND SOURCE
+		$S_1v = $e_bb * $S_1 - ( 1 - $e_bb ) * $S_k;
+		$S_2v = $e_bb * $S_2 - ( 1 - $e_bb) *  $S_k;
+		if ($kv == 1 ) { writeTMP(sprintf  ("S_1 = %.3f,  S_2 = %.3f\n", $S_1v, $S_2v)); }
+		
+		# ---CALIBRATION VIEW RADIANCE---
+		# diagnostic print if kv == 1
+		if ($kv == 1 ) { writeTMP(sprintf  ("kt %.4f, %.4f, %.4f\n", $kt1, $kt2, $kttarget )); }
+			
+		# Ad = (kd-k1) ./ (k2-k1);
+		$Ad = ( $kttarget - $kt1 ) / ( $kt2 - $kt1 );
+		
+		# Correct for the irt beam spread
+		$Ad = $Acorr * $Ad;
+		if ($kv == 1 ) { writeTMP(sprintf  ("Ad = %.4f\n", $Ad)); }
+		
+		# CAL VIEW INCOMING IRRADIANCE BY INTERPOLATION
+		my $S_cal = $S_1v + ($S_2v - $S_1v) * $Ad;
+		if ($kv == 1 ) { writeTMP(sprintf  ("S_cal = %.4f\n", $S_cal)); }
+		
+		# --- BACKWELLING IRRADIANCE FROM CAL BATH -----------
+		$S_upwelling = $S_cal * ( 1 - $e_cal );
+		if ($kv == 1 ) { writeTMP(sprintf  ("S_upwelling = %.4f\n", $S_upwelling)); }
+		
+		# ---- CAL RADIANCE ------------------
+		# ---- view radiance minus the upwelling ------
+		$S_cal = ( $S_cal - $S_upwelling) / $e_cal;
+		if ($kv == 1 ) { writeTMP(sprintf  ("S_cal = %.4f\n", $S_cal)); }
+		
+		# ---- COMPUTE CALIBRATION BATH FROM THE TABLE --------
+		$T_target = GetTempFromRad($ttr, $rtr, $S_cal) + $CalOffset;  
+	} else {
+		$T_target = $missing;
+	}
+	if($kv==1){writeTMP(sprintf  "T_target = %.3f\n",$T_target)}
+	return $T_target;
+}
+#==================================================================
+sub writeTMP {
+	my $str = shift();
+	print"test $str\n";
+# 	open TMP, ">>/tmp/avgrosr.txt" or die("OPEN TMP FAILS\n");
+# 	print TMP "$str\n";
+# 	close TMP;
+}
+

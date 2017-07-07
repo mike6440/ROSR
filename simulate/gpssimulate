@@ -1,0 +1,21 @@
+#!/usr/bin/kermit +
+  ##!/opt/local/bin/kermit +
+
+set line /dev/tty.usbserial1
+set speed 9600
+set duplex half
+set flow none
+set carrier-watch off
+set send timeout 600 fixed
+set transmit prompt 0
+set file type binary
+set transmit linefeed on
+
+define \%x 1
+while 1 {
+	run gpsgetrecord \%x > /tmp/g1
+	transmit /tmp/g1
+	increment \%x
+	wait 3
+}
+quit

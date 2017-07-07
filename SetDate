@@ -1,0 +1,25 @@
+#!/usr/bin/expect
+
+set pw  [lindex $argv 0]
+#send_user  "$pw\n"
+set yyyy  [lindex $argv 1]
+#send_user  "$yyyy\n"
+set MM  [lindex $argv 2]
+#send_user  "$MM\n"
+set dd  [lindex $argv 3]
+#send_user  "$dd\n"
+set hh  [lindex $argv 4]
+#send_user  "$hh\n"
+set mm  [lindex $argv 5]
+#send_user  "$mm\n"
+set ss  [lindex $argv 6]
+#send_user  "$ss\n"
+
+
+spawn sudo date -u $MM$dd$hh$mm$yyyy.$ss
+	# Specific for Linux "Password:" for Unix
+expect  "assword"
+#expect  "password for `whoami`:"
+send "$pw\r"
+interact
+

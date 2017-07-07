@@ -1,0 +1,9 @@
+#!/usr/bin/perl -X
+
+@w = `ls /dev/tty*PL* 2>/dev/null`;
+@x = `ls /dev/tty*USB* 2>/dev/null`;
+@w=(@w,@x);
+if ( $#w < 0 ){exit 1}
+chomp($w[0]);
+print"$w[0]";
+exit 0;

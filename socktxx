@@ -1,0 +1,88 @@
+#! /usr/bin/perl -w
+# Connects as a client to a socket server with ip# port.
+# Builds the $ROSST packet and sends through the socket.
+# sends $ROSST,%s,M,,,,,M,*5A if there is no data. 
+
+
+use lib $ENV{DAQLIB};
+use perltools::MRtime;
+use perltools::MRutilities;
+# use perltools::MRsensors;
+# use perltools::MRstatistics;
+# use perltools::Isar;
+# use POSIX;
+use IO::Socket::INET;
+
+# ip# and port from su.txt or command line.
+if($#ARGV < 0){
+	$serverip=FindInfo(`cat tmp`,'TELNET SERVER IP',':');
+	$serverport=FindInfo(`cat tmp`,'TELNET SERVER PORT',':');
+} else {
+	$serverip=shift();
+	$serverport=shift();
+}
+# print"$serverip\n";
+# print"$serverport\n";
+
+# auto-flush on socket
+$| = 1;
+
+# create a connecting socket
+my $socket = new IO::Socket::INET (
+    PeerHost => $serverip,
+    PeerPort => $serverport,
+    Proto => 'tcp',
+);
+print"socktx connecting $serverip $serverport\n";
+die "cannot connect to the server $!\n" unless $socket;
+# print "connected to the server\n";
+
+my ($fn, $str, @w);
+# data to send to a server
+$fn=`LastDataFolder rosr_avg`;
+# print"fn=$fn\n";
+if( -f $fn ){
+	#print"$fn exists.\n";
+	$str=`tail -1 $fn`;
+	chomp($str);
+	#print"tail=$str\n";
+	@w=split /[, ]+/, $str;
+	$str=sprintf "\$ROSST,$w[1]$w[2]$w[3],$w[4]$w[5]$w[6],";
+	#test gps
+	if($w[7]<-90 || $w[8]<-180 || $w[7]>90 || $w[8]>360 ){
+		$str=$str.'I,,,,,';
+	} else {
+		$str=$str."V,$w[7],$w[8],$w[9],$w[10],";
+	}
+	# test ssst
+	if($w[11]<0 || $w[11]>50){
+		$str=$str.'I,*';
+	} else {
+		$str=$str."V,$w[11]*";
+	}
+	#$str=sprintf "\$ROSST,$w[1]$w[2]$w[3],$w[4]$w[5]$w[6],V,$w[7],$w[8],$w[9],$w[10],V,$w[11]*";
+}
+else{
+	$str=sprintf"\$ROSST,%s,M,,,,,M,*",dtstr(now(),'csv');
+}
+# make the packet
+#$str='$GPRMC,070951,A,3356.2135,N,13055.5039,E,000.1,051.6,160915,007.1,W* == 64';
+$str=$str.NmeaChecksum($str)."\r\n";
+print"$str\n";
+
+# send packet
+my $size = $socket->send($str);
+
+# notify server that request has been sent
+shutdown($socket, 1);
+
+# receive a response of up to 1024 characters from server
+# my $response = "";
+# $socket->recv($response, 1024);
+# print "received response: $response\n";
+
+# close the socket
+$socket->close();
+
+exit 0;
+ 

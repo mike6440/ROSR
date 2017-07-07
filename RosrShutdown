@@ -1,0 +1,116 @@
+#!/usr/bin/expect --
+# Kermit to ROSR. First use 'g' to go to operate mode in case the rosr was
+# left in the menu. Then 't' to go to menu, prompt='>'. Command 'fc' closes
+# the shutter. Quit connection and bootoff the power.
+
+set PROGRAMNAME ShutDown
+set VERSION 1
+set EDITDATE 151019
+
+# Connect to ROSR. Go to terminal mode.  'd325' points the drum inside.
+#   'fc' closes the shutter.  'bootoff' shuts off the power.
+
+puts "RUN PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE"
+
+set loguser 1;		#   test 0-quiet, 1=verbose
+log_user $loguser;
+
+		# SETUP FILE DEFINED
+set setupfile "setup/su.txt";
+send_user "setup file = $setupfile\n";
+		## SEE IF THE SETUP FILE EXISTS
+if [catch {open $setupfile} sufile] {
+	puts "Setup file open fails, exit 1"
+	exit 1
+}
+
+global ROSR ROSRPID
+#========================================================
+		# PROCEDURE TO CONNECT TO ROSR
+#============================================================
+proc SpawnRosr { hub_url rosrport} {
+	global ROSR ROSRPID
+	set str [spawn_kermit $hub_url $rosrport]
+	set ROSR [lindex $str 0];    
+	set ROSRPID [lindex $str 1];
+}
+#===========================================================================
+# PROCEDURE TO CONNECT TO A PORT USING KERMIT
+# input
+#	serialport = full path name for the serial port, e.g. /dev/tty.usbserial0
+#   baud = desired baud rate, e.g. 9600
+#============================================
+proc spawn_kermit {hub_url portnumber} {
+	global infoname
+			# START PROCESS -- KERMIT
+	set pid [spawn kermit]
+	expect {
+		timeout {send_user "KERMIT FAILS TO OPEN\n"; exit 1}
+		">>"
+	}
+	
+			# OPEN THE PORT
+	send "set host $hub_url $portnumber\r"
+	expect ">>"
+	send "set tcp keepalive on 0\r\n"
+	expect ">>"
+	send "set tcp linger OFF\r\n"
+	expect ">>"
+	send "set tcp nodelay on\r\n"
+	expect ">>"
+	send "set telnet echo local\r\n"
+	expect ">>"
+			# this is important for using the rsr menu
+			# raw means send CR by itself, not CRLF and NOT CRNul
+	send "set telnet newline-mode nvt raw\r\n"
+	expect ">>"
+			# CONNECT 
+	send "connect\r"
+	expect {
+		timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
+		"Conn*---"  { }  #v15
+	}
+	set out $spawn_id;
+	lappend out $pid
+	return $out
+}
+#==================== END PROCEDURES =============================================
+
+
+	# PDS SERIAL HUB URL AND OFFSET
+spawn -noecho getsetupinfo $setupfile "SERIAL HUB URL"
+expect -re "(\.*)(\r)";
+set hub_url $expect_out(1,string)
+	# ROSR PORT
+spawn -noecho getsetupinfo $setupfile "ROSR HUB COM NUMBER"
+expect -re "(\.*)(\r)";
+set rosrport $expect_out(1,string)
+send_user "hub ip: $hub_url   port:$rosrport\n";
+		# OPEN SERIAL PORTS
+SpawnRosr $hub_url $rosrport 
+set spawn_id $ROSR
+
+	# SEND G TO BE SURE WE ARE sampling
+send "g\r"
+sleep 1
+	# NOW SEND 'T' TO GO TO MENU
+send "t"
+expect {
+	timeout {send_user "timeout waiting for prompt\n"}
+	">" {send_user "Prompt received\n"}
+}
+send "fc\r"
+expect {
+	timeout {send_user "timeout waiting for prompt\n"}
+	">" {send_user "fc prompt received\n"}
+}
+	# Kermit break ^\ q = 0X1C 
+send \028
+send "q"
+
+	# bootoff
+exec bootoff
+send_user "bootoff\n";
+
+send_user "FINISHED\n";
+exit;

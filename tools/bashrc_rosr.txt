@@ -1,0 +1,126 @@
+# BASH SETUP FOR ISAR3
+# edit 20170619T145359Z 
+#
+export PS1='\w/$ '
+export EDITOR="vi"
+alias Top="top -u -s5"
+alias Date='date -u "+%Y %m %d %H %M %S Z"'
+alias ll="ls -l"
+
+#  		ROSR S/N 
+export ROSRSN="01";
+# color 
+export LSCOLORS="cxfxcxdxfxegedabagacad"
+alias ls="ls -aG"
+# folders
+export DAQFOLDER="$DAQPATH/ROSR"
+export DAQSWFOLDER="$DAQFOLDER/sw"
+export DAQDATAFOLDER="$DAQFOLDER/data"
+alias gtdaq="cd $DAQSWFOLDER"
+
+echo $PATH | grep -q -s /opt/local/bin
+if [ $? -eq 1 ] ; then
+    PATH=$PATH\:/opt/local/bin\:/opt/local/sbin
+    export PATH
+fi
+
+echo $PATH | grep -q -s $DAQSWFOLDER
+if [ $? -eq 1 ] ; then
+    PATH=$PATH\:$DAQSWFOLDER\:.
+    export PATH
+fi
+
+	# SETUP FILE NAME
+export SETUPFILE=$DAQSWFOLDER"/setup/su.txt"
+
+# TEST CALLS
+alias I='cd $DAQSWFOLDER; 	./term_to_rosr $SETUPFILE'
+alias N='cd $DAQSWFOLDER; 	./term_to_sbd  $SETUPFILE'
+alias P='cd $DAQSWFOLDER; 	./term_to_gps  $SETUPFILE'
+
+alias Help="less help.txt"
+
+		# CHECK DATA
+rosravg () {
+	cd $DAQSWFOLDER;
+	xx=`LastDataFolder rosr_avg`
+	head -1 $xx
+	tail -f $xx
+}
+gpsavg () {
+	cd $DAQSWFOLDER;
+	xx=`LastDataFolder gps_avg`
+	head -1 $xx
+	tail -f $xx
+}
+		# RAW
+gpsraw () {
+	cd $DAQSWFOLDER;
+	echo "^c to end"
+	xx=`LastDataFolder gps_raw`
+	tail -f $xx
+}
+rosrraw () {
+	cd $DAQSWFOLDER;
+	echo "^c to end"
+	xx=`LastDataFolder rosr_raw`
+	tail -f $xx
+}
+rosrav () {
+	cd $DAQSWFOLDER;
+	echo "^c to end"
+	xx=`LastDataFolder rosr_av_`
+	tail -f $xx
+}
+rosrst () {
+	cd $DAQSWFOLDER;
+	echo "^c to end"
+	xx=`LastDataFolder rosr_sst`
+	tail -f $xx
+}
+rosrsbd () {
+	cd $DAQSWFOLDER;
+	tail -f /tmp/sbd
+}
+
+
+	# SCREEN
+alias isscreen='echo "CHECK FOR A SCREEN"; screen -ls'
+alias gtscreen='echo "GO TO SCREEN"; screen -S ROSR -d -r'
+
+	# RUN CALLS
+alias G='cd $DAQSWFOLDER;  Z_rosr `cat tmp`'
+alias GG='cd $DAQSWFOLDER;  Z_gps `cat tmp`'
+
+		#START SCREEN
+Startrosr () {
+	KillScreen;
+	cd $DAQSWFOLDER; ./PrepareForRun; export RUNSETUPFILE=`cat tmp`;
+	crontab $DAQFOLDER/tools/crontab_rosr.txt
+	screen -S ROSR -d -m -c $DAQFOLDER/tools/screenrc_rosr.txt
+	screen -S ROSR -p 1 -X stuff "GG$(printf \\r)"
+	screen -S ROSR -p 2 -X stuff "G$(printf \\r)"
+	isscreen
+}
+
+	#STOP DATA COLLECTION SCREEN
+alias Stoprosr="KillScreen; Stopcron; Cleanuprosr;"
+
+	#START AND STOP CRONTAB
+alias Startcron="crontab $DAQFOLDER/tools/crontab_rosr.txt"
+alias Stopcron="crontab -r"
+
+
+#		PERL LIBRARY =============================
+export DAQLIB=$DAQFOLDER"/tools"
+export MYLIB=$DAQLIB
+
+	# KERMIT RC =====================
+echo "prompt k>>" > ~/.kermrc
+
+	# MONITOR PROGRESS
+alias rosrsbd="tail -f /tmp/sbd 2>/dev/null"
+alias sbdlog="tail -f ../data/sbdlog"
+
+cd $DAQSWFOLDER
+

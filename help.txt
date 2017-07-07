@@ -1,0 +1,75 @@
+2016-05-20
+       Enter "Help" to read.   Press 'q' to end this sheet  !!!!
+       Enter "gedit help.txt" to edit.  ^q to quit
+
+ssh rmr@IP#      password: r0srr0sr  (use ifconfig for wifi ip#)
+
+gtdaq        --  go to "~/swmain/apps/ROSR/sw/$ "
+
+--- TIME --------------------------
+Date         --  2015 10 19 18 03 57 Z
+SetDate r0srr0sr yyyy MM dd hh mm ss  --  sets the PC clock
+example:
+  SetDate r0srr0sr 2016 05 20 17 23 30<enter>
+
+
+--- START OPERATION ---------------------
+booton       --  Power ON, wait two minutes.
+Startrosr    --  Begin data collection
+rosrraw      --  Confirm data flow  (^c to end)
+
+--- STOP OPERATION ---------------------
+Stoprosr     --  End data collection
+RosrShutdown -- Close shutter and power off. Note: Use this when ROSR is unattended.
+
+--- ARCHIVE DATA --------------------------
+ArchiveRosr   -- Makes an archive file in /home/rmr/rosrdata
+ClearRosrData -- Clears the data folder. (Checks y or n)
+
+--- POWER --------------------------
+booton       --  Power ON, ROSR begins operation in two minutes.
+bootoff      --  Power OFF
+bootstatus  --  current power status, ON or OFF.
+
+--- DIRECT CONNECT -----------------
+P             --  direct connect to GPS
+I             --  direct connect to ROSR, "^\ q" to end
+  T           --    ROSR terminal mode
+    ?         --    terminal menu
+    fc        --    close shutter
+    fo        --    open shutter
+    g         --    Go. End terminal session. Start operation.
+^\ q          --  end direct connect. Hold down <Crtl> and '\'. Release and press 'q'. 
+
+
+--- VIEW DATA -------------------------
+rosrsbd     --  show WISBD packets, 10-min, ^c to end
+rosrraw     --  show $WIROS raw data, 280 sec, ^c to end
+rosravg     --  show PC avg file, 10 min averages (5,15,25,...,55), ^c to end
+rosrav      --  show $WIRAV packets, 280 sec, ^c to end
+rosrst      --  show $WIRST packets, 280 sec, ^c to end
+
+
+--- ROSR OUTPUT PACKETS ---
+$WIROS,etime,drum,KT,Tkt,adc0,adc1,adc2,adc3,adc4,adc5,adc6,adc7,adc8,adc9,adc10,
+    adc11,vref,t11,t12,t21,t22,pit,rol,Tkt,Tktx,Twin,Tpwr,Vin,vrain,sec*chk<cr><lf>
+
+$WIRAV,etime,vav0,vav1,vav2,vav3,k0,k1,k2,k3,ksd0,ksd1,ksd2,ksd3,t11,t12,t21,t22,tsd11,
+    tsd12,tsd21,tsd22,T1,T2,pav,psd,rav,rsd,ang,emis*chk
+    
+$WIRST,etime,vav0,vav1,vav2,vav3,k0,k1,k2,k3,T1,T2,ang,emis,ssst*chk
+
+
+--- DAQ DATA FILES ---
+$WISBD yyyyMMdd hhmmss lat lon sog cog ssst pi sdpi ro sdro emis
+    k1 k2 ksky ksea T1 T2 vrain
+
+AVG DATA
+  ix UTC lat lon sog cog ssst ssstu T1 T2 k1 k2 ksea ksky emis pit sdpit rol sdrol rain
+
+OUTPUT TO SHIP
+  $ROSST yyyyMMdd hhmmss V1 lat lon sog co V2 ssst
+
+
+----- END -----------------
+

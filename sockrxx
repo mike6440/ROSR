@@ -1,0 +1,38 @@
+#!/usr/bin/perl -w
+
+
+use lib $ENV{DAQLIB};
+use perltools::MRtime;
+use perltools::MRutilities;
+use IO::Socket;
+
+# ip# and port from su.txt or command line.
+if($#ARGV < 0){
+	$serverip=FindInfo('setup/su.txt','TELNET SERVER IP',':');
+	$serverport=FindInfo('setup/su.txt','TELNET SERVER PORT',':');
+} else {
+	$serverip=shift();
+	$serverport=shift();
+}
+print"IP=$serverip PORT=$serverport\n";
+
+my $sock = new IO::Socket::INET (
+	LocalHost => $serverip,
+	LocalPort => $serverport,
+	Proto => 'tcp',
+	Listen => 1,
+	Reuse => 1,
+);
+die "Could not create socket: $!\n" unless $sock;
+
+my ($size,$new_sock,$str);
+$str="ok\n";
+while(1){
+	$new_sock = $sock->accept();
+	while(<$new_sock>) {
+	    print $_;
+	}
+	print"\n";
+}
+
+close($sock);

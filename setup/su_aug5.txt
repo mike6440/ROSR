@@ -1,0 +1,145 @@
+THIS FILE: 
+Editdate: 150411
+
+		DATA FILES ---------------------
+RT OUT PATH: data
+NO DATA WAIT TIME: 3600
+
+	========================
+		HUB ADDRESS AND PORTS
+		PDS default: 192.168.255.1 (sometimes ...3)
+	========================
+SERIAL LINE: /dev/tty.PL2303-001013FA
+SERIAL SPEED: 9600
+
+SERIAL HUB URL: 192.168.255.1
+IBOOT IP: 192.168.255.2
+PC IP: 192.168.255.10
+TEST IP: 192.168.255.12
+
+
+		ROSR -- 10001, simulate=0
+ROSR HUB COM NUMBER: 10001
+		GPS -- 10003, Fixed=-1, simulate=0
+GPS HUB COM NUMBER: 10003
+		MODEM -- 10004, Not connected=-1, simulate=0
+SBD HUB COM NUMBER: -1
+
+	=======================
+		OPERATIONAL PARAMETERS
+	=======================
+	# RUN
+	# 
+SSST SLOPE : 1.0106
+SSST OFFSET: -0.0426
+	# !! view angles (same as eeprom) -- (bb1, bb2, sky, sea)
+SCAN VIEW ANGLES: 265 325 45 135
+	# CALIBRATION
+CAL SSST SLOPE: 1
+CAL SSST OFFSET: 0
+CAL SCAN VIEW ANGLES: 265 325 45 90
+
+
+
+
+	=======================
+		BLACK BODY
+	=======================
+BLACK BODY EMISSIVITY : 1.0
+		## set Vref to 0 and the values from the 2*adc12-7 will be used.
+BB THERM VREF: 0
+BB TEMP Ref R: 10000
+		Resistances from testing with precision resistances. See notes 090909.
+BB RESISTORS: 10000, 10000, 10000, 10000, 10000, 10000
+		# Rref for wintemp and tt8temp
+APPERATURE THERM REF RESISTOR: 10000
+REF VOLTAGE FOR 12 BIT ADC: 4.0928
+		# Rref2 for four ysi apperature therms
+		## ROSR-01: 9995 9984 9997 9997
+		## ROSR-04: 10000 10000 10000 10000
+APPERATURE THERMS REF RESISTANCES: 10000 10000 10000 10000
+
+	=======================
+		CALIBRATION PARAMETERS
+	=======================
+		#CAL EMIS: 0 = field use, compute e from angle,  ~=1 = calibration mode
+CALIBRATION EMISSIVITY: 0
+		# INDEX -- (0,1,...) index.  Use for calibration case
+CALIBRATION VIEW POSITION : 3
+		# CAL VIEW ANGLES (SAME AS ROSR EEPROM) -- (bb1, bb2, sky, sea)
+CAL VIEW ANGLES: 280 325 45 90
+
+	========================
+		EXPERIMENT INFO
+	========================
+EXPERIMENT NAME: ANDROMEDA LEADER VOS 2014-15 
+
+GEOGRAPHIC LOCATION: Lg Beach CA
+		two characters for a ship code
+PLATFORM NAME: ANDROMEDA LEADER
+LOCATION ON PLATFORM: Port
+HEIGHT ABOVE SEA LEVEL (m): 30 m approx
+SHIP TYPE: Car Carrier
+SHIP NAME: ANDROMEDA LEADER
+CRUISE NAME: AL33
+	port or starboard
+PLATFORM SIDE: PORT
+
+
+	========================
+		QUALITY ERROR CHECK
+	========================
+MINIMUM EXPECTED LATITUDE: 5
+MAXIMUM EXPECTED LATITUDE: 90
+MINIMUM EXPECTED LONGITUDE: -180
+MAXIMUM EXPECTED LONGITUDE: 360
+MISSING VALUE: -999
+
+
+	========================
+		COMMENTS/LOG
+	========================
+COMMENTS:
+ ROSR sn1 testing
+END
+
+	========================
+		GPS SETUP
+		NOTE: Use the Garmin-supplied Windows program to set the 17x for
+		9600 baud, 1-sec output, GPRMC only string.
+	========================
+##GPS MODEL NUMBER: GPS17X
+##GPS MIN SAMPLES FOR AVG: 3
+GPS AVERAGING TIME: 120
+	========================
+		FIXED POSITION -- NO GPS
+		(hub port=-1)
+	========================
+	# EUCLID AVE
+GPS FIXED LATITUDE: 47.60329
+GPS FIXED LONGITUDE: -122.28797
+		Magnetic variation, + = East of true
+GPS FIXED VARIATION: 18.1
+
+	========================
+		ROSR
+	========================
+ROSR SERIAL NUMBER: 1
+		Verbose mode prints out test messages and data.  VERBOSE = 1, NOT VERBOSE = 0
+		avgrosr.pl makes a file called data/tmp.txt.
+VERBOSE MODE: 0
+		## Specifics on the Instrument
+		## rosr01 : kt1585_sn11486.txt
+KT15 SERIAL NUMBER: 11486
+KT15 FILTER FILE: kt15/kt1585_sn11486.txt
+ROSR AVERAGING TIME (sec): 600
+SEA EMISSIVITY (UNCORRECTED): 0.9870975
+APERATURE EMISSIVITY : 0.95
+##MAXIMUM NUMBER OF AVERAGES (Set to 1e20 for final run) : 1e20
+MIN SAMPLES FOR AVG: 2
+SELF-HEAT FLAG: 1
+
+
+	========================
+		END SETUP FILE
+	========================

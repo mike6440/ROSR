@@ -1,0 +1,37 @@
+#!/usr/bin/perl -w
+
+#  Call after 'Stoprosr'
+#  Tars entire ROSR folder and stores in /home/rmr/rosrdata/ folder
+#  
+#  Call:  perl ArchiveRosr
+#  
+#  Output: /home/rmr/rosrdata/rosrarchive_20151020T123456Z.tar.gz
+# 
+
+use lib $ENV{MYLIB};
+use perltools::MRutilities;
+use perltools::MRtime;
+
+	## DATA PATH
+my $datapath="$ENV{HOME}/swmain/apps/ROSR";
+print"data path = $datapath\n";
+
+	## ARCHIVE PATH
+my $archivepath="$ENV{HOME}/rosrdata";
+print"Archive path=$archivepath\n";
+if(! -d $archivepath){
+	print"Create $archivepath\n";
+	`mkdir $archivepath`;
+}
+
+	## TAR FILE NAME
+my $tarname=sprintf "rosrarchive_%s.tar.gz",dtstr(now(),'iso');
+print"tarname=$tarname\n";
+
+
+	## TAR COMMAND
+my $cmd = sprintf "cd $datapath; tar -zcf $archivepath/$tarname .";
+print"$cmd\n";
+system $cmd;
+
+exit 0;

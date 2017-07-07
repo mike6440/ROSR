@@ -1,0 +1,34 @@
+Changes
+lib/List/Util.pm
+lib/List/Util/XS.pm
+lib/Scalar/Util.pm
+ListUtil.xs
+Makefile.PL
+MANIFEST			This list of files
+multicall.h
+MYMETA.yml
+ppport.h
+README
+t/00version.t
+t/blessed.t
+t/dualvar.t
+t/first.t
+t/getmagic-once.t
+t/isvstring.t
+t/lln.t
+t/max.t
+t/maxstr.t
+t/min.t
+t/minstr.t
+t/openhan.t
+t/proto.t
+t/readonly.t
+t/reduce.t
+t/refaddr.t
+t/reftype.t
+t/shuffle.t
+t/stack-corruption.t
+t/sum.t
+t/tainted.t
+t/weak.t
+META.yml                                 Module meta-data (added by MakeMaker)

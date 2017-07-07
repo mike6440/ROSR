@@ -1,0 +1,51 @@
+#!/usr/bin/expect --
+#edit 150425,1100L
+
+#term_to_spare.ex (MAC)
+#Note: the file .kermrc has the command "prompt k>>"
+
+# KERMIT CONNECTION TO PDS752 COM ?
+
+
+log_user 0
+
+# IP number and port number
+set ip [exec getsetupinfo "setup/su.txt" "IBOOT IP"]
+
+
+# START PROCESS -- KERMIT FOR MODEM
+spawn telnet $ip
+set PDS $spawn_id
+set timeout 4
+
+expect {
+	timeout {"TELNET FAILS TO OPEN\n"; exit 1}
+	"User>"
+}
+
+send "admin\r\n";
+expect {
+	"Password>"
+}
+
+send "admin\r\n";
+expect {
+	"iBoot>"
+}
+
+send "set outlet on\r"
+expect {
+	"iBoot>"
+}
+
+send "get outlet\r"
+expect {
+	"On" {send_user "Power is ON.\n"}
+	"Off" {send_user "Power is OFF.\n"}
+}
+
+
+
+send "logout\r"
+
+exit 0

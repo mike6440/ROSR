@@ -1,0 +1,17 @@
+#!/usr/bin/perl -w
+
+my $wrap=12;
+my $i= $ARGV[0];
+if($i<=0){$i=1}
+$i = ($i-1)%$wrap; # wrap at max records
+#printf"Get record %d\n",$i+1;
+#exit;
+open F, "rosr.txt" or die;
+for($n=0;$n<=$i;$n++){
+	$str=<F>;
+}
+chomp($str);
+#print"Record $n\n";
+print"$str\r\n";
+close F;
+exit;

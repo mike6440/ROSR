@@ -1,0 +1,20 @@
+#command: crontab $DAQFOLDER/tools/crontab_rosr.txt
+
+# crontab -e to use default editor
+# EDITOR="nano" crontab -e # to define the editor (nano,vi,vim)
+
+#To use my bashrc stuff
+MAILTO=""
+BASH_ENV="$HOME/.bashrc"
+SHELL=/bin/bash
+
+#    SBD transmit
+#26,56 * * * * $DAQSWFOLDER/sbd_transmit >> $DAQDATAFOLDER/sbdlog
+
+#    Check and reboot
+14 * * * * $DAQSWFOLDER/UpdateDaq >> $DAQDATAFOLDER/daqlog
+
+#	SCS OUTPUT
+#6,16,26,36,46,56 * * * * $DAQSWFOLDER/sbd2scs_tcp >> /tmp/scslog
+#6,16,26,36,46,56 * * * * $DAQSWFOLDER/sbd2scs_232 >> /tmp/scslog
+

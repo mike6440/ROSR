@@ -1,0 +1,97 @@
+#!/usr/bin/perl -w
+
+# Prepare to run an experiment
+# folders::
+#  $HOME/
+#		swmain/
+#			apps/
+#			  ROSR/
+#				data/
+#					datayyyyMMddThhmmssZ/
+#						su_yyyyMMddThhmmssZ.txt
+#						(data files)
+#				sw/
+#					setup/su.txt
+#					(all program files)
+#				tools/
+#					perltools/
+#
+
+## RUN FROM THE DAQ sw folder
+# PERLTOOL IN THE ~/sw/perl FOLDER
+use lib "$ENV{DAQLIB}";
+use perltools::MRtime;
+use perltools::MRutilities;
+
+print"home = $ENV{HOME}\n";
+print"data = $ENV{DAQDATAFOLDER}\n";
+
+$setupfile=$ENV{SETUPFILE};
+print"setupfile = $setupfile\n";
+$e_cal = FindInfo($setupfile,'CALIBRATION EMISSIVITY', ':');  # black body emissivity
+if($e_cal == 0){
+	print"e_cal = $e_cal, RUN.\n";
+} else {
+	print"e_cal = $e_cal, CALIBRATION.\n";
+}
+
+#=========================
+# MAKE SURE THE CORRECT FOLDERS ARE IN PLACE
+# IF NOT, THEN CREATE THEM
+#========================
+# DATA FOLDER
+$fndata = "$ENV{DAQDATAFOLDER}";
+if ( ! -d $fndata ) {
+	print"DATA FOLDER IS MISSING, CREATE NEW\n";
+	`mkdir $fndata`;
+}
+print"MAIN DATA FOLDER: $fndata\n";
+
+
+#========================
+# CREATE THE NEW DATA FOLDER FOR THIS RUN
+#========================
+my $dt0 = now();
+if($e_cal==0){
+	$fndata = sprintf "$fndata/data_%s", dtstr($dt0,'iso');
+	`mkdir $fndata`;
+	print"RUN DATA FOLDER = $fndata\n";
+} else {
+	$fndata = sprintf "$fndata/datacal_%s", dtstr($dt0,'iso');
+	`mkdir $fndata`;
+	print"CALIBRATION DATA FOLDER = $fndata\n";
+}
+
+#========================
+# MOVE THE SETUP FILE INTO THIS FOLDER
+#========================
+print"CURRENT SETUP FILE = $ENV{SETUPFILE}\n";
+$fsu = sprintf "%s/su_%s.txt", $fndata, dtstr($dt0,'iso');
+print"NEW SETUP FILE = $fsu\n";
+`cp $ENV{SETUPFILE} $fsu`;
+
+
+#========================
+# MODIFY THE SETUP FILE 
+#  THIS FILE = $fsu
+#perl -pi -e 's/: (.+)/: MIkes test/g if /^EXPERIMENT NAME/' tmp
+#========================
+# HEADER LINE
+$cmd=sprintf "perl -pi -e 's!: (.+)!: %s!g if /^THIS FILE/' %s", $fsu, $fsu;
+#print"\ncmd = $cmd\n";
+system $cmd;
+
+# OUT PATH
+$cmd=sprintf "perl -pi -e 's!: (.+)!: %s!g if /^RT OUT PATH/' %s", $fndata, $fsu;
+#print"\ncmd = $cmd\n";
+system $cmd;
+
+printf"
+======= READY, %s==========
+", dtstr($dt0,'iso');
+
+# We want to save this to export it from the shell.
+open(F,'>tmp'); print F "$fsu\n"; close F;
+
+exit
+

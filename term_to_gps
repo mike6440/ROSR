@@ -1,0 +1,87 @@
+#!/usr/bin/expect --
+#term_to_isar 
+#Note: the file .kermrc has the command "prompt k>>"
+#111221 - remove ping
+
+# KERMIT CONNECTION TO PDS752 COM 1
+
+log_user 0
+#==============
+# READ THE COMMAND LINE
+# COMMANDS
+# 1. SETUP FILE PATH AND NAME, /setup/test_setup.txt
+# 2. SIMULATE- dddd where eac d=0/1
+#      order of d's is [cdu][rad][tcm][gps][wxt] "crcgw"
+#==============
+set argc [llength $argv]
+# NO CMD LINE ARGS ==>> HELP
+if { $argc == 0} {
+	set setupfile "$env(DAQSWFOLDER)/setup/su.txt"
+} else {
+	# SETUP FILE DEFINED
+	set setupfile [lindex $argv 0]
+	
+	## SEE IF THE SETUP FILE EXISTS
+	if [catch {open $setupfile} sufile] {
+		puts "Setup file open fails, exit 1"
+		exit 1
+	} else {
+		puts "SETUP FILE $setupfile EXISTS"
+	}
+}
+#==============
+## READ SETUP FILE FOR IP ADDRESS
+#==============
+spawn -noecho getsetupinfo $setupfile "SERIAL HUB URL"
+expect -re "(\.*)(\r)";
+set hubip $expect_out(1,string)
+#set hubip env(HUBIP)
+send_user "SERIAL HUB URL: $hubip\n"
+#==============
+## READ SETUP FILE FOR PORT NUMBER
+#==============
+spawn -noecho getsetupinfo $setupfile "GPS HUB COM NUMBER"
+expect -re "(\.*)(\r)";
+set portnumber $expect_out(1,string)
+send_user "GPS PORT NUMBER: $portnumber\n"
+
+# 111221-remove ping as unnecessary.
+
+# START PROCESS -- KERMIT FOR ISAR MODEM
+spawn kermit
+set PDS $spawn_id
+set timeout 4
+
+expect {
+	timeout {"KERMIT FAILS TO OPEN\n"; exit 1}
+	">>"
+}
+
+## OPEN THE PORT
+send "set host $hubip $portnumber\r"
+expect ">>"
+send_user "set host $hubip $portnumber\n";
+
+## FINE TUNING TCP/IP
+send "set tcp keepalive on 0\r\n"
+expect ">>"
+send "set tcp linger 0\r\n"
+expect ">>"
+send "set tcp nodelay on\r\n"
+expect ">>"
+send "set telnet echo local\r\n"
+expect ">>"
+
+
+## CONNECT 
+send "connect\r"
+expect {
+	"Conn*---"  {send_user "GPS CONNECTED\n"}
+	timeout {send_user "GPS TIMEOUT, NO CONNECT"; exit 1}
+}
+
+
+set spawn_id $PDS
+interact
+
+exit 0

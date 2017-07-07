@@ -1,0 +1,33 @@
+#! /usr/bin/perl
+#gps_simulator.pl
+# edit date: 150411
+
+use lib $ENV{DAQLIB};
+use perltools::MRtime;
+
+my $update = 1;  # seconds between records
+
+$fin = "$ENV{DAQSWFOLDER}/simulate/gps.txt";
+if ( ! -f $fin ) {
+	printf"File %s does NOT exist\n",$fin;
+	exit 0;
+}
+
+my ($then, $now);
+$then = $now = now();
+my $irec = 0;
+
+#110107,000018,$GPRMC,000015,A,3000.3609,N,14455.5704,W,014.4,262.4,070111,012.8,E*66
+while (1) {
+	$irec = 0;
+	open(F,"<$fin") or die;
+	while (<F>) {
+		chomp( $str = $_);
+		print"$str\r\n";
+		
+		## PAUSE A FEW SECONDS
+		sleep($update);
+	}
+	print"Starting over\n";
+	close F;
+}

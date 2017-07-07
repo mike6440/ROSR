@@ -1,0 +1,93 @@
+THIS FILE: su_rosr2cal.txt
+Editdate: 151115
+		#CAL EMIS: 0 = field use, compute e from tilt,  ~=1 = calibration mode
+CALIBRATION EMISSIVITY: 1
+CAL SSST SLOPE: 1
+CAL SSST OFFSET: 0
+CAL SCAN VIEW ANGLES: 265 325 45 90
+KT15 SERIAL NUMBER: 11733
+KT15 FILTER FILE: kt15/kt1585_sn11733.txt
+
+		DATA FILES ---------------------
+RT OUT PATH: data
+ROSR SERIAL NUMBER: 2
+
+	========================
+		HUB ADDRESS AND PORTS
+		PDS default: 192.168.255.1 (sometimes ...3)
+	========================
+SERIAL HUB URL: 192.168.255.1
+		IBOOT IP: 10.198.3.110
+		PC IP: 192.168.255.10
+		TEST IP: 10.198.3.103
+
+TELNET SERVER IP: 0
+TELNET SERVER PORT: 
+
+		ROSR -- 10001, simulate=0
+ROSR HUB COM NUMBER: 10001
+		GPS -- 10003, Fixed=-1, simulate=0
+GPS HUB COM NUMBER: -1
+
+NO DATA WAIT TIME: 3600
+	=======================
+		OPERATIONAL PARAMETERS
+	=======================
+SSST SLOPE : 1.0106
+SSST OFFSET: -0.0426
+	# (bb1, bb2, sky, sea)
+SCAN VIEW ANGLES: 265 325 45 135
+	=======================
+		BLACK BODY
+	=======================
+BLACK BODY EMISSIVITY : 1.0
+		## set Vref to 0 and the values from the 2*adc12-7 will be used.
+BB THERM VREF: 0
+BB TEMP Ref R: 10000
+		Resistances from testing with precision resistances. See notes 090909.
+BB RESISTORS: 10000, 10000, 10000, 10000, 10000, 10000
+		# Rref for wintemp and tt8temp
+APPERATURE THERM REF RESISTOR: 10000
+REF VOLTAGE FOR 12 BIT ADC: 4.0928
+		# Rref2 for four ysi apperature therms
+		## ROSR-01: 9995 9984 9997 9997
+		## ROSR-04: 10000 10000 10000 10000
+APPERATURE THERMS REF RESISTANCES: 10000 10000 10000 10000
+
+	=======================
+		CALIBRATION PARAMETERS
+	=======================
+		# INDEX -- (0,1,...) index.  Use for calibration case
+CALIBRATION VIEW POSITION : 3
+		# CAL VIEW ANGLES (SAME AS ROSR EEPROM) -- (bb1, bb2, sky, sea)
+CAL VIEW ANGLES: 265 325 45 90
+MISSING VALUE: -999
+
+	========================
+		EXPERIMENT INFO
+	========================
+EXPERIMENT NAME: ROSR2 CALIBRATION
+
+	========================
+		COMMENTS/LOG
+	========================
+COMMENTS:
+ Calibration at UW APL
+END
+
+	========================
+		ROSR
+	========================
+		Verbose mode prints out test messages and data.  VERBOSE = 1, NOT VERBOSE = 0
+		avgrosr.pl makes a file called data/tmp.txt.
+VERBOSE MODE: 0
+		## Specifics on the Instrument
+ROSR AVERAGING TIME (sec): 600
+SEA EMISSIVITY (UNCORRECTED): 0.9870975
+APERATURE EMISSIVITY : 0.95
+##MAXIMUM NUMBER OF AVERAGES (Set to 1e20 for final run) : 1e20
+MIN SAMPLES FOR AVG: 2
+SELF-HEAT FLAG: 1
+	========================
+		END SETUP FILE
+	========================

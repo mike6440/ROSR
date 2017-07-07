@@ -1,0 +1,11 @@
+#!/opt/local/bin/kermit +
+
+echo Arg0 = \%1, Arg1 = \%2
+
+set host \%1 \%2
+set tcp keepalive on
+set tcp linger off
+set tcp nodelay on
+set telnet echo local
+set telnet newline-mode nvt raw
+connect

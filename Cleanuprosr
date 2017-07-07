@@ -1,0 +1,30 @@
+#! /usr/bin/perl -w
+
+$usr=`whoami`;
+chomp($usr);
+
+	#=================
+	# REMOVE ZOMBIES
+	#=================
+@removelist=("avgrosr","avggps","kermit","expect","perl");
+foreach $xx (@removelist){
+	$cmd="ps -u $usr -o pid,command | grep \"$xx\"";
+	#print"test 1 cmd = $cmd\n";
+	@pslist = `$cmd`;
+	#$ii=0; foreach(@pslist){chomp($_); print"test 0 $ii, $pslist[$ii]\n"; $ii++}
+	foreach $pscmd (@pslist){
+		chomp($pscmd);
+		#print"test 2 $pscmd\n";
+		if( $pscmd =~ /grep/){
+			#print"test 3 $pscmd\n";
+		} else {
+			#print"test 4 $pscmd\n";
+			@d=split/[ ]+/,$pscmd;
+			$cmd="kill -9 $d[0]";
+			#print"test 5 cmd = $cmd\n";
+			`$cmd`;
+		}
+	}
+}
+exit;
+
