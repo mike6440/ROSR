@@ -893,9 +893,9 @@ void    Action(char *cmd)
 //     Serial.println("Ejff.f  -- Pitch correct deg        EJff.f  -- Roll correct deg");
 //     Serial.println("");
 //     Serial.println("------- FUNCTIONS -----------------------------------");
-    Serial.println("an -- ADC Chan n                    A      -- ADC all loop");
-    Serial.println("bn -- BB n heater OFF               Bn     -- BB n heater ON");
-    Serial.println("c  -- 5REF OFF                      C      -- 5REF ON");
+    Serial.println("an   -- ADC Chan n                    A      -- ADC all");
+    Serial.println("bn   -- BB n heater OFF               Bn     -- BB n heater ON");
+    Serial.println("c    -- 5REF OFF                      C      -- 5REF ON");
     Serial.println("d    -- encoder loop");
     Serial.println("df.f -- Point to angle f.f");
     Serial.println("Df.f -- Set the encoder to f.f");
@@ -919,18 +919,16 @@ void    Action(char *cmd)
   // READ ADC CHANNEL
   else if (cmd[0] == 'a' && strlen(cmd) > 1) {
     ix = cmd[1] - 48;
-    Serial.print("Chan ");
-    Serial.println(ix, DEC);
+    Serial.print("Chan "); Serial.println(ix, DEC);
     if (ix < 0 || ix > 15) {
       Serial.println("Error");
     }
     else {
     	while ( !Serial.available()  ) {
 		  GetAdcSample(ix, (vmean + ix));
-		  Serial.print("Chan ");
-		  Serial.print(ix, DEC);
-		  Serial.print("  ");
+		  Serial.print("Chan "); Serial.print(ix, DEC); Serial.print("  ");
 		  Serial.println(vmean[ix], 4);
+		  delay(500);
 		}
     }
   }
@@ -2598,11 +2596,11 @@ float ReadEncoder (float ref)
 	float angle = MISSING;
 	byte e[4];
 
-	while ( count < 2 )  { // test
+	while ( count < 2 )  { 
 		// Turn to transmit 485
 		digitalWrite(SEITX, HIGH);
 		delay(2); // short delay for things to settle
-	// clear buffer
+	    // clear buffer
 		while (Serial1.available()) {
 			Serial1.read();
 		}
@@ -2616,7 +2614,7 @@ float ReadEncoder (float ref)
 		i = 0;
 		while ( Serial1.available() ) {
 			e[i] = Serial1.read();
-			//Serial.print("byte ");Serial.print(i,DEC);Serial.print(" = ");Serial.println(e[i],DEC);
+			Serial.print("byte ");Serial.print(i,DEC);Serial.print(" = ");Serial.println(e[i],DEC);
 			i++;
 			if(i>2) break;
 		}
@@ -2626,7 +2624,7 @@ float ReadEncoder (float ref)
 			angle = ((float)e[0] * 256 + (float)e[1]) / 40.0;
 			if (angle >= 0 && angle <= 360) break;
 			else angle=MISSING;
-			//Serial.print("test angle = ");Serial.println(angle,3);
+			Serial.print("test angle = ");Serial.println(angle,3);
 		}
 		count++;
 	}

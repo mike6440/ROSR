@@ -5,13 +5,13 @@ export PS1='\w/$ '
 export EDITOR="vi"
 alias Top="top -u -s5"
 alias Date='date -u "+%Y %m %d %H %M %S Z"'
-alias ll="ls -l"
 
 #  		ROSR S/N 
 export ROSRSN="01";
 # color 
 export LSCOLORS="cxfxcxdxfxegedabagacad"
 alias ls="ls -aG"
+alias ll="ls -laG"
 # folders
 export DAQFOLDER="$DAQPATH/ROSR"
 export DAQSWFOLDER="$DAQFOLDER/sw"
@@ -96,8 +96,8 @@ alias GG='cd $DAQSWFOLDER;  Z_gps `cat tmp`'
 Startrosr () {
 	KillScreen;
 	cd $DAQSWFOLDER; ./PrepareForRun; export RUNSETUPFILE=`cat tmp`;
-	crontab $DAQFOLDER/tools/crontab_rosr.txt
-	screen -S ROSR -d -m -c $DAQFOLDER/tools/screenrc_rosr.txt
+	crontab $DAQSWFOLDER/tools/crontab_rosr.txt
+	screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_rosr.txt
 	screen -S ROSR -p 1 -X stuff "GG$(printf \\r)"
 	screen -S ROSR -p 2 -X stuff "G$(printf \\r)"
 	isscreen
@@ -107,12 +107,12 @@ Startrosr () {
 alias Stoprosr="KillScreen; Stopcron; Cleanuprosr;"
 
 	#START AND STOP CRONTAB
-alias Startcron="crontab $DAQFOLDER/tools/crontab_rosr.txt"
+alias Startcron="crontab $DAQSWFOLDER/tools/crontab_rosr.txt"
 alias Stopcron="crontab -r"
 
 
 #		PERL LIBRARY =============================
-export DAQLIB=$DAQFOLDER"/tools"
+export DAQLIB="$HomePath/swmain/perl"
 export MYLIB=$DAQLIB
 
 	# KERMIT RC =====================
