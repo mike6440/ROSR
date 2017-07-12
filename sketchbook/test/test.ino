@@ -1,12 +1,10 @@
-//v28,160715 Arduino compile: Sketch uses 38,026 bytes (14%) of program storage space. Maximum is 253,952 bytes.
-//Global variables use 5,753 bytes (70%) of dynamic memory, leaving 2,439 bytes for local variables. Maximum is 8,192 bytes.
-// Therefore: there is ample space for more thermistor calibrations. I'm not sure about local
-//variable space.
+//test -- copied from v29    search on xxx
+//Problems with encoder
 
-#define PROGRAMNAME "rosr_main"
-#define VERSION     "30"//
-#define EDITDATE    "161222" //"160812" spurs2
-const byte  EEPROM_ID = 14;
+#define PROGRAMNAME "test"
+#define VERSION     "29"// TMAX too low "28"//"26"//"25"//"24"//23
+#define EDITDATE    "170712"
+const byte  EEPROM_ID = 15;  //!! change if you fool around with eeprom variables
 
 //v23 - ComputeSSST had issues. No more!
 //v24 - Added calibrated therm coefs for ROSR2
@@ -15,7 +13,6 @@ const byte  EEPROM_ID = 14;
 //v27 - New 485 circuit, pcb v2, for the encoder. See ReadEncoder()
 //v28 - See !! Revise thermistor coefficient subroutine for rosr3. New BB table for kt15.
 //v29 - TMAX is too low. change from 50 to 70.  Add pitch_correct and roll_correct to eeprom
-//v30 - ready for improvement.
 
 //NOTE ====== INCLUDES
 #include <string.h>
@@ -32,77 +29,77 @@ Adafruit_ADS1115 ads2(0x4A);    // ad2, u14, construct an ads1115 at address 0x4
 //Adafruit_ADS1115 ads3(0x4B);  // ad3, u17, spare,
 
 //NOTE ====== DIGITAL LINES
-const int Serial4Tx = 2;    // Testing KT15 Tx;  TILT TX
-const int Serial4Rx = 3;    // Testing KT15 Rx;  TILT RX
-const int RAIN = 4;         // RAIN DETECTOR -- Drives the LED
-const int DHe1 = 5;         // INPUT Hall Effect Switch 1
-const int DHe2 = 6;         // IN Hall Effect Switch 2
-const int D2a = 7;          // shutter motor
-const int D2b = 8;          // shutter motor
-const int BB1 = 9;          // bb1 heater on/off
-const int BB2 = 10;         // bb2 heater on/off
-const int D1a = 11;         // motor forward
-const int D1b = 12;         // motor !forward
-//const int HBT = 13;           // heartbeat  LED31
-const int SEITX = 23;
-const int LED11 = 24;       // Green Scan Drum motor
-const int LED12 = 26;       // Red shutter motor
-const int LED21 = 28;       // green BB2 heater on
-const int LED22 = 30;       // red BB1 heat on
-const int LED31 = 32;       // green -- continuous on = power
-const int LED32 = 13;       // red -- heartbeat. red 5REF
-const int REFSW = 22;       // BB thermistor reference voltage
+#define Serial4Tx = 2;    // Testing KT15 Tx;  TILT TX
+#define Serial4Rx = 3;    // Testing KT15 Rx;  TILT RX
+#define RAIN = 4;         // RAIN DETECTOR -- Drives the LED
+#define DHe1 = 5;         // INPUT Hall Effect Switch 1
+#define DHe2 = 6;         // IN Hall Effect Switch 2
+#define D2a = 7;          // shutter motor
+#define D2b = 8;          // shutter motor
+#define BB1 = 9;          // bb1 heater on/off
+#define BB2 = 10;         // bb2 heater on/off
+#define D1a = 11;         // motor forward
+#define D1b = 12;         // motor !forward
+//#define HBT = 13;           // heartbeat  LED31
+#define SEITX = 23;
+#define LED11 = 24;       // Green Scan Drum motor
+#define LED12 = 26;       // Red shutter motor
+#define LED21 = 28;       // green BB2 heater on
+#define LED22 = 30;       // red BB1 heat on
+#define LED31 = 32;       // green -- continuous on = power
+#define LED32 = 13;       // red -- heartbeat. red 5REF
+#define REFSW = 22;       // BB thermistor reference voltage
 
 // ANALOG ASSIGNMENTS
 // three 4-chan 16 bit adc, adc#=(unsigned)(x/4), chan#=x%4;
-const int ADCMAX = 12;      // =12 normally. maximum number of ADC channels
-const int Nbb11 = 0;        // BB1 thermistor 1
-const int Nbb12 = 4;        // BB2 thermistor1
-const int Nbb21 = 1;        // BB1 thermistor 2
-const int Nbb22 = 5;        // BB2 thermistor 2
-const int Nkt15 = 2;        // KT15 analog output
-const int NRF   = 3;        // 5REF/2
-const int Npwr = 6;         // Circuit power temp
-const int Nwindow = 7;      // Window thermistor
-const int Ntkt15 =  8;      // KT15 body temperature
-const int NVin =    9;      // VIN/4
-const int Nrain =  10;      // Rain / 4
-const int Nspare1 = 11;     // Spare input 1
+#define ADCMAX = 12;      // =12 normally. maximum number of ADC channels
+#define Nbb11 = 0;        // BB1 thermistor 1
+#define Nbb12 = 4;        // BB2 thermistor1
+#define Nbb21 = 1;        // BB1 thermistor 2
+#define Nbb22 = 5;        // BB2 thermistor 2
+#define Nkt15 = 2;        // KT15 analog output
+#define NRF   = 3;        // 5REF/2
+#define Npwr = 6;         // Circuit power temp
+#define Nwindow = 7;      // Window thermistor
+#define Ntkt15 =  8;      // KT15 body temperature
+#define NVin =    9;      // VIN/4
+#define Nrain =  10;      // Rain / 4
+#define Nspare1 = 11;     // Spare input 1
 
 //NOTE ====== CONSTANTS
-const char OK = 1;
-const char NOTOK = 0;
-const int MISSING = -999;
-const int POS = 1;
-const int NEG = -1;
-const int CCW = 1;          // forward direction
-const int CW = -1;          // reverse direction
-const int STOP = 0;         // motor stop
-const int ON = 1;
-const int OFF = 0;
-const int OPEN = 1;
-const int CLOSED = 0;
-const char SPACE = ' ';
-const char ZERO = '0';
+#define OK = 1;
+#define NOTOK = 0;
+#define MISSING = -999;
+#define POS = 1;
+#define NEG = -1;
+#define CCW = 1;          // forward direction
+#define CW = -1;          // reverse direction
+#define STOP = 0;         // motor stop
+#define ON = 1;
+#define OFF = 0;
+#define OPEN = 1;
+#define CLOSED = 0;
+#define SPACE = ' ';
+#define ZERO = '0';
 
 //encoder  Use the SEI program to set the address to E
 const char EncCmd = 0x1F; //address 'F' calls all encoders addresses 0-E.
 // test menu
-const char TEST = -1;
-const char RUN = 1;
+#define TEST = -1;
+#define RUN = 1;
 // TEMPERATURE
 const int WARMUPMILLISECS = 50;
 const int ADCREADWAIT = 100;
 const double TMAX = 70; //v29
 const double TMIN = -5;
 // SPECTRON TILT
-const double C1 = 0.0129;
-const double C2 = 0;
-const double C3 = -0.0000000003;
-const double P1 = -1; // use -1 for a reversed direction
-const double P0 = 0;
-const double R1 = -1; // use -1 for a reversed direction
-const double R0 = 0;
+#define C1 = 0.0129;
+#define C2 = 0;
+#define C3 = -0.0000000003;
+#define P1 = -1; // use -1 for a reversed direction
+#define P0 = 0;
+#define R1 = -1; // use -1 for a reversed direction
+#define R0 = 0;
 
 // SHUTTER
 // CCW = open shutter
@@ -230,9 +227,9 @@ const float default_roll_correct = 0;  //v29
 const char default_bbheat[2] = {
   OFF, ON
 };
-// THERMISTOR S/N, 0=>std YSI cal. (eeprom)
+// !! THERMISTOR S/N, 0=>std YSI cal. (eeprom)
 const unsigned int default_ntherm[4] = {
-  9,10,11,12 // v28, rosr3
+  1,2,3,4 //xxx--New GetThermCoef will have 5 coefficients
 };
 //const char default_bbheater=BB2;
 const double    default_Rref[7] = {
@@ -249,7 +246,7 @@ const double    default_Rref[7] = {
 // 11935 rosr3
 //p3=[-1.18044e-08  6.56500e-05  1.17025e-02  6.42726e-01]
 //q = [1.13823e+01  -5.30498e+01  1.37868e+02  -6.96146e+01]
-
+//xxx
 //!! rosr3 kt1585.11935
 const double default_pt2b[4] = {
   -1.18044e-08,  6.56500e-05,  1.17025e-02,  6.42726e-01
@@ -257,6 +254,21 @@ const double default_pt2b[4] = {
 const double default_pb2t[4] = {
   1.13823e+01,  -5.30498e+01,  1.37868e+02,  -6.96146e+01
 };
+
+//!! xxx BB thermistor coefs 
+// See the table at "Tcaltable"
+double Tcal[5][3] = {  
+	//0 standard ysi
+	{ 1.025579e-03,   2.397338e-04,   1.542038e-07 },
+	//1 Therm #1, Rosr1 T11
+	{ 1.0108115e-03, 2.4212099e-04,   1.4525424e-07 },
+	//2 Therm #2, ROSR1, T12
+	{ 1.0138029e-03, 2.4156995e-04,   1.4628056e-07 },
+	//3 Therm #3, ROSR1, T21
+	{ 1.0101740e-03, 2.4208389e-04,   1.4485814e-07 },
+	//4 Therm #4, ROSR1, T22
+};
+
 
 const double default_Acorr = 1;
 const double default_Offset = 0;
@@ -304,7 +316,7 @@ char *      floatToString(char *, double, byte, byte);
 double      GetAdcVolts (unsigned int );   // ads adc
 unsigned int GetAdcSample(unsigned int ch, double *vmean);   // ads adc
 double      GetEmis( double vsea, double missing);
-unsigned int GetThermCoefs(unsigned int, double *coef );   // ads adc
+//unsigned int GetThermCoefs(unsigned int, double *coef );   // ads adc
 double      GetMotorCurrent();
 double      GetRadFromTemp (double);
 double      GetTempFromRad (double);
@@ -892,7 +904,8 @@ void    Action(char *cmd)
     Serial.println("an -- ADC Chan n                    A      -- ADC all loop");
     Serial.println("bn -- BB n heater OFF               Bn     -- BB n heater ON");
     Serial.println("c  -- 5REF OFF                      C      -- 5REF ON");
-    Serial.println("d[ff.f] -- Point to angle f.f,      Omit f.f for current position");
+    Serial.println("d test encoder - 445 circuit");
+//    Serial.println("d[ff.f] -- Point to angle f.f,      Omit f.f for current position");
     Serial.println("Dff.f   -- Set the encoder to ff.f");
     Serial.println("fo   -- Shutter Open (CCW)          fc    -- Shutter Close (CW)");
     Serial.println("F    -- Shutter 20x or keystroke");
@@ -1077,6 +1090,16 @@ void    Action(char *cmd)
   }
 
   // POINT SCAN DRUM
+//   else if (cmd[0] == 'd') {
+//     while ( !Serial.available()  ) {  
+// 		digitalWrite(SEITX,HIGH);
+// 		Serial.print("HIGH");
+// 		delay(2000);
+// 		digitalWrite(SEITX,LOW);
+// 		Serial.print("LOW");
+// 		delay(2000);
+// 	}
+//   }
   else if (cmd[0] == 'd') {
     EncoderAngle = ReadEncoder(ee.encoderref);
     Serial.print("Drum = ");
@@ -2225,55 +2248,6 @@ double GetMotorCurrent(void) {
   //Serial.println(vdiff);
   return vdiff;
 }
-//============================================================
-unsigned int GetThermCoefs(unsigned int nt, double c[] ) {
-  //   revision, add 9,10,11,12
-  // Give the correct SHH coefs for the thermnumber
-  // See 04.20.18.10../Tcal3_1605_thermistor_cal_rosr3/Tcal1605_report.key.pdf
-  // See BB_Therm_Master_List spreadsheet we need to revise this for each rosr
-
-  double tcal[13][3] = {  //v28  !! 13 rows, add to this for new calibrations.
-    //0 standard ysi
-    { 1.025579e-03,   2.397338e-04,   1.542038e-07 },
-    //1 Therm #1, Rosr1 T11
-    { 1.0108115e-03, 2.4212099e-04,   1.4525424e-07 },
-    //2 Therm #2, ROSR1, T12
-    { 1.0138029e-03, 2.4156995e-04,   1.4628056e-07 },
-    //3 Therm #3, ROSR1, T21
-    { 1.0101740e-03, 2.4208389e-04,   1.4485814e-07 },
-    //4 Therm #4, ROSR1, T22
-    { 1.0137647e-03, 2.4161708e-04,   1.4619775e-07 },
-    //5 Therm #5, ROSR2, T11
-    { 1.0073532E-03, 2.41655931E-04, 1.56252214E-07 },
-    //6 Therm #8, ROSR2, T12
-    { 1.00647228E-03, 2.42265935E-04, 1.50546312E-07 },
-    //7 Therm #9, ROSR2, T21
-    { 1.01935214E-03, 2.40428900E-04,	1.56322696E-07 },
-    //8 Therm #10, ROSR2, T22
-    { 1.02013510E-03, 2.40304832E-04, 1.55160255E-07  },
-    //9 Therm-12, ROSR3, T11  //v28
-    { 1.00171527e-03, 2.42997797e-04, 1.46913550e-07 },
-    //10 Therm-13. ROSR3, T12  //v28
-    { 1.01743969e-03, 2.40737206e-04, 1.52367550e-07 },
-    //11 Therm-15, ROSR3, T21  //v28
-    { 9.92861282e-04, 2.44664838e-04, 1.37715245e-07 },
-    //12 Therm-16, ROSR3, T22  //v28
-	{ 1.00677444e-03, 2.42252224e-04, 1.49693186e-07 }
-  };
-
-  if (nt < 0 || nt > 13) {
-    Serial.print("Error in GetThermCoefs() -- bad thermnumber=");
-    Serial.println(nt, DEC);
-    c[0] = c[1] = c[2] = 0;
-    return 0;
-  }
-  else {
-    c[0] = tcal[nt][0];
-    c[1] = tcal[nt][1];
-    c[2] = tcal[nt][2];
-    return 1;
-  }
-}
 /*****************************************************************************************/
 double      GetRadFromTemp (double t) {
   double x;
@@ -2586,7 +2560,7 @@ float ReadEncoder (float ref)
 		}
 		// position command -- send 0x1E
 		Serial1.write(EncCmd);
-		delayMicroseconds(900); // short delay for tx to complete
+		delayMicroseconds(1000); // xxx was 900 short delay for tx to complete
 		// back to receive 485
 		digitalWrite(SEITX, LOW);
 		delay(20); // 
@@ -2594,7 +2568,7 @@ float ReadEncoder (float ref)
 		i = 0;
 		while ( Serial1.available() ) {
 			e[i] = Serial1.read();
-			//Serial.print("byte ");Serial.print(i,DEC);Serial.print(" = ");Serial.println(e[i],DEC);
+			//Serial.print("byte ");Serial.print(i,DEC);Serial.print(" = ");Serial.println(e[i],DEC);//test
 			i++;
 			if(i>2) break;
 		}
@@ -3017,20 +2991,58 @@ double SteinhartHart(double beta[], double r)
 }
 //==========================================================================
 double ThermistorTemp(double v, double Vref, double Rref, unsigned int ntherm) {
+//xxx extensive changes
+double r;
+double a[3], t;
 
-  double r;
-  double a[3], t;
+if (v < threshold[0]) return 0;
+if (v > threshold[1]) return 200;
 
-  if (v < threshold[0]) return 0;
-  if (v > threshold[1]) return 200;
-
-  GetThermCoefs(ntherm, a);
-  r = Rref * (v / (Vref - v));
-  t = SteinhartHart(a, r);
-  return t;
+//xxxGetThermCoefs(ntherm, a);
+if (ntherm <0 || ntherm >5 ){
+	Serial.println("ThermisterTemp() ntherm error");
+	a[0]=Tcal[0][0];
+	a[1]=Tcal[0][1];
+	a[2]=Tcal[0][2];
+} else {
+	a[0]=Tcal[ntherm][0];
+	a[1]=Tcal[ntherm][1];
+	a[2]=Tcal[ntherm][2];
 }
-
-
-
-
-
+r = Rref * (v / (Vref - v));
+t = SteinhartHart(a, r);
+return t;
+}
+//==================================================
+//NOTE -- thermistor coefs  -- ThermistorTemp
+//============================================================
+  // Give the correct SHH coefs for the thermnumber
+  // See 04.20.18.10../Tcal3_1605_thermistor_cal_rosr3/Tcal1605_report.key.pdf
+  // See BB_Therm_Master_List spreadsheet we need to revise this for each rosr
+// double Tcal[13][3] = {  //v28  !! 13 rows, add to this for new calibrations.
+// //0 standard ysi
+// { 1.025579e-03,   2.397338e-04,   1.542038e-07 },
+// //1 Therm #1, Rosr1 T11
+// { 1.0108115e-03, 2.4212099e-04,   1.4525424e-07 },
+// //2 Therm #2, ROSR1, T12
+// { 1.0138029e-03, 2.4156995e-04,   1.4628056e-07 },
+// //3 Therm #3, ROSR1, T21
+// { 1.0101740e-03, 2.4208389e-04,   1.4485814e-07 },
+// //4 Therm #4, ROSR1, T22
+// { 1.0137647e-03, 2.4161708e-04,   1.4619775e-07 },
+// //5 Therm #5, ROSR2, T11
+// { 1.0073532E-03, 2.41655931E-04, 1.56252214E-07 },
+// //6 Therm #8, ROSR2, T12
+// { 1.00647228E-03, 2.42265935E-04, 1.50546312E-07 },
+// //7 Therm #9, ROSR2, T21
+// { 1.01935214E-03, 2.40428900E-04,	1.56322696E-07 },
+// //8 Therm #10, ROSR2, T22
+// { 1.02013510E-03, 2.40304832E-04, 1.55160255E-07  },
+// //9 Therm-12, ROSR3, T11  //v28
+// { 1.00171527e-03, 2.42997797e-04, 1.46913550e-07 },
+// //10 Therm-13. ROSR3, T12  //v28
+// { 1.01743969e-03, 2.40737206e-04, 1.52367550e-07 },
+// //11 Therm-15, ROSR3, T21  //v28
+// { 9.92861282e-04, 2.44664838e-04, 1.37715245e-07 },
+// //12 Therm-16, ROSR3, T22  //v28
+// { 1.00677444e-03, 2.42252224e-04, 1.49693186e-07 }
