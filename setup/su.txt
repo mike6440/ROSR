@@ -1,4 +1,4 @@
-edit 20170707T054219Z
+edit 170712
 THIS FILE: su4.txt
 
 	DATA FILES ---------------------
