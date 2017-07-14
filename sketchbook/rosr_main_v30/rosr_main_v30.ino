@@ -5,8 +5,8 @@
 
 #define PROGRAMNAME "rosr_main"
 #define VERSION     "30"//
-#define EDITDATE    "170713" //"160812" spurs2
-const byte  EEPROM_ID = 15;  //!! change if you fool around with eeprom variables
+#define EDITDATE    "20170714T170110Z" //"160812" spurs2
+const byte  EEPROM_ID = 16;  //!! change if you fool around with eeprom variables
 
 //v23 - ComputeSSST had issues. No more!
 //v24 - Added calibrated therm coefs for ROSR2
@@ -1158,7 +1158,7 @@ void    Action(char *cmd)
       Serial.print(ddum, 0);
       Serial.print("  ");
       Serial.println(fdum, 3);
-      delay(1000);
+      delay(2000);
       ix++;
     }
     if (nsum > 3) {
@@ -1379,7 +1379,7 @@ void    Action(char *cmd)
       // v30
       else if ( cmd[1] == 'N' ) {
         ix = cmd[2] - 48;
-        if (ix < 0 || ix > 2 ) {
+        if (ix < 0 || ix > 3 ) {
           Serial.println("Error.");
         }
         else {
@@ -1388,13 +1388,14 @@ void    Action(char *cmd)
           Serial.print(ix, DEC);
           Serial.print("] = ");
           Serial.println(n);
-          ee.close_params[ix] = n;
+          ee.close_params[ix-1] = n;
         }
+        eok=1;
       }
       // v30
       else if ( cmd[1] == 'O' ) {
         ix = cmd[2] - 48;
-        if (ix < 0 || ix > 2 ) {
+        if (ix < 0 || ix > 3 ) {
           Serial.println("Error.");
         }
         else {
@@ -1403,8 +1404,9 @@ void    Action(char *cmd)
           Serial.print(ix, DEC);
           Serial.print("] = ");
           Serial.println(n);
-          ee.open_params[ix] = n;
+          ee.open_params[ix-1] = n;
         }
+		eok=1;
       }
 	  //
       if ( eok == 1 ) {
@@ -1954,6 +1956,7 @@ void EepromPrint()
   Serial.print("  F    Encoder scan tolerance = ");  Serial.print(ee.ScanTolerance, 2);  Serial.println(" deg");
   Serial.print("  g    Acorr = ");  Serial.print(ee.Acorr, 5);  Serial.println("");
   Serial.print("  G    Offset = ");  Serial.print(ee.Offset, 4);  Serial.println("");
+  Serial.print("  Hij  i=0/1,j=1/0,  BB heater configuration = ");Serial.print(ee.bbheat[0], DEC);Serial.print("  ");Serial.println(ee.bbheat[1], DEC);
   Serial.print("  h    BB Emis = ");  Serial.print(ee.ebb, 5);  Serial.println("");
   Serial.print("  j    pitch correct = ");  Serial.print(ee.pitch_correct, 1);   Serial.println(""); //v29
   Serial.print("  J    roll correct correct = ");  Serial.print(ee.roll_correct, 1);  Serial.println(""); //v29
@@ -1976,12 +1979,7 @@ void EepromPrint()
   Serial.print("  T ocean sample count = ");  Serial.print(ee.Nocean);  Serial.println("");
   Serial.print("  U sky sample count = ");  Serial.print(ee.Nsky);  Serial.println("");
   //
-  Serial.print("  BB heater configuration = ");
-  Serial.print(ee.bbheat[0], DEC);
-  Serial.print("  ");
-  Serial.println(ee.bbheat[1], DEC);
-  //
-  Serial.print("  BB Therm SNs = ");
+  Serial.print("  BB Therm SNs (set at compile) = ");
 	  for (i = 0; i < 4; i++) {
 		Serial.print(ee.ntherm[i], 1);
 		Serial.print("  ");
