@@ -16,7 +16,7 @@ use perltools::MRutilities;
 use perltools::MRtime;
 
 	## DATA PATH
-my $datapath="$ENV{HOME}/swmain/apps/ROSR/data";
+my $datapath="$ENV{HomePath}/swmain/apps/ROSR/data";
 print"data path = $datapath\n";
 
 print"

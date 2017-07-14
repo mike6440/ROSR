@@ -47,7 +47,6 @@ proc SpawnAvgGps { setupfile } {
 	}
 }
 
-
 #====================================================================
 # PROCEDURE WRITE_INFO
 # input
@@ -205,10 +204,11 @@ while 1 {
 			set spawn_id $GPSAV
 			send "$rawstr\r\n"
 			
-					# SAVE TO RAW FILE
+			# SAVE TO RAW FILE
 			set F [open $rawname a 0600]
 			set rawstr [timestamp -gmt -format "$Nrecs %Y %m %d %H %M %S " -seconds $timegps]$rawstr
 			puts $F $rawstr
+            send_user "$rawstr\n";
 			close $F
 			
 					# SEND RAW TO AVG AND RCV RESPONSE

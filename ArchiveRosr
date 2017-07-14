@@ -13,11 +13,11 @@ use perltools::MRutilities;
 use perltools::MRtime;
 
 	## DATA PATH
-my $datapath="$ENV{HOME}/swmain/apps/ROSR";
+my $datapath="$ENV{HomePath}/swmain/apps/ROSR";
 print"data path = $datapath\n";
 
 	## ARCHIVE PATH
-my $archivepath="$ENV{HOME}/rosrdata";
+my $archivepath="$ENV{HomePath}/rosrdata";
 print"Archive path=$archivepath\n";
 if(! -d $archivepath){
 	print"Create $archivepath\n";

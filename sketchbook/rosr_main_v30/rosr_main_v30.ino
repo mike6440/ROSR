@@ -5,7 +5,7 @@
 
 #define PROGRAMNAME "rosr_main"
 #define VERSION     "30"//
-#define EDITDATE    "170712" //"160812" spurs2
+#define EDITDATE    "170713" //"160812" spurs2
 const byte  EEPROM_ID = 15;  //!! change if you fool around with eeprom variables
 
 //v23 - ComputeSSST had issues. No more!
@@ -17,7 +17,9 @@ const byte  EEPROM_ID = 15;  //!! change if you fool around with eeprom variable
 //v29 - TMAX is too low. change from 50 to 70.  Add pitch_correct and roll_correct to eeprom
 //v30 - ready for improvement. 1. Changed ReadEncoder wait to 1000 microsecs from 900
 //		Reorganized how thermister coefs are handled. review '!!' notes.
-
+//		Better menu items. 'h','k','p','r' all loops
+//		remove eeprom from main menu
+//		shutter open/close parameters in eeprom
 
 //NOTE ====== INCLUDES
 #include <string.h>
@@ -106,15 +108,6 @@ const double P0 = 0;
 const double R1 = -1; // use -1 for a reversed direction
 const double R0 = 0;
 
-// SHUTTER
-// CCW = open shutter
-const double CCWSHUTTERCURRENTTHRESHOLD = 50;
-const unsigned CCWSHUTTERTIMEOUT = 1400;
-const unsigned CCWSTOPMILLISECS = 200;
-// CW = close
-const double CWSHUTTERCURRENTTHRESHOLD = 50;
-const unsigned CWSHUTTERTIMEOUT = 2000;
-const unsigned CWSTOPMILLISECS = 200;
 
 // mega adc
 const int I1a = 0;          // shutter motor
@@ -240,15 +233,22 @@ const unsigned int default_ntherm[4] = {
 const double    default_Rref[7] = {
   10000, 10000, 10000, 10000, 10000, 10000, 10000
 }; // BB11, BB12, BB21, BB22, Tktx, Twin, Tpwr
-
-//!! See rmrtools/MakeRadTempTables.m to compute these numbers.
-//!! rosr3 kt1585.11935
+//!! See rmrtools/MakeRadTempTables.m and PlanckFiltered.m to compute these numbers.
+//!! rosr4 kt1585.12228
 const double default_pt2b[4] = {
-  -1.18044e-08,  6.56500e-05,  1.17025e-02,  6.42726e-01
+	-6.79728e-09,  6.84067e-05,  1.19049e-02,  6.44110e-01
 };
 const double default_pb2t[4] = {
-  1.13823e+01,  -5.30498e+01,  1.37868e+02,  -6.96146e+01
+	1.10337e+01,  -5.18827e+01,  1.35381e+02,  -6.85144e+01
 };
+const double default_Acorr = 1;
+const double default_Offset = 0;
+const double default_ebb = 1;
+const float default_scan_tolerance = .1; // SCAN_TOLERANCE 
+// shutter open/close parameters
+const int default_open_params[3] = {50,2000,200};   //milliamps,millisecs,millisecs 
+const int default_close_params[3]={50,1400,200};
+
 
 //!! BB thermistor coefs 
 // See the table at "Tcaltable"
@@ -265,10 +265,6 @@ double Tcal[5][3] = {
 	{ 1.00773770E-03, 2.42354810E-04, 1.45565000E-07 }
 };
 
-const double default_Acorr = 1;
-const double default_Offset = 0;
-const double default_ebb = 1;
-const float SCAN_TOLERANCE = .1;
 
 
 struct eeprom {
@@ -283,6 +279,7 @@ struct eeprom {
   double pt2b[4];
   double pb2t[4];
   double Acorr, Offset, ebb;
+  int open_params[3], close_params[3]; 
 };
 struct eeprom ee;
 int eeSize;
@@ -881,41 +878,47 @@ void    Action(char *cmd)
   // TAKE ACTION AND PREPARE AN OUTPUT MESSAGE IN out_message
   if (cmd[0] == '?') {
     PrintProgramID();
-    Serial.println("------- EEPROM -----------------------------------");
+//     Serial.println("------- EEPROM -----------------------------------");
     Serial.println("E       -- show eeprom ");
-    Serial.println("Ecfff.f -- BB1 point angle          ECfff.f -- BB2 point angle");
-    Serial.println("EHnn    -- set bb1 and bb2 heater, 0/1 = off,on.  Standard=01");
-    Serial.println("Epfff.f -- SKY point angle          EPfff.f -- OCEAN point angle");
-    Serial.println("EFfff.f -- Encoder Scan Tolerance");
-    Serial.println("EBnn    -- Black body sample count  EMn     -- Shutter motor on=1, disable=0");
-    Serial.println("EUnn    -- SKY sample count         ETnn    -- OCEAN (target) count");
-    Serial.println("EDfff.f -- Drum zero ref            EEn     -- MODE: 0=Run, 1=Cal");
-    Serial.println("ERfff.f -- Rain threshold volts     Ernn    -- Shutter open delay, nn secs");
-    Serial.println("Egfff.f -- Cal slope Acorr          EGfff.f -- Cal offset, degC");
-    Serial.println("EAnff.f -- Ref R[n] = fff.f ohms    Ehfff.f -- BB Emissivity");
-    Serial.println("Ejff.f  -- Pitch correct deg        EJff.f  -- Roll correct deg");
-    Serial.println("");
+//     Serial.println("Ecfff.f -- BB1 point angle          ECfff.f -- BB2 point angle");
+//     Serial.println("EHnn    -- set bb1 and bb2 heater, 0/1 = off,on.  Standard=01");
+//     Serial.println("Epfff.f -- SKY point angle          EPfff.f -- OCEAN point angle");
+//     Serial.println("EFfff.f -- Encoder Scan Tolerance");
+//     Serial.println("EBnn    -- Black body sample count  EMn     -- Shutter motor on=1, disable=0");
+//     Serial.println("EUnn    -- SKY sample count         ETnn    -- OCEAN (target) count");
+//     Serial.println("EDfff.f -- Drum zero ref            EEn     -- MODE: 0=Run, 1=Cal");
+//     Serial.println("ERfff.f -- Rain threshold volts     Ernn    -- Shutter open delay, nn secs");
+//     Serial.println("Egfff.f -- Cal slope Acorr          EGfff.f -- Cal offset, degC");
+//     Serial.println("EAnff.f -- Ref R[n] = fff.f ohms    Ehfff.f -- BB Emissivity");
+//     Serial.println("Ejff.f  -- Pitch correct deg        EJff.f  -- Roll correct deg");
+//     Serial.println("");
     Serial.println("------- FUNCTIONS -----------------------------------");
     Serial.println("an -- ADC Chan n                    A      -- ADC all loop");
-    Serial.println("bn -- BB n heater OFF               Bn     -- BB n heater ON");
-    Serial.println("c  -- 5REF OFF                      C      -- 5REF ON");
-    Serial.println("d[ff.f] -- Point to angle f.f,      Omit f.f for current position");
+    Serial.println("bn -- BB n heater OFF");
+    Serial.println("Bn -- BB n heater ON");
+    Serial.println("C  -- 5REF ON");
+    Serial.println("c  -- 5REF OFF");
+    Serial.println("d  -- current drum position");
+    Serial.println("d[ff.f] -- Point to angle f.f");
     Serial.println("Dff.f   -- Set the encoder to ff.f");
-    Serial.println("fo   -- Shutter Open (CCW)          fc    -- Shutter Close (CW)");
-    Serial.println("F    -- Shutter 20x or keystroke");
-    Serial.println("h    -- HE switches                 H     -- HE loop");
-    Serial.println("k    -- KT15 RAD                    K     -- KT15 loop");
-    Serial.println("l    -- Send KT15 command ");
-    Serial.println("m    -- Drum motor CCW              M     -- Drum motor CW");
-    Serial.println("p    -- pitch/roll single           P     -- pitch/roll loop");
-    Serial.println("r    -- Rain check single           R     -- Rain check loop");
-    Serial.println("t    -- Read system clock           T     -- Set default f.p. day");
-    Serial.println("sn   -- LED test:  1=Heartbeat   2=Drum   3=Shutter/Rain");
-    Serial.println("wff.f-- GetEmis(ff.f,MISSING)");
-    Serial.println("Wff.f-- GetRadFromTemp(ff.f) --> GetTempFromRad");
-    Serial.println("x    -- Compute SSST");
-    Serial.println("v/V  -- Program version");
-    Serial.println("g/G  -- Continue sampling.");
+    Serial.println("fo      -- Shutter Open (CCW)");
+    Serial.println("fc      -- Shutter Close (CW)");
+    Serial.println("F       -- Shutter 20x or keystroke");
+    Serial.println("h       -- HE switch loop");
+    Serial.println("k       -- KT15 RAD loop");
+    Serial.println("l       -- Send KT15 command ");
+    Serial.println("m       -- Drum motor CCW");
+    Serial.println("M       -- Drum motor CW");
+    Serial.println("p       -- pitch/roll loop");
+    Serial.println("r       -- Rain check loop");
+    Serial.println("t       -- Read system clock loop");
+    Serial.println("T       -- Set default f.p. day");
+    Serial.println("sn      -- LED test:  1=Heartbeat   2=Drum   3=Shutter/Rain");
+    Serial.println("wff.f   -- GetEmis(ff.f,MISSING)");
+    Serial.println("Wff.f   -- GetRadFromTemp(ff.f) --> GetTempFromRad");
+    Serial.println("x       -- Compute SSST");
+    Serial.println("v/V     -- Program version");
+    Serial.println("g/G     -- Continue sampling.");
   }
 
   // READ ADC CHANNEL
@@ -1058,7 +1061,7 @@ void    Action(char *cmd)
   }
 
   // HALL EFFECT (HE) SWITCHES
-  else if (cmd[0] == 'h' || cmd[0] == 'H' ) {
+  else if (cmd[0] == 'h') {
     Serial.println("CLOSED  OPEN");
     while ( !Serial.available()  ) {
       Serial.print(digitalRead(DHe1));
@@ -1126,14 +1129,18 @@ void    Action(char *cmd)
   }
 
   // KT15
+//   else if (cmd[0] == 'k') {
+//     while (! Serial.available()) {
+// 		ReadKT15(&ddum, &fdum);
+// 		Serial.print("rad = ");
+// 		Serial.print(ddum, 0);
+// 		Serial.print("    irt = ");
+// 		Serial.println(fdum, 3);
+//       	delay(2000);
+//       	ix++;
+//     }
+//   }
   else if (cmd[0] == 'k') {
-    ReadKT15(&ddum, &fdum);
-    Serial.print("rad = ");
-    Serial.print(ddum, 0);
-    Serial.print("    irt = ");
-    Serial.println(fdum, 3);
-  }
-  else if (cmd[0] == 'K') {
     fsum1 = fsq1 = fsum2 = fsq2 = 0;
     nsum = 0;
     Serial.println(" N  RAD  IRT");
@@ -1369,6 +1376,37 @@ void    Action(char *cmd)
         ee.ShutterFlag = ix;
         eok = 1;
       }
+      // v30
+      else if ( cmd[1] == 'N' ) {
+        ix = cmd[2] - 48;
+        if (ix < 0 || ix > 2 ) {
+          Serial.println("Error.");
+        }
+        else {
+          n = atoi(cmd + 3);
+          Serial.print("Set close_params[");
+          Serial.print(ix, DEC);
+          Serial.print("] = ");
+          Serial.println(n);
+          ee.close_params[ix] = n;
+        }
+      }
+      // v30
+      else if ( cmd[1] == 'O' ) {
+        ix = cmd[2] - 48;
+        if (ix < 0 || ix > 2 ) {
+          Serial.println("Error.");
+        }
+        else {
+          n = atoi(cmd + 3);
+          Serial.print("Set open_params[");
+          Serial.print(ix, DEC);
+          Serial.print("] = ");
+          Serial.println(n);
+          ee.open_params[ix] = n;
+        }
+      }
+	  //
       if ( eok == 1 ) {
         EepromStore();
         EepromPrint();
@@ -1393,13 +1431,6 @@ void    Action(char *cmd)
   }
   // PITCH/ROLL
   else if (cmd[0] == 'p') {
-    ReadTilt(&ddum, &fdum);
-    Serial.print("pitch = ");
-    Serial.print(ddum, 2);
-    Serial.print("    roll = ");
-    Serial.println(fdum, 2);
-  }
-  else if (cmd[0] == 'P') {
     Serial.println(" N  PITCH  ROLL");
     ix = 0;
     while (! Serial.available()) {
@@ -1416,16 +1447,16 @@ void    Action(char *cmd)
   }
 
   // RAIN
+//   else if (cmd[0] == 'r') {
+//     CheckRain( &ddum, &Ldum );
+//     Serial.print("Rain volts = ");
+//     Serial.print(ddum, 2);
+//     Serial.print("   Sec to open = ");
+//     Serial.print(Ldum);
+//     Serial.print("   State = ");
+//     Serial.println(RainState, DEC);
+//   }
   else if (cmd[0] == 'r') {
-    CheckRain( &ddum, &Ldum );
-    Serial.print("Rain volts = ");
-    Serial.print(ddum, 2);
-    Serial.print("   Sec to open = ");
-    Serial.print(Ldum);
-    Serial.print("   State = ");
-    Serial.println(RainState, DEC);
-  }
-  else if (cmd[0] == 'R') {
     Serial.println(" N  STATUS   VOLTS   SECS");
     ix = 0;
     while (! Serial.available()) {
@@ -1830,12 +1861,18 @@ void EepromDefault() {
   ee.pb2t[1] = default_pb2t[1];
   ee.pb2t[2] = default_pb2t[2];
   ee.pb2t[3] = default_pb2t[3];
-  ee.ScanTolerance = SCAN_TOLERANCE;
+  ee.ScanTolerance = default_scan_tolerance; //SCAN_TOLERANCE;
   ee.Acorr = default_Acorr;
   ee.Offset = default_Offset;
   ee.ebb = default_ebb;
   ee.pitch_correct = default_pitch_correct;  //v29
   ee.roll_correct = default_roll_correct;  //v29
+  ee.open_params[0] = default_open_params[0];
+  ee.open_params[1] = default_open_params[1];
+  ee.open_params[2] = default_open_params[2];
+  ee.close_params[0] = default_close_params[0];
+  ee.close_params[1] = default_close_params[1];
+  ee.close_params[2] = default_close_params[2];
   EepromStore();
   EepromRead();
   EepromPrint();
@@ -1877,92 +1914,87 @@ void EepromRead()
 }
 
 //===============================================================================
+// EepromPrint:
+//   ID = 15
+//   c   BB1 angle = 265.00 deg
+//   C   BB2 angle = 325.00 deg
+//   p   sky angle = 45.00 deg
+//   P   ocean angle = 90.00 deg
+//   D   drum zero ref = 0.00 deg
+//   F   Encoder scan tolerance = 0.10 deg
+//   B   BB sample count = 30
+//   U   sky sample count = 10
+//   T   ocean sample count = 40
+//   M   Shutter on/off  = 1
+//   E   Calibration Flag = 0
+//   R   Rain threshold  = 0.09 volts
+//   r   Rain shutter delay  = 600 secs
+//   g   Acorr = 1.00000
+//   G   Offset = 0.0000
+//   h   BB Emis = 1.00000
+//   j   pitch correct = 0.0
+//   J   roll correct correct = 0.0
+//   An  n=1..4   Ref esistors = 10000.0  10000.0  10000.0  10000.0
+//   Bn  n=heater configuration = 0  1
+//   BB  Therm SNs = 1  2  3  4
+//   T to B Quadratic = -0.00000001 0.00006565 0.01170250 0.64272599
+//   B to T Quadratic = 11.38230037 -53.04980087 137.86799621 -69.61460113
 void EepromPrint()
 {
   int i;
   Serial.println("EepromPrint: ");
-  Serial.print("  ID = ");
-  Serial.print(ee.id);
-  Serial.println(" ");
-  //Serial.print("    E BBHeater = ");
-  //Serial.println(ee.bbheater,DEC);  xyx
-  Serial.print("  c BB1 angle = ");
-  Serial.print(ee.abb1, 2);
-  Serial.println(" deg");
-  Serial.print("  C BB2 angle = ");
-  Serial.print(ee.abb2, 2);
-  Serial.println(" deg");
-  Serial.print("  p sky angle = ");
-  Serial.print(ee.asky, 2);
-  Serial.println(" deg");
-  Serial.print("  P ocean angle = ");
-  Serial.print(ee.aocean, 2);
-  Serial.println(" deg");
-  Serial.print("  D drum zero ref = ");
-  Serial.print(ee.encoderref, 2);
-  Serial.println(" deg");
-  Serial.print("  F Encoder scan tolerance = ");
-  Serial.print(ee.ScanTolerance, 2);
-  Serial.println(" deg");
-  Serial.print("  B BB sample count = ");
-  Serial.print(ee.Nbb);
-  Serial.println("");
-  Serial.print("  U sky sample count = ");
-  Serial.print(ee.Nsky);
-  Serial.println("");
-  Serial.print("  T ocean sample count = ");
-  Serial.print(ee.Nocean);
-  Serial.println("");
-  Serial.print("  M Shutter on/off  = "); //v25
-  Serial.print(ee.ShutterFlag, 2);
-  Serial.println(""); //v25
-  Serial.print("  E Calibration Flag = ");
-  Serial.println(ee.CalFlag);
-  Serial.print("  R Rain threshold  = ");
-  Serial.print(ee.rain_threshold, 2);
-  Serial.println(" volts");
-  Serial.print("  r Rain shutter delay  = ");
-  Serial.print(ee.rainsecs);
-  Serial.println(" secs");
-  Serial.print("  g Acorr = ");
-  Serial.print(ee.Acorr, 5);
-  Serial.println("");
-  Serial.print("  G Offset = ");
-  Serial.print(ee.Offset, 4);
-  Serial.println("");
-  Serial.print("  h BB Emis = ");
-  Serial.print(ee.ebb, 5);
-  Serial.println("");
-  Serial.print("  j pitch correct = "); //v29
-  Serial.print(ee.pitch_correct, 1);  //v29
-  Serial.println(""); //v29
-  Serial.print("  J roll correct correct = "); //v29
-  Serial.print(ee.roll_correct, 1);  //v29
-  Serial.println(""); //v29
-  Serial.print("  A Ref esistors = ");
-  for (i = 0; i < 7; i++) {
-    Serial.print(ee.Rref[i], 1);
-    Serial.print("  ");
-  }
-  Serial.println("");
+  Serial.print("  ID = ");  Serial.print(ee.id);  Serial.println(" ");
+  Serial.print("  An   n=1..4, BB Ref esistors = ");
+  	for (i = 0; i < 7; i++) { Serial.print(ee.Rref[i], 1);    Serial.print("  "); }
+  Serial.print("  B    BB view sample count = ");  Serial.print(ee.Nbb);  Serial.println("");
+  Serial.print("  c    BB1 angle = ");  Serial.print(ee.abb1, 2);  Serial.println(" deg");
+  Serial.print("  C    BB2 angle = ");  Serial.print(ee.abb2, 2); Serial.println(" deg");
+  Serial.print("  D    drum zero ref = ");  Serial.print(ee.encoderref, 2);  Serial.println(" deg");
+  Serial.print("  E    Calibration Flag = ");  Serial.println(ee.CalFlag); //xxx review this action
+  Serial.print("  F    Encoder scan tolerance = ");  Serial.print(ee.ScanTolerance, 2);  Serial.println(" deg");
+  Serial.print("  g    Acorr = ");  Serial.print(ee.Acorr, 5);  Serial.println("");
+  Serial.print("  G    Offset = ");  Serial.print(ee.Offset, 4);  Serial.println("");
+  Serial.print("  h    BB Emis = ");  Serial.print(ee.ebb, 5);  Serial.println("");
+  Serial.print("  j    pitch correct = ");  Serial.print(ee.pitch_correct, 1);   Serial.println(""); //v29
+  Serial.print("  J    roll correct correct = ");  Serial.print(ee.roll_correct, 1);  Serial.println(""); //v29
+  Serial.print("  M    Shutter on/off  = ");  Serial.print(ee.ShutterFlag, 2);  Serial.println(""); //v25
+  //
+  Serial.println("  Nn  n=1..3, Shutter CLOSE params: milliamp limit, msecs timeout, msecs after switch");
+  	Serial.print("      [1] max current limit, milliamps = ");Serial.println(ee.close_params[0]);
+  	Serial.print("      [2] timeout, msecs = ");Serial.println(ee.close_params[1]);
+  	Serial.print("      [3] msecs after HE switch = ");Serial.println(ee.close_params[2]);
+  //
+  Serial.println("  On  n=1..3, Shutter OPEN Params: ");
+  	Serial.print("      [1] max current limit, milliamps = ");Serial.println(ee.open_params[0]);
+  	Serial.print("      [2] timeout, msecs = ");Serial.println(ee.open_params[1]);
+  	Serial.print("      [3] msecs after HE switch = ");Serial.println(ee.open_params[2]);
+  //
+  Serial.print("  p sky angle = ");  Serial.print(ee.asky, 2);  Serial.println(" deg");
+  Serial.print("  P ocean angle = ");  Serial.print(ee.aocean, 2);  Serial.println(" deg");
+  Serial.print("  R Rain threshold  = ");  Serial.print(ee.rain_threshold, 2);  Serial.println(" volts");
+  Serial.print("  r Rain shutter delay  = ");  Serial.print(ee.rainsecs);  Serial.println(" secs");
+  Serial.print("  T ocean sample count = ");  Serial.print(ee.Nocean);  Serial.println("");
+  Serial.print("  U sky sample count = ");  Serial.print(ee.Nsky);  Serial.println("");
+  //
   Serial.print("  BB heater configuration = ");
   Serial.print(ee.bbheat[0], DEC);
   Serial.print("  ");
   Serial.println(ee.bbheat[1], DEC);
+  //
   Serial.print("  BB Therm SNs = ");
-  for (i = 0; i < 4; i++) {
-    Serial.print(ee.ntherm[i], 1);
-    Serial.print("  ");
-  }
+	  for (i = 0; i < 4; i++) {
+		Serial.print(ee.ntherm[i], 1);
+		Serial.print("  ");
+	  }
   Serial.println("");
-
+//
   Serial.print("  T to B Quadratic = ");
   for (i = 0; i < 4; i++) {
     Serial.print(ee.pt2b[i], 8);
     Serial.print(" ");
   }
   Serial.println("");
-
+//
   Serial.print("  B to T Quadratic = ");
   for (i = 0; i < 4; i++) {
     Serial.print(ee.pb2t[i], 8);
@@ -1971,6 +2003,7 @@ void EepromPrint()
   Serial.println("");
   return;
 }
+
 /***************************************************************************************/
 unsigned long ElapsedTime (char *ddhhmmss) {
 
@@ -2789,13 +2822,13 @@ void ShutterOpen(void) {
 		// CURRENT
 		fdum = abs(GetMotorCurrent());      // absolute value
 		//Serial.println(fdum,2); // test
-		if (fdum >= CCWSHUTTERCURRENTTHRESHOLD && (unsigned)(millis() - t0) > 100) {
+		if (fdum >= ee.open_params[0] && (unsigned)(millis() - t0) > 100) {
 		  Serial.println("SHUTTER OPEN, CCW CURRENT");
 		  ShutterMotor(STOP);
 		  break;
 		}
 		// TIMEOUT
-		if ( (unsigned)(millis() - t0) > CCWSHUTTERTIMEOUT ) {
+		if ( (unsigned)(millis() - t0) > ee.open_params[1] ) {
 		  Serial.println("SHUTTER OPEN, CCW TIMEOUT");
 		  ShutterMotor(STOP);
 		  break;
@@ -2803,7 +2836,7 @@ void ShutterOpen(void) {
 		// HE SWITCH
 		if ( digitalRead(DHe1) == 0 ) {
 		  Serial.println("SHUTTER OPEN, HE1");
-		  delay(CCWSTOPMILLISECS);
+		  delay(ee.open_params[2]);
 		  ShutterMotor(STOP);
 		  break;
 		}
@@ -2840,13 +2873,13 @@ void ShutterClose(void) {
         // CURRENT
         fdum = abs(GetMotorCurrent() && (unsigned)(millis() - t0) > 100);       // absolute value
         //Serial.println(fdum,2);
-        if (fdum >= CWSHUTTERCURRENTTHRESHOLD) {
+        if (fdum >= ee.close_params[0]) {
           Serial.println("SHUTTER CLOSED, CW CURRENT");
           ShutterMotor(STOP);
           break;
         }
         // TIMEOUT
-        if ( (unsigned)(millis() - t0) > CWSHUTTERTIMEOUT ) {
+        if ( (unsigned)(millis() - t0) > ee.close_params[1] ) {
           Serial.println("SHUTTER CLOSED, CW TIMEOUT");
           ShutterMotor(STOP);
           break;
@@ -2854,7 +2887,7 @@ void ShutterClose(void) {
         // HE SWITCH
         if ( digitalRead(DHe2) == 0 ) {
           Serial.println("SHUTTER CLOSED, HE2");
-          delay(CWSTOPMILLISECS);
+          delay(ee.close_params[2]);
           ShutterMotor(STOP);
           break;
         }
@@ -3056,6 +3089,9 @@ double ThermistorTemp(double v, double Vref, double Rref, unsigned int ntherm) {
 //p3=[-1.18044e-08  6.56500e-05  1.17025e-02  6.42726e-01]
 //q = [1.13823e+01  -5.30498e+01  1.37868e+02  -6.96146e+01]
 // rosr4
+// p3=[-6.79728e-09  6.84067e-05  1.19049e-02  6.44110e-01]
+// q = [1.10337e+01  -5.18827e+01  1.35381e+02  -6.85144e+01]
+
 // find these lines in the code
 // 	//!! See rmrtools/MakeRadTempTables.m to compute these numbers.
 // 	//!! rosr3 kt1585.11935
@@ -3065,3 +3101,30 @@ double ThermistorTemp(double v, double Vref, double Rref, unsigned int ntherm) {
 // 	const double default_pb2t[4] = {
 // 	  1.13823e+01,  -5.30498e+01,  1.37868e+02,  -6.96146e+01
 // 	};
+
+// // SHUTTER v29 and before
+// v29 and before we assigned these params at compile
+// // CCW = open shutter
+// // const double CCWSHUTTERCURRENTTHRESHOLD = 50;
+// // const unsigned CCWSHUTTERTIMEOUT = 1400;
+// // const unsigned CCWSTOPMILLISECS = 200;
+// // CW = close
+// // const double CWSHUTTERCURRENTTHRESHOLD = 50;
+// // const unsigned CWSHUTTERTIMEOUT = 2000;
+// // const unsigned CWSTOPMILLISECS = 200;
+//
+// SHUTTER v30+ new definitions same parameters in eeprom
+// shutter open/close parameters
+// const int default_open_params[3] = {50,2000,200};   //milliamps,millisecs,millisecs 
+// const int default_close_params[3]={50,1400,200};
+// equivalency
+// ee.open_params[0] -- CCWSHUTTERCURRENTTHRESHOLD
+// ee.open_params[1] -- CCWSHUTTERTIMEOUT
+// ee.open_params[2] -- CCWSTOPMILLISECS
+// ee.close_params[0] -- CWSHUTTERCURRENTTHRESHOLD
+// ee.close_params[1] -- CWSHUTTERTIMEOUT
+// ee.close_params[2] -- CWSTOPMILLISECS
+
+
+
+

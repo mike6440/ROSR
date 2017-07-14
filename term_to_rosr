@@ -85,11 +85,16 @@ expect ">>"
 send "set telnet newline-mode nvt raw\r\n"
 expect ">>"
 
+# LOG THE SESSION
+set logpath "$env(DAQDATAFOLDER)/capture_rosr.txt"
+send_user "log to $logpath\n";
+send "log session $logpath append\r\n"
+expect ">>"
 
 ## CONNECT 
 send "connect\r"
 expect {
-	"Conn*---"  {send_user "CONNECTED\n"}
+	"Conn*---"  {send_user "CONNECTED\r\n"}
 	timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
 }
 
