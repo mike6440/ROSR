@@ -3,7 +3,7 @@
 // Therefore: there is ample space for more thermistor calibrations. I'm not sure about local
 //variable space.
 
-#define PROGRAMNAME "rosr_main"
+#define PROGRAMNAME "rosr_main_v30_r4"
 #define VERSION     "30"//
 #define EDITDATE    "20170714T170110Z" //"160812" spurs2
 const byte  EEPROM_ID = 16;  //!! change if you fool around with eeprom variables
