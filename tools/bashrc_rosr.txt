@@ -120,7 +120,7 @@ alias Stopcron="crontab -r"
 
 
 #		PERL LIBRARY =============================
-export DAQLIB="$HomePath/swmain/perl"
+export DAQLIB=$HOME"/swmain/perl"
 export MYLIB=$DAQLIB
 
 	# KERMIT RC =====================
