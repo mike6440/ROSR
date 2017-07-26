@@ -20,7 +20,7 @@ echo "prompt k>>" > ~/.kermrc
 
 # ROSR
 if expr $DAQ = "ROSR" > /dev/null ; then
-test -f $DAQPATH/ROSR/tools/bashrc_rosr.txt && . $_
+test -f $DAQPATH/ROSR/sw/tools/bashrc_rosr.txt && . $_
 fi
 
 #==== END INSERTED TEXT =======================================

@@ -10,8 +10,8 @@ alias Date='date -u "+%Y %m %d %H %M %S Z"'
 export ROSRSN="01";
 # color 
 export LSCOLORS="cxfxcxdxfxegedabagacad"
-alias ls="ls -aG"
-alias ll="ls -laG"
+alias ls="ls -aG --color"
+alias ll="ls -laG --color"
 # folders
 export DAQFOLDER="$DAQPATH/ROSR"
 export DAQSWFOLDER="$DAQFOLDER/sw"
