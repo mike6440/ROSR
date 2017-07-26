@@ -13,10 +13,21 @@ export DAQ="ROSR"
     # KERMIT RC =====================
 echo "prompt k>>" > ~/.kermrc
 
+<<<<<<< HEAD
+
+# ROSR
+if expr $DAQ = "ROSR" > /dev/null ; then
+test -f $DAQPATH/ROSR/tools/bashrc_rosr.txt && . $_
+=======
+    # PERL LIBRARY =============================
+[ -d $HOME/Dropbox ] \
+	&& export MYLIB=$HOME"/Dropbox/swmain/perl" \
+	|| export MYLIB=$HOME"/swmain/perl"
 
 # ROSR
 if expr $DAQ = "ROSR" > /dev/null ; then
 test -f $DAQPATH/ROSR/sw/tools/bashrc_rosr.txt && . $_
+>>>>>>> cb463d1532e02fd41bb6b8cb405b2ee6c9eee77c
 fi
 
 #==== END INSERTED TEXT =======================================

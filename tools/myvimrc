@@ -38,5 +38,8 @@ filetype off
 ""Plugin 'L9'
 ""call vundle#end()
 
+colo pablo
+
 filetype plugin indent on
 syntax on
+
