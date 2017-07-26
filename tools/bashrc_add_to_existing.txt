@@ -13,48 +13,10 @@ export DAQ="ROSR"
     # KERMIT RC =====================
 echo "prompt k>>" > ~/.kermrc
 
-    # PERL LIBRARY =============================
-[ -d $HOME/Dropbox ] \
-	&& export MYLIB=$HOME"/Dropbox/swmain/perl" \
-	|| export MYLIB=$HOME"/swmain/perl"
-
-# FRSR
-if expr $DAQ = "FRSR" > /dev/null ; then
-test -f $DAQPATH/FRSR/tools/bashrc_frsr.txt && . $_
-fi
 
 # ROSR
 if expr $DAQ = "ROSR" > /dev/null ; then
 test -f $DAQPATH/ROSR/tools/bashrc_rosr.txt && . $_
 fi
 
-# ISAR2 
-if expr $DAQ = "ISAR2" > /dev/null ; then
-test -f $DAQPATH/ISAR2/tools/bashrc_isar2.txt && . $_
-fi
-
-# ISAR3
-if expr $DAQ = "ISAR3" > /dev/null ; then 
-test -f $DAQPATH/ISAR3/tools/bashrc_isar3.txt && . $_
-fi
-
-# ISAR4
-if expr $DAQ = "ISAR4" > /dev/null ; then 
-test -f $DAQPATH/ISAR4/tools/bashrc_isar4.txt && . $_
-fi
-
-# PRP
-if expr $DAQ = "PRP" > /dev/null ; then 
-test -f $DAQPATH/PRP/tools/bashrc_prp.txt && . $_
-fi
-
-# PRP2
-if expr $DAQ = "PRP2" > /dev/null ; then 
-test -f $DAQPATH/PRP2/tools/bashrc_prp2.txt && . $_
-fi
-
-# RAD
-if expr $DAQ = "RAD" > /dev/null ; then 
-test -f $DAQPATH/RAD/tools/bashrc_rad.txt && . $_
-fi
 #==== END INSERTED TEXT =======================================
