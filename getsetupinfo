@@ -1,8 +1,6 @@
 #!/usr/bin/perl -X
-
 use lib $ENV{MYLIB};
 use perltools::MRutilities;
-
 my $fname = shift();
 my $str = shift();
 my $strout;

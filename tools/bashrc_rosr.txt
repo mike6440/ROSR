@@ -6,12 +6,6 @@ export EDITOR="vi"
 alias Top="top -u -s5"
 alias Date='date -u "+%Y %m %d %H %M %S Z"'
 
-#  		ROSR S/N 
-export ROSRSN="01";
-# color 
-export LSCOLORS="cxfxcxdxfxegedabagacad"
-alias ls="ls -aG --color"
-alias ll="ls -laG --color"
 # folders
 export DAQFOLDER="$DAQPATH/ROSR"
 export DAQSWFOLDER="$DAQFOLDER/sw"
@@ -120,8 +114,7 @@ alias Stopcron="crontab -r"
 
 
 #		PERL LIBRARY =============================
-export DAQLIB=$HOME"/swmain/perl"
-export MYLIB=$DAQLIB
+export DAQLIB=$MYLIB
 
 	# KERMIT RC =====================
 echo "prompt k>>" > ~/.kermrc

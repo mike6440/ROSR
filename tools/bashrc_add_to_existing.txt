@@ -14,6 +14,16 @@ export DAQ="ROSR"
     # KERMIT RC =====================
 echo "prompt k>>" > ~/.kermrc
 
+   # VIMRC
+#echo "source $HOME/Dropbox/swmain/vim/myvimrc" > ~/.vimrc
+[ -d $HOME/Dropbox ] \
+	&& echo "source $HOME/Dropbox/swmain/vim/myvimrc" > $HOME/.vimrc \
+	|| echo "source $HOME/swmain/vim/myvimrc" > $HOME/.vimrc
+
+# color 
+export LSCOLORS="cxfxcxdxfxegedabagacad"
+alias ls="ls -aG"
+alias ll="ls -laG"
 
 # ROSR
 if expr $DAQ = "ROSR" > /dev/null ; then
