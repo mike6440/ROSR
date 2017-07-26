@@ -1,4 +1,5 @@
 #Add this to the end of any .bashrc on any new unix/linux pc.
+#edit 20170726T035408Z
 
 #==========================================================
     # DEFINE THE DAQ SYSTEM: ROSR NONE
