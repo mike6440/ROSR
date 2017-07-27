@@ -3,10 +3,10 @@
 // Therefore: there is ample space for more thermistor calibrations. I'm not sure about local
 //variable space.
 
-#define PROGRAMNAME "rosr_main"
-#define VERSION     "31"//
-#define EDITDATE    "20170621T023616Z" //"160812" spurs2
-const byte  EEPROM_ID = 15;
+#define PROGRAMNAME "rosr_main_v30_r4"
+#define VERSION     "30"//
+#define EDITDATE    "20170727T003222Z" //"160812" spurs2
+const byte  EEPROM_ID = 16;  //!! change if you fool around with eeprom variables
 
 //v23 - ComputeSSST had issues. No more!
 //v24 - Added calibrated therm coefs for ROSR2
@@ -15,10 +15,12 @@ const byte  EEPROM_ID = 15;
 //v27 - New 485 circuit, pcb v2, for the encoder. See ReadEncoder()
 //v28 - See !! Revise thermistor coefficient subroutine for rosr3. New BB table for kt15.
 //v29 - TMAX is too low. change from 50 to 70.  Add pitch_correct and roll_correct to eeprom
-//v30 - ready for improvement.
-//v31 -   tilt reversed multiply pitch and roll by -1 (or other)
-//        eeprom and revised menu
-
+//v30 - ready for improvement. 1. Changed ReadEncoder wait to 1000 microsecs from 900
+//		Reorganized how thermister coefs are handled. review '!!' notes.
+//		Better menu items. 'h','k','p','r' all loops
+//		remove eeprom from main menu
+//		shutter open/close parameters in eeprom
+//		use #include to customize for each rosr
 
 //NOTE ====== INCLUDES
 #include <string.h>
@@ -47,7 +49,7 @@ const int BB2 = 10;         // bb2 heater on/off
 const int D1a = 11;         // motor forward
 const int D1b = 12;         // motor !forward
 //const int HBT = 13;           // heartbeat  LED31
-const int SEITX = 23;
+const int SEITX = 23;		// rs422 circuit
 const int LED11 = 24;       // Green Scan Drum motor
 const int LED12 = 26;       // Red shutter motor
 const int LED21 = 28;       // green BB2 heater on
@@ -107,15 +109,6 @@ const double P0 = 0;
 const double R1 = -1; // use -1 for a reversed direction
 const double R0 = 0;
 
-// SHUTTER
-// CCW = open shutter
-const double CCWSHUTTERCURRENTTHRESHOLD = 50;
-const unsigned CCWSHUTTERTIMEOUT = 1400;
-const unsigned CCWSTOPMILLISECS = 200;
-// CW = close
-const double CWSHUTTERCURRENTTHRESHOLD = 50;
-const unsigned CWSHUTTERTIMEOUT = 2000;
-const unsigned CWSTOPMILLISECS = 200;
 
 // mega adc
 const int I1a = 0;          // shutter motor
@@ -228,7 +221,6 @@ const byte default_Nocean = 40;
 const float default_rain_threshold = .090;
 const char default_shutter = 1;
 const unsigned long default_rainsecs = 600;
-const byte default_tiltrev = 0;  //v31 0->micro50 forward, 1->micro50 reversed
 const float default_pitch_correct = 0; //v29
 const float default_roll_correct = 0;  //v29
 const char default_bbheat[2] = {
@@ -236,40 +228,34 @@ const char default_bbheat[2] = {
 };
 // THERMISTOR S/N, 0=>std YSI cal. (eeprom)
 const unsigned int default_ntherm[4] = {
-  9,10,11,12 // v28, rosr3
+  1,2,3,4 // v30 see Tcal 
 };
 //const char default_bbheater=BB2;
 const double    default_Rref[7] = {
   10000, 10000, 10000, 10000, 10000, 10000, 10000
 }; // BB11, BB12, BB21, BB22, Tktx, Twin, Tpwr
 
-//!! See rmrtools/MakeRadTempTables.m to compute these numbers.
-//11486 Rosr1
-//p3=[-4.85838e-09  6.94800e-05  1.19834e-02  6.44627e-01]
-//q = [1.09003e+01  -5.14300e+01  1.34426e+02  -6.80914e+01]
-// 11733 Rosr2
-//p3=[-8.89845e-09  6.75354e-05  1.18510e-02  6.44305e-01]
-//q = [1.11073e+01  -5.21289e+01  1.36020e+02  -6.88613e+01]
-// 11935 rosr3
-//p3=[-1.18044e-08  6.56500e-05  1.17025e-02  6.42726e-01]
-//q = [1.13823e+01  -5.30498e+01  1.37868e+02  -6.96146e+01]
+//==========================
+// !! T-rad tables
+//==========================
+#include "t-rad_table4.h"
 
-//!! rosr3 kt1585.11935
-const double default_pt2b[4] = {
-  -1.18044e-08,  6.56500e-05,  1.17025e-02,  6.42726e-01
-};
-const double default_pb2t[4] = {
-  1.13823e+01,  -5.30498e+01,  1.37868e+02,  -6.96146e+01
-};
 
 const double default_Acorr = 1;
 const double default_Offset = 0;
 const double default_ebb = 1;
-const float SCAN_TOLERANCE = .1;
+const float default_scan_tolerance = .1; // SCAN_TOLERANCE 
+// shutter open/close parameters
+const int default_open_params[3] = {50,2000,200};   //milliamps,millisecs,millisecs 
+const int default_close_params[3]={50,1400,200};
+
+
+//!! BB thermistor coefs 
+#include "Tcal_rosr4.h"
 
 
 struct eeprom {
-  byte id, Nbb, Nsky, Nocean, ShutterFlag, CalFlag, tiltrev;
+  byte id, Nbb, Nsky, Nocean, ShutterFlag, CalFlag;
   float abb1, abb2, aocean, asky, encoderref, rain_threshold, ScanTolerance;
   float pitch_correct, roll_correct; //v29
   unsigned long rainsecs;
@@ -280,6 +266,7 @@ struct eeprom {
   double pt2b[4];
   double pb2t[4];
   double Acorr, Offset, ebb;
+  int open_params[3], close_params[3]; 
 };
 struct eeprom ee;
 int eeSize;
@@ -308,7 +295,7 @@ char *      floatToString(char *, double, byte, byte);
 double      GetAdcVolts (unsigned int );   // ads adc
 unsigned int GetAdcSample(unsigned int ch, double *vmean);   // ads adc
 double      GetEmis( double vsea, double missing);
-unsigned int GetThermCoefs(unsigned int, double *coef );   // ads adc
+//unsigned int GetThermCoefs(unsigned int, double *coef );   // ads adc
 double      GetMotorCurrent();
 double      GetRadFromTemp (double);
 double      GetTempFromRad (double);
@@ -879,7 +866,7 @@ void    Action(char *cmd)
   if (cmd[0] == '?') {
     PrintProgramID();
 //     Serial.println("------- EEPROM -----------------------------------");
-//     Serial.println("E       -- show eeprom ");
+    Serial.println("E       -- show eeprom ");
 //     Serial.println("Ecfff.f -- BB1 point angle          ECfff.f -- BB2 point angle");
 //     Serial.println("EHnn    -- set bb1 and bb2 heater, 0/1 = off,on.  Standard=01");
 //     Serial.println("Epfff.f -- SKY point angle          EPfff.f -- OCEAN point angle");
@@ -892,44 +879,49 @@ void    Action(char *cmd)
 //     Serial.println("EAnff.f -- Ref R[n] = fff.f ohms    Ehfff.f -- BB Emissivity");
 //     Serial.println("Ejff.f  -- Pitch correct deg        EJff.f  -- Roll correct deg");
 //     Serial.println("");
-//     Serial.println("------- FUNCTIONS -----------------------------------");
-    Serial.println("an   -- ADC Chan n                    A      -- ADC all");
-    Serial.println("bn   -- BB n heater OFF               Bn     -- BB n heater ON");
-    Serial.println("c    -- 5REF OFF                      C      -- 5REF ON");
-    Serial.println("d    -- encoder loop");
-    Serial.println("df.f -- Point to angle f.f");
-    Serial.println("Df.f -- Set the encoder to f.f");
-    Serial.println("fo   -- Shutter Open (CCW)          fc    -- Shutter Close (CW)");
-    Serial.println("F    -- Shutter 20x or keystroke");
-    Serial.println("h/H  -- HE switches loop");
-    Serial.println("k    -- KT15 RAD                    K     -- KT15 loop");
-    Serial.println("l    -- Send KT15 command ");
-    Serial.println("m    -- Drum motor CCW              M     -- Drum motor CW");
-    Serial.println("p    -- pitch/roll loop");
-    Serial.println("r    -- Rain check single           R     -- Rain check loop");
-    Serial.println("t    -- Read system clock           T     -- Set default f.p. day");
-    Serial.println("sn   -- LED test:  1=Heartbeat   2=Drum   3=Shutter/Rain");
-    Serial.println("wff.f-- GetEmis(ff.f,MISSING)");
-    Serial.println("Wff.f-- GetRadFromTemp(ff.f) --> GetTempFromRad");
-    Serial.println("x    -- Compute SSST");
-    Serial.println("v/V  -- Program version");
-    Serial.println("g/G  -- Continue sampling.");
+    Serial.println("------- FUNCTIONS -----------------------------------");
+    Serial.println("an -- ADC Chan n                    A      -- ADC all loop");
+    Serial.println("bn -- BB n heater OFF");
+    Serial.println("Bn -- BB n heater ON");
+    Serial.println("C  -- 5REF ON");
+    Serial.println("c  -- 5REF OFF");
+    Serial.println("d  -- current drum position");
+    Serial.println("d[ff.f] -- Point to angle f.f");
+    Serial.println("Dff.f   -- Set the encoder to ff.f");
+    Serial.println("fo      -- Shutter Open (CCW)");
+    Serial.println("fc      -- Shutter Close (CW)");
+    Serial.println("F       -- Shutter 20x or keystroke");
+    Serial.println("h       -- HE switch loop");
+    Serial.println("k       -- KT15 RAD loop");
+    Serial.println("l       -- Send KT15 command ");
+    Serial.println("m       -- Drum motor CCW");
+    Serial.println("M       -- Drum motor CW");
+    Serial.println("p       -- pitch/roll loop");
+    Serial.println("r       -- Rain check loop");
+    Serial.println("t       -- Read system clock loop");
+    Serial.println("T       -- Set default f.p. day");
+    Serial.println("sn      -- LED test:  1=Heartbeat   2=Drum   3=Shutter/Rain");
+    Serial.println("wff.f   -- GetEmis(ff.f,MISSING)");
+    Serial.println("Wff.f   -- GetRadFromTemp(ff.f) --> GetTempFromRad");
+    Serial.println("x       -- Compute SSST");
+    Serial.println("v/V     -- Program version");
+    Serial.println("g/G     -- Continue sampling.");
   }
 
   // READ ADC CHANNEL
   else if (cmd[0] == 'a' && strlen(cmd) > 1) {
     ix = cmd[1] - 48;
-    Serial.print("Chan "); Serial.println(ix, DEC);
+    Serial.print("Chan ");
+    Serial.println(ix, DEC);
     if (ix < 0 || ix > 15) {
       Serial.println("Error");
     }
     else {
-    	while ( !Serial.available()  ) {
-		  GetAdcSample(ix, (vmean + ix));
-		  Serial.print("Chan "); Serial.print(ix, DEC); Serial.print("  ");
-		  Serial.println(vmean[ix], 4);
-		  delay(500);
-		}
+      GetAdcSample(ix, (vmean + ix));
+      Serial.print("Chan ");
+      Serial.print(ix, DEC);
+      Serial.print("  ");
+      Serial.println(vmean[ix], 4);
     }
   }
   // ADC LOOP
@@ -1056,7 +1048,7 @@ void    Action(char *cmd)
   }
 
   // HALL EFFECT (HE) SWITCHES
-  else if (cmd[0] == 'h' || cmd[0] == 'H' ) {
+  else if (cmd[0] == 'h') {
     Serial.println("CLOSED  OPEN");
     while ( !Serial.available()  ) {
       Serial.print(digitalRead(DHe1));
@@ -1083,27 +1075,17 @@ void    Action(char *cmd)
 
   // POINT SCAN DRUM
   else if (cmd[0] == 'd') {
-  	if(strlen(cmd) == 1){
-    	while ( !Serial.available()  ) {
-			EncoderAngle = ReadEncoder(ee.encoderref);
-			Serial.print("Drum = ");
-			Serial.print(EncoderAngle, 2);
-			Serial.println(" deg");
-			delay(2000);
-		}
-    } else {
-    	// Read current position
-		EncoderAngle = ReadEncoder(ee.encoderref);
-		Serial.print("Drum = ");
-		Serial.print(EncoderAngle, 2);
-		Serial.println(" deg");
-		//Point the drum
-		ddum = atof(cmd + 1);
-		Serial.print("Request ");
-		Serial.println(ddum, 2);
-		EncoderAngle = PointScanDrum(ddum);
-		Serial.print("Final EncoderAngle = ");
-		Serial.println(EncoderAngle, 2);
+    EncoderAngle = ReadEncoder(ee.encoderref);
+    Serial.print("Drum = ");
+    Serial.print(EncoderAngle, 2);
+    Serial.println(" deg");
+    if (strlen(cmd) > 1) {
+      ddum = atof(cmd + 1);
+      Serial.print("Request ");
+      Serial.println(ddum, 2);
+      EncoderAngle = PointScanDrum(ddum);
+      Serial.print("Final EncoderAngle = ");
+      Serial.println(EncoderAngle, 2);
    	}
   }
   else if (cmd[0] == 'D' && strlen(cmd) > 1) {
@@ -1134,14 +1116,18 @@ void    Action(char *cmd)
   }
 
   // KT15
+//   else if (cmd[0] == 'k') {
+//     while (! Serial.available()) {
+// 		ReadKT15(&ddum, &fdum);
+// 		Serial.print("rad = ");
+// 		Serial.print(ddum, 0);
+// 		Serial.print("    irt = ");
+// 		Serial.println(fdum, 3);
+//       	delay(2000);
+//       	ix++;
+//     }
+//   }
   else if (cmd[0] == 'k') {
-    ReadKT15(&ddum, &fdum);
-    Serial.print("rad = ");
-    Serial.print(ddum, 0);
-    Serial.print("    irt = ");
-    Serial.println(fdum, 3);
-  }
-  else if (cmd[0] == 'K') {
     fsum1 = fsq1 = fsum2 = fsq2 = 0;
     nsum = 0;
     Serial.println(" N  RAD  IRT");
@@ -1159,7 +1145,7 @@ void    Action(char *cmd)
       Serial.print(ddum, 0);
       Serial.print("  ");
       Serial.println(fdum, 3);
-      delay(1000);
+      delay(2000);
       ix++;
     }
     if (nsum > 3) {
@@ -1377,14 +1363,39 @@ void    Action(char *cmd)
         ee.ShutterFlag = ix;
         eok = 1;
       }
-      else if ( cmd[1] == 't'  ) {
-        ix = atoi(cmd + 2);
-        if(ix>0)ix=1;
-        Serial.print("Tilt reversed flag = ");
-        Serial.println(ix);
-        ee.tiltrev = ix;
-        eok = 1;
+      // v30
+      else if ( cmd[1] == 'N' ) {
+        ix = cmd[2] - 48;
+        if (ix < 0 || ix > 3 ) {
+          Serial.println("Error.");
+        }
+        else {
+          n = atoi(cmd + 3);
+          Serial.print("Set close_params[");
+          Serial.print(ix, DEC);
+          Serial.print("] = ");
+          Serial.println(n);
+          ee.close_params[ix-1] = n;
+        }
+        eok=1;
       }
+      // v30
+      else if ( cmd[1] == 'O' ) {
+        ix = cmd[2] - 48;
+        if (ix < 0 || ix > 3 ) {
+          Serial.println("Error.");
+        }
+        else {
+          n = atoi(cmd + 3);
+          Serial.print("Set open_params[");
+          Serial.print(ix, DEC);
+          Serial.print("] = ");
+          Serial.println(n);
+          ee.open_params[ix-1] = n;
+        }
+		eok=1;
+      }
+	  //
       if ( eok == 1 ) {
         EepromStore();
         EepromPrint();
@@ -1419,22 +1430,22 @@ void    Action(char *cmd)
       Serial.print(ddum, 2);
       Serial.print("  ");
       Serial.println(fdum, 2);
-      delay(2000);
+      delay(1000);
       ix++;
     }
   }
 
   // RAIN
+//   else if (cmd[0] == 'r') {
+//     CheckRain( &ddum, &Ldum );
+//     Serial.print("Rain volts = ");
+//     Serial.print(ddum, 2);
+//     Serial.print("   Sec to open = ");
+//     Serial.print(Ldum);
+//     Serial.print("   State = ");
+//     Serial.println(RainState, DEC);
+//   }
   else if (cmd[0] == 'r') {
-    CheckRain( &ddum, &Ldum );
-    Serial.print("Rain volts = ");
-    Serial.print(ddum, 2);
-    Serial.print("   Sec to open = ");
-    Serial.print(Ldum);
-    Serial.print("   State = ");
-    Serial.println(RainState, DEC);
-  }
-  else if (cmd[0] == 'R') {
     Serial.println(" N  STATUS   VOLTS   SECS");
     ix = 0;
     while (! Serial.available()) {
@@ -1839,13 +1850,18 @@ void EepromDefault() {
   ee.pb2t[1] = default_pb2t[1];
   ee.pb2t[2] = default_pb2t[2];
   ee.pb2t[3] = default_pb2t[3];
-  ee.tiltrev = default_tiltrev;
-  ee.ScanTolerance = SCAN_TOLERANCE;
+  ee.ScanTolerance = default_scan_tolerance; //SCAN_TOLERANCE;
   ee.Acorr = default_Acorr;
   ee.Offset = default_Offset;
   ee.ebb = default_ebb;
   ee.pitch_correct = default_pitch_correct;  //v29
   ee.roll_correct = default_roll_correct;  //v29
+  ee.open_params[0] = default_open_params[0];
+  ee.open_params[1] = default_open_params[1];
+  ee.open_params[2] = default_open_params[2];
+  ee.close_params[0] = default_close_params[0];
+  ee.close_params[1] = default_close_params[1];
+  ee.close_params[2] = default_close_params[2];
   EepromStore();
   EepromRead();
   EepromPrint();
@@ -1887,95 +1903,83 @@ void EepromRead()
 }
 
 //===============================================================================
+// EepromPrint:
+//   ID = 15
+//   c   BB1 angle = 265.00 deg
+//   C   BB2 angle = 325.00 deg
+//   p   sky angle = 45.00 deg
+//   P   ocean angle = 90.00 deg
+//   D   drum zero ref = 0.00 deg
+//   F   Encoder scan tolerance = 0.10 deg
+//   B   BB sample count = 30
+//   U   sky sample count = 10
+//   T   ocean sample count = 40
+//   M   Shutter on/off  = 1
+//   E   Calibration Flag = 0
+//   R   Rain threshold  = 0.09 volts
+//   r   Rain shutter delay  = 600 secs
+//   g   Acorr = 1.00000
+//   G   Offset = 0.0000
+//   h   BB Emis = 1.00000
+//   j   pitch correct = 0.0
+//   J   roll correct correct = 0.0
+//   An  n=1..4   Ref esistors = 10000.0  10000.0  10000.0  10000.0
+//   Bn  n=heater configuration = 0  1
+//   BB  Therm SNs = 1  2  3  4
+//   T to B Quadratic = -0.00000001 0.00006565 0.01170250 0.64272599
+//   B to T Quadratic = 11.38230037 -53.04980087 137.86799621 -69.61460113
 void EepromPrint()
 {
   int i;
   Serial.println("EepromPrint: ");
-  Serial.print("  ID = ");
-  Serial.print(ee.id);
-  Serial.println(" ");
-  //Serial.print("    E BBHeater = ");
-  //Serial.println(ee.bbheater,DEC);  xyx
-  Serial.print("  c BB1 angle = ");
-  Serial.print(ee.abb1, 2);
-  Serial.println(" deg");
-  Serial.print("  C BB2 angle = ");
-  Serial.print(ee.abb2, 2);
-  Serial.println(" deg");
-  Serial.print("  p sky angle = ");
-  Serial.print(ee.asky, 2);
-  Serial.println(" deg");
-  Serial.print("  P ocean angle = ");
-  Serial.print(ee.aocean, 2);
-  Serial.println(" deg");
-  Serial.print("  D drum zero ref = ");
-  Serial.print(ee.encoderref, 2);
-  Serial.println(" deg");
-  Serial.print("  F Encoder scan tolerance = ");
-  Serial.print(ee.ScanTolerance, 2);
-  Serial.println(" deg");
-  Serial.print("  B BB sample count = ");
-  Serial.print(ee.Nbb);
+  Serial.print("  ID = ");  Serial.print(ee.id);  Serial.println(" ");
+  Serial.print("  An   n=1..4, BB Ref esistors = ");
+  	for (i = 0; i < 7; i++) { Serial.print(ee.Rref[i], 1);    Serial.print("  "); }
+  Serial.print("  B    BB view sample count = ");  Serial.print(ee.Nbb);  Serial.println("");
+  Serial.print("  c    BB1 angle = ");  Serial.print(ee.abb1, 2);  Serial.println(" deg");
+  Serial.print("  C    BB2 angle = ");  Serial.print(ee.abb2, 2); Serial.println(" deg");
+  Serial.print("  D    drum zero ref = ");  Serial.print(ee.encoderref, 2);  Serial.println(" deg");
+  Serial.print("  E    Calibration Flag = ");  Serial.println(ee.CalFlag); //xxx review this action
+  Serial.print("  F    Encoder scan tolerance = ");  Serial.print(ee.ScanTolerance, 2);  Serial.println(" deg");
+  Serial.print("  g    Acorr = ");  Serial.print(ee.Acorr, 5);  Serial.println("");
+  Serial.print("  G    Offset = ");  Serial.print(ee.Offset, 4);  Serial.println("");
+  Serial.print("  Hij  i=0/1,j=1/0,  BB heater configuration = ");Serial.print(ee.bbheat[0], DEC);Serial.print("  ");Serial.println(ee.bbheat[1], DEC);
+  Serial.print("  h    BB Emis = ");  Serial.print(ee.ebb, 5);  Serial.println("");
+  Serial.print("  j    pitch correct = ");  Serial.print(ee.pitch_correct, 1);   Serial.println(""); //v29
+  Serial.print("  J    roll correct correct = ");  Serial.print(ee.roll_correct, 1);  Serial.println(""); //v29
+  Serial.print("  M    Shutter on/off  = ");  Serial.print(ee.ShutterFlag, 2);  Serial.println(""); //v25
+  //
+  Serial.println("  Nn  n=1..3, Shutter CLOSE params: milliamp limit, msecs timeout, msecs after switch");
+  	Serial.print("      [1] max current limit, milliamps = ");Serial.println(ee.close_params[0]);
+  	Serial.print("      [2] timeout, msecs = ");Serial.println(ee.close_params[1]);
+  	Serial.print("      [3] msecs after HE switch = ");Serial.println(ee.close_params[2]);
+  //
+  Serial.println("  On  n=1..3, Shutter OPEN Params: ");
+  	Serial.print("      [1] max current limit, milliamps = ");Serial.println(ee.open_params[0]);
+  	Serial.print("      [2] timeout, msecs = ");Serial.println(ee.open_params[1]);
+  	Serial.print("      [3] msecs after HE switch = ");Serial.println(ee.open_params[2]);
+  //
+  Serial.print("  p sky angle = ");  Serial.print(ee.asky, 2);  Serial.println(" deg");
+  Serial.print("  P ocean angle = ");  Serial.print(ee.aocean, 2);  Serial.println(" deg");
+  Serial.print("  R Rain threshold  = ");  Serial.print(ee.rain_threshold, 2);  Serial.println(" volts");
+  Serial.print("  r Rain shutter delay  = ");  Serial.print(ee.rainsecs);  Serial.println(" secs");
+  Serial.print("  T ocean sample count = ");  Serial.print(ee.Nocean);  Serial.println("");
+  Serial.print("  U sky sample count = ");  Serial.print(ee.Nsky);  Serial.println("");
+  //
+  Serial.print("  BB Therm SNs (set at compile) = ");
+	  for (i = 0; i < 4; i++) {
+		Serial.print(ee.ntherm[i], 1);
+		Serial.print("  ");
+	  }
   Serial.println("");
-  Serial.print("  U sky sample count = ");
-  Serial.print(ee.Nsky);
-  Serial.println("");
-  Serial.print("  T ocean sample count = ");
-  Serial.print(ee.Nocean);
-  Serial.println("");
-  Serial.print("  M Shutter on/off  = "); //v25
-  Serial.print(ee.ShutterFlag, 2);
-  Serial.println(""); //v25
-  Serial.print("  E Calibration Flag = ");
-  Serial.println(ee.CalFlag);
-  Serial.print("  R Rain threshold  = ");
-  Serial.print(ee.rain_threshold, 2);
-  Serial.println(" volts");
-  Serial.print("  r Rain shutter delay  = ");
-  Serial.print(ee.rainsecs);
-  Serial.println(" secs");
-  Serial.print("  g Acorr = ");
-  Serial.print(ee.Acorr, 5);
-  Serial.println("");
-  Serial.print("  G Offset = ");
-  Serial.print(ee.Offset, 4);
-  Serial.println("");
-  Serial.print("  h BB Emis = ");
-  Serial.print(ee.ebb, 5);
-  Serial.println("");
-  Serial.print("  t Tilt Rev Flag = "); //v31
-  Serial.print(ee.tiltrev);  //v31
-  Serial.println("");
-  Serial.print("  j pitch correct = "); //v29
-  Serial.print(ee.pitch_correct, 1);  //v29
-  Serial.println(""); //v29
-  Serial.print("  J roll correct correct = "); //v29
-  Serial.print(ee.roll_correct, 1);  //v29
-  Serial.println(""); //v29
-  Serial.print("  A Ref esistors = ");
-  for (i = 0; i < 7; i++) {
-    Serial.print(ee.Rref[i], 1);
-    Serial.print("  ");
-  }
-  Serial.println("");
-  Serial.print("  BB heater configuration = ");
-  Serial.print(ee.bbheat[0], DEC);
-  Serial.print("  ");
-  Serial.println(ee.bbheat[1], DEC);
-  Serial.print("  BB Therm SNs = ");
-  for (i = 0; i < 4; i++) {
-    Serial.print(ee.ntherm[i], 1);
-    Serial.print("  ");
-  }
-  Serial.println("");
-
+//
   Serial.print("  T to B Quadratic = ");
   for (i = 0; i < 4; i++) {
     Serial.print(ee.pt2b[i], 8);
     Serial.print(" ");
   }
   Serial.println("");
-
+//
   Serial.print("  B to T Quadratic = ");
   for (i = 0; i < 4; i++) {
     Serial.print(ee.pb2t[i], 8);
@@ -1984,6 +1988,7 @@ void EepromPrint()
   Serial.println("");
   return;
 }
+
 /***************************************************************************************/
 unsigned long ElapsedTime (char *ddhhmmss) {
 
@@ -2245,55 +2250,6 @@ double GetMotorCurrent(void) {
   //Serial.println(vdiff);
   return vdiff;
 }
-//============================================================
-unsigned int GetThermCoefs(unsigned int nt, double c[] ) {
-  //   revision, add 9,10,11,12
-  // Give the correct SHH coefs for the thermnumber
-  // See 04.20.18.10../Tcal3_1605_thermistor_cal_rosr3/Tcal1605_report.key.pdf
-  // See BB_Therm_Master_List spreadsheet we need to revise this for each rosr
-
-  double tcal[13][3] = {  //v28  !! 13 rows, add to this for new calibrations.
-    //0 standard ysi
-    { 1.025579e-03,   2.397338e-04,   1.542038e-07 },
-    //1 Therm #1, Rosr1 T11
-    { 1.0108115e-03, 2.4212099e-04,   1.4525424e-07 },
-    //2 Therm #2, ROSR1, T12
-    { 1.0138029e-03, 2.4156995e-04,   1.4628056e-07 },
-    //3 Therm #3, ROSR1, T21
-    { 1.0101740e-03, 2.4208389e-04,   1.4485814e-07 },
-    //4 Therm #4, ROSR1, T22
-    { 1.0137647e-03, 2.4161708e-04,   1.4619775e-07 },
-    //5 Therm #5, ROSR2, T11
-    { 1.0073532E-03, 2.41655931E-04, 1.56252214E-07 },
-    //6 Therm #8, ROSR2, T12
-    { 1.00647228E-03, 2.42265935E-04, 1.50546312E-07 },
-    //7 Therm #9, ROSR2, T21
-    { 1.01935214E-03, 2.40428900E-04,	1.56322696E-07 },
-    //8 Therm #10, ROSR2, T22
-    { 1.02013510E-03, 2.40304832E-04, 1.55160255E-07  },
-    //9 Therm-12, ROSR3, T11  //v28
-    { 1.00171527e-03, 2.42997797e-04, 1.46913550e-07 },
-    //10 Therm-13. ROSR3, T12  //v28
-    { 1.01743969e-03, 2.40737206e-04, 1.52367550e-07 },
-    //11 Therm-15, ROSR3, T21  //v28
-    { 9.92861282e-04, 2.44664838e-04, 1.37715245e-07 },
-    //12 Therm-16, ROSR3, T22  //v28
-	{ 1.00677444e-03, 2.42252224e-04, 1.49693186e-07 }
-  };
-
-  if (nt < 0 || nt > 13) {
-    Serial.print("Error in GetThermCoefs() -- bad thermnumber=");
-    Serial.println(nt, DEC);
-    c[0] = c[1] = c[2] = 0;
-    return 0;
-  }
-  else {
-    c[0] = tcal[nt][0];
-    c[1] = tcal[nt][1];
-    c[2] = tcal[nt][2];
-    return 1;
-  }
-}
 /*****************************************************************************************/
 double      GetRadFromTemp (double t) {
   double x;
@@ -2500,216 +2456,10 @@ void PrintProgramID(void)
 }
 
 
-//*******************************************************
-// void Read4017 (double *adc, char chan)
-// // Issue a command to the 4017, jump to receive, read in the string.
-// // See Adam 4000 manual page 4-14,
-// //       #01<cr> for all channels,   >+7.2111+7.23453+...<cr>
-// //           ">+02.368+02.393+02.404+02.399+01.685+00.866+00.461+00.237"   len=57
-// //       #01x<cr> where x=0-7,       >+1.4567<cr>
-// //           ">+02.394"      len=8
-// //       adc[7] is a float array of the result of the read.
-// {
-//     char strcmd[6];
-//     char strin[65];
-//     byte i, j, ic, chrin,lencmd,rxlen;
-//     unsigned long millistart, millilapsed; // define input wait time
-//
-//     //Serial.print("Read4017: ");   Serial.println(chan,DEC);
-//
-//     // MAKE COMMAND
-//     // all channels
-//     if ( chan > 7 || chan < 0 ) {
-//         strncpy(strcmd,"#01",3);
-//         strcmd[3] = '\0';
-//         lencmd = 3;
-//         rxlen=59;
-//     }
-//     // single channel
-//     else {
-//         // individual channel
-//         strncpy(strcmd,"#01",3);
-//         strcmd[3]=chan+48;
-//         strcmd[4]='\0';
-//         lencmd=4;
-//         rxlen=9;
-//     }
-//
-//     // Command sent
-//     for(i=0;i<lencmd;i++){
-//         Serial2.write(strcmd[i]);
-//     }
-//     Serial2.write(13);
-//
-//     delay(10);
-//
-//     // Receive string
-//     millistart = millis();
-//     j=0;
-//     while(j<rxlen){
-//      if( Serial2.available() ){
-//          chrin=Serial2.read();
-//          if(chrin == 13){break;}
-//          else{ strin[j++]=chrin; }
-//      }
-//      millilapsed=millis()-millistart;
-//      if ( millilapsed > 700 ) break;
-//     }
-//     //Serial2.setTimeout(700);
-//     //Serial2.readBytes(strin,rxlen);
-//
-//     //ic = strlen(strin);
-//     //Serial.print(ic);
-//     //Serial.println(" bytes received.");
-//     //Serial.println(strin);
-//
-//  strin[rxlen]='\0';
-//  if(rxlen==9){
-//      adc[chan]=atof( strin+1  );
-//      //Serial.println(adc[0],2);
-//  }
-//  else {
-//      j=0;
-//      for(i=1; i<rxlen; i++){
-//          if(strin[i]=='+'|| strin[i]=='-'){
-//              adc[j]=atof( strin+i );
-//              //Serial.print(j);Serial.print("  "); Serial.println(adc[j],2);
-//              j++;
-//          }
-//      }
-//  }
-// }
-//
+// !! s/r float ReadEncoder (float ref)
+// #include "readencoder1.h" //rosr1 and rosr2
+#include "readencoder2.h" //rosr3, 4 and above
 
-// USED FOR ROSR3 AND AFTER. USES 485 CIRCUIT
-//*******************************************************
-float ReadEncoder (float ref)
-// Read the USDIGITAL encoder
-// Absolute position is computed using output = encoder angle - ref
-//  input: zero reference angle.
-//  output: encoder angle - ref OR MISSING
-//  global variables:
-//      MISSING (=-999)
-{
-	unsigned char count = 0;            // number of trys for input;
-	byte i = 0;                         // number of bytes in the buffer.
-	float angle = MISSING;
-	byte e[4];
-
-	while ( count < 2 )  { 
-		// Turn to transmit 485
-		digitalWrite(SEITX, HIGH);
-		delay(2); // short delay for things to settle
-	    // clear buffer
-		while (Serial1.available()) {
-			Serial1.read();
-		}
-		// position command -- send 0x1E
-		Serial1.write(EncCmd);
-		delayMicroseconds(900); // short delay for tx to complete
-		// back to receive 485
-		digitalWrite(SEITX, LOW);
-		delay(20); // 
-		// get bytes
-		i = 0;
-		while ( Serial1.available() ) {
-			e[i] = Serial1.read();
-			Serial.print("byte ");Serial.print(i,DEC);Serial.print(" = ");Serial.println(e[i],DEC);
-			i++;
-			if(i>2) break;
-		}
-		// DO WE HAVE A GOOD ANGLE
-		if ( i >= 2 ) {
-			// This next calc assumes an encoder setting of 14400 resolution
-			angle = ((float)e[0] * 256 + (float)e[1]) / 40.0;
-			if (angle >= 0 && angle <= 360) break;
-			else angle=MISSING;
-			Serial.print("test angle = ");Serial.println(angle,3);
-		}
-		count++;
-	}
-	if ( angle != (float)MISSING ) {
-		//Serial.print("ref = ");Serial.println(ref,3);
-		angle += ref;
-		if ( angle >= 360 ) angle -= 360;
-		if ( angle < 0 ) angle += 360;
-	}
-	return angle;
-}
-	// USED FOR ROSR1 AND ROSR2
-	// //*******************************************************
-	// float ReadEncoder (float ref)
-	// // Read the USDIGITAL encoder
-	// // Absolute position is computed using output = encoder angle - ref
-	// //  input: zero reference angle.
-	// //  output: encoder angle - ref OR MISSING
-	// //  global variables:
-	// //      MISSING (=-999)
-	// {
-	//   unsigned char count = 0;            // number of trys for input;
-	//   unsigned long microstart, micronow; // define input wait time
-	//   byte i = 0;                         // number of bytes in the buffer.
-	//   float angle = MISSING;
-	//   byte e[4];
-	// 
-	//   count = 0;
-	//   while ( count < 3 )  {
-	//     // position command
-	//     Serial1.write(EncCmd);
-	// 
-	//     // get three bytes
-	//     microstart = micros();
-	//     i = 0;
-	//     while (i <= 2) {
-	//       // i=0 get the command byte
-	//       if (i == 0 && Serial1.available()) {
-	//         e[0] = Serial1.read();
-	//         if (e[0] == EncCmd) {
-	//           //Serial.print("0-");Serial.print(e[0],HEX);
-	//           i++;
-	//         }
-	//       }
-	//       // i=1 First byte
-	//       else if (Serial1.available() && i == 1) {
-	//         e[1] = Serial1.read();
-	//         //Serial.print("  1-");Serial.print(e[1],HEX);
-	//         i++;
-	//       }
-	//       // i=2, second byte
-	//       else if (Serial1.available() && i == 2) {
-	//         e[2] = Serial1.read();
-	//         //Serial.print("  2-");Serial.println(e[2],HEX);
-	//         i++;
-	//       }
-	//       // timeout
-	//       else if ( micros() - microstart > 10000 ) {
-	//         //Serial.println("ReadEncoder timeout.");
-	//         break;
-	//       }
-	//     }
-	//     // DO WE HAVE A GOOD ANGLE
-	//     if ( i >= 2 ) {
-	//       // This next calc assumes an encoder setting of 14400 resolution
-	//       angle = (float)(e[1] * 256 + e[2]) / 40.0;
-	//       //Serial.print("angle=");Serial.print(angle,2);
-	//       if (angle >= 0 && angle <= 360) {
-	//         count = 100;
-	//       }
-	//     }
-	//     // if not, try again
-	//     else {
-	//       count++;
-	//     }
-	//   }
-	//   //Serial.print("angle = ");Serial.println(angle,3);
-	//   if ( angle != (float)MISSING ) {
-	//     //Serial.print("ref = ");Serial.println(ref,3);
-	//     angle += ref;
-	//     if ( angle >= 360 ) angle -= 360;
-	//     if ( angle < 0 ) angle += 360;
-	//   }
-	//   return angle;
-	// }
 //============================================================================
 void        ReadKT15(double *irrad, double *irtemp)
 {
@@ -2772,7 +2522,6 @@ void        ReadTilt(double *pitch, double *roll)
     if (ddum < -1660) ddum = -1660;
     if (ddum > 1660) ddum = 1660;
     *pitch = P1 * (C1 * ddum + C2 * ddum * ddum + C3 * ddum * ddum * ddum) + P0 + ee.pitch_correct;  //v29
-    if(ee.tiltrev==1) *pitch *= -1;
   }
   else *pitch = MISSING;
   //  Serial.print("Pitch = "); Serial.println(*pitch,1);
@@ -2799,7 +2548,6 @@ void        ReadTilt(double *pitch, double *roll)
     if (ddum < -1660) ddum = -1660;
     if (ddum > 1660) ddum = 1660;
     *roll = R1 * (C1 * ddum + C2 * ddum * ddum + C3 * ddum * ddum * ddum) + R0 + ee.roll_correct; //v29
-    if(ee.tiltrev==1) *roll *= -1;
   }
   else *roll = MISSING;
   //  Serial.print("Roll = "); Serial.println(*roll,1);
@@ -2926,13 +2674,13 @@ void ShutterOpen(void) {
 		// CURRENT
 		fdum = abs(GetMotorCurrent());      // absolute value
 		//Serial.println(fdum,2); // test
-		if (fdum >= CCWSHUTTERCURRENTTHRESHOLD && (unsigned)(millis() - t0) > 100) {
+		if (fdum >= ee.open_params[0] && (unsigned)(millis() - t0) > 100) {
 		  Serial.println("SHUTTER OPEN, CCW CURRENT");
 		  ShutterMotor(STOP);
 		  break;
 		}
 		// TIMEOUT
-		if ( (unsigned)(millis() - t0) > CCWSHUTTERTIMEOUT ) {
+		if ( (unsigned)(millis() - t0) > ee.open_params[1] ) {
 		  Serial.println("SHUTTER OPEN, CCW TIMEOUT");
 		  ShutterMotor(STOP);
 		  break;
@@ -2940,7 +2688,7 @@ void ShutterOpen(void) {
 		// HE SWITCH
 		if ( digitalRead(DHe1) == 0 ) {
 		  Serial.println("SHUTTER OPEN, HE1");
-		  delay(CCWSTOPMILLISECS);
+		  delay(ee.open_params[2]);
 		  ShutterMotor(STOP);
 		  break;
 		}
@@ -2977,13 +2725,13 @@ void ShutterClose(void) {
         // CURRENT
         fdum = abs(GetMotorCurrent() && (unsigned)(millis() - t0) > 100);       // absolute value
         //Serial.println(fdum,2);
-        if (fdum >= CWSHUTTERCURRENTTHRESHOLD) {
+        if (fdum >= ee.close_params[0]) {
           Serial.println("SHUTTER CLOSED, CW CURRENT");
           ShutterMotor(STOP);
           break;
         }
         // TIMEOUT
-        if ( (unsigned)(millis() - t0) > CWSHUTTERTIMEOUT ) {
+        if ( (unsigned)(millis() - t0) > ee.close_params[1] ) {
           Serial.println("SHUTTER CLOSED, CW TIMEOUT");
           ShutterMotor(STOP);
           break;
@@ -2991,7 +2739,7 @@ void ShutterClose(void) {
         // HE SWITCH
         if ( digitalRead(DHe2) == 0 ) {
           Serial.println("SHUTTER CLOSED, HE2");
-          delay(CWSTOPMILLISECS);
+          delay(ee.close_params[2]);
           ShutterMotor(STOP);
           break;
         }
@@ -3039,20 +2787,25 @@ double SteinhartHart(double beta[], double r)
 }
 //==========================================================================
 double ThermistorTemp(double v, double Vref, double Rref, unsigned int ntherm) {
+//v30 extensive changes
+	double r;
+	double a[3], t;
 
-  double r;
-  double a[3], t;
+	if (v < threshold[0]) return 0;
+	if (v > threshold[1]) return 200;
 
-  if (v < threshold[0]) return 0;
-  if (v > threshold[1]) return 200;
-
-  GetThermCoefs(ntherm, a);
-  r = Rref * (v / (Vref - v));
-  t = SteinhartHart(a, r);
-  return t;
+	if (ntherm <0 || ntherm >5 ){
+		Serial.println("ThermisterTemp() ntherm error");
+		a[0]=Tcal[0][0];
+		a[1]=Tcal[0][1];
+		a[2]=Tcal[0][2];
+	} else {
+		a[0]=Tcal[ntherm][0];
+		a[1]=Tcal[ntherm][1];
+		a[2]=Tcal[ntherm][2];
+	}
+	r = Rref * (v / (Vref - v));
+	t = SteinhartHart(a, r);
+	return t;
 }
-
-
-
-
 
