@@ -4,9 +4,13 @@
 #==========================================================
     # DEFINE THE DAQ SYSTEM: ROSR NONE
 #==========================================================
+# HomePath="/Users/rmr"
+[ -d $HOME/Dropbox ] \
+	&& export HomePath="$HOME/Dropbox" \
+	|| export HomePath="$HOME"
+
 export PS1='\w/$ '
 export DAQ="ROSR"
-#export DAQPATH="$HOME/Dropbox/swmain/apps"
 [ -d $HOME/Dropbox ] \
 	&& export DAQPATH="$HOME/Dropbox/swmain/apps" \
 	|| export DAQPATH="$HOME/swmain/apps"
