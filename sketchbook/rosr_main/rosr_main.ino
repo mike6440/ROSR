@@ -8,6 +8,9 @@
 #define EDITDATE    "20170727T003222Z" //"160812" spurs2
 const byte  EEPROM_ID = 16;  //!! change if you fool around with eeprom variables
 
+#define rosr4
+
+
 //v23 - ComputeSSST had issues. No more!
 //v24 - Added calibrated therm coefs for ROSR2
 //v25 - ek shutter control, and menu
@@ -238,8 +241,9 @@ const double    default_Rref[7] = {
 //==========================
 // !! T-rad tables
 //==========================
+#ifdef rosr4
 #include "t-rad_table4.h"
-
+#endif
 
 const double default_Acorr = 1;
 const double default_Offset = 0;
@@ -249,10 +253,10 @@ const float default_scan_tolerance = .1; // SCAN_TOLERANCE
 const int default_open_params[3] = {50,2000,200};   //milliamps,millisecs,millisecs 
 const int default_close_params[3]={50,1400,200};
 
-
 //!! BB thermistor coefs 
+#ifdef rosr4
 #include "Tcal_rosr4.h"
-
+#endif
 
 struct eeprom {
   byte id, Nbb, Nsky, Nocean, ShutterFlag, CalFlag;
@@ -320,6 +324,11 @@ double ComputeSSST( double, double, double, double, double, double, double, doub
 
 //============================================================================
 void setup() {
+
+#ifdef rosr4
+	Serial.println('rosr4 compile');
+#endif
+
   // USER Serial setup
   Serial.begin(9600);
   // ENCODER serial setup
@@ -2457,9 +2466,11 @@ void PrintProgramID(void)
 
 
 // !! s/r float ReadEncoder (float ref)
-// #include "readencoder1.h" //rosr1 and rosr2
+#ifdef rosr1
+#include "readencoder1.h" //rosr1 and rosr2
+#else
 #include "readencoder2.h" //rosr3, 4 and above
-
+#endif
 //============================================================================
 void        ReadKT15(double *irrad, double *irtemp)
 {

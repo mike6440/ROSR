@@ -6,7 +6,7 @@
 log_user 0
 # IP number and port number
 set ip [exec getsetupinfo "setup/su.txt" "IBOOT IP"]
-
+send_user "Boot IP $ip\n";
 
 # START PROCESS -- KERMIT FOR MODEM
 spawn telnet $ip
