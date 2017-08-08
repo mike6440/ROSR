@@ -3,13 +3,11 @@
 // Therefore: there is ample space for more thermistor calibrations. I'm not sure about local
 //variable space.
 
-#define PROGRAMNAME "rosr_main_v30_r4"
-#define VERSION     "30"//
-#define EDITDATE    "20170727T003222Z" //"160812" spurs2
+// !! ROSRnumber is in the programname 
+#define PROGRAMNAME "rosr_main_v30_r2"
+#define VERSION     "31"//
+#define EDITDATE    "20170808T234050Z" //"160812" spurs2
 const byte  EEPROM_ID = 16;  //!! change if you fool around with eeprom variables
-
-#define rosr4
-
 
 //v23 - ComputeSSST had issues. No more!
 //v24 - Added calibrated therm coefs for ROSR2
@@ -241,9 +239,8 @@ const double    default_Rref[7] = {
 //==========================
 // !! T-rad tables
 //==========================
-#ifdef rosr4
-#include "t-rad_table4.h"
-#endif
+#include "t-rad_table2.h"
+// #include "t-rad_table4.h"
 
 const double default_Acorr = 1;
 const double default_Offset = 0;
@@ -254,9 +251,8 @@ const int default_open_params[3] = {50,2000,200};   //milliamps,millisecs,millis
 const int default_close_params[3]={50,1400,200};
 
 //!! BB thermistor coefs 
-#ifdef rosr4
-#include "Tcal_rosr4.h"
-#endif
+#include "Tcal_rosr2.h"
+// #include "Tcal_rosr4.h"
 
 struct eeprom {
   byte id, Nbb, Nsky, Nocean, ShutterFlag, CalFlag;
@@ -2466,11 +2462,9 @@ void PrintProgramID(void)
 
 
 // !! s/r float ReadEncoder (float ref)
-#ifdef rosr1
 #include "readencoder1.h" //rosr1 and rosr2
-#else
-#include "readencoder2.h" //rosr3, 4 and above
-#endif
+// #include "readencoder2.h" //rosr3, 4 and above
+
 //============================================================================
 void        ReadKT15(double *irrad, double *irtemp)
 {

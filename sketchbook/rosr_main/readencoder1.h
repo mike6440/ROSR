@@ -26,20 +26,20 @@ float ReadEncoder (float ref)
             if (i==0 && Serial1.available()) {
                 e[0]=Serial1.read();
                 if (e[0]==EncCmd){
-                    Serial.print("0-");Serial.print(e[0],HEX);
+                    //Serial.print("0-");Serial.print(e[0],HEX);
                     i++;
                 }
             }
             	//i=1 First byte
             else if (Serial1.available() && i==1) {
                 e[1]=Serial1.read();
-                Serial.print("  1-");Serial.print(e[1],HEX);
+                //Serial.print("  1-");Serial.print(e[1],HEX);
                 i++;
             }
             	//i=2, second byte
             else if (Serial1.available() && i==2) {
                 e[2]=Serial1.read();
-                Serial.print("  2-");Serial.println(e[2],HEX);
+                //Serial.print("  2-");Serial.println(e[2],HEX);
                 i++;
             }
             	//timeout
@@ -52,7 +52,7 @@ float ReadEncoder (float ref)
         if( i >= 2 ) {
             	//This next calc assumes an encoder setting of 14400 resolution
             angle = (float)(e[1]*256+e[2]) / 40.0; 
-            Serial.print("angle=");Serial.print(angle,2);
+            //Serial.print("angle=");Serial.print(angle,2);
             if(angle>=0 && angle <=360){
                 count=100;
             }
@@ -64,7 +64,7 @@ float ReadEncoder (float ref)
     }
     Serial.print("angle = ");Serial.println(angle,3); 
     if ( angle != (float)MISSING ) {
-        Serial.print("ref = ");Serial.println(ref,3);
+        //Serial.print("ref = ");Serial.println(ref,3);
         angle += ref;
         if ( angle >= 360 ) angle -= 360;
         if ( angle < 0 ) angle += 360;
