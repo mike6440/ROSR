@@ -9,7 +9,11 @@
 	&& export HomePath="$HOME/Dropbox" \
 	|| export HomePath="$HOME"
 
+    # PERL LIBRARY =============================
+export MYLIB="$HomePath/swmain/perl"
+
 export PS1='\w/$ '
+
 export DAQ="ROSR"
 [ -d $HOME/Dropbox ] \
 	&& export DAQPATH="$HOME/Dropbox/swmain/apps" \

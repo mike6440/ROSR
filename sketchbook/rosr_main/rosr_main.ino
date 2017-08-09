@@ -6,7 +6,7 @@
 // !! ROSRnumber is in the programname 
 #define PROGRAMNAME "rosr_main_v30_r2"
 #define VERSION     "31"//
-#define EDITDATE    "20170808T234050Z" //"160812" spurs2
+#define EDITDATE    "20170809T012648Z" //"160812" spurs2
 const byte  EEPROM_ID = 16;  //!! change if you fool around with eeprom variables
 
 //v23 - ComputeSSST had issues. No more!
@@ -247,8 +247,8 @@ const double default_Offset = 0;
 const double default_ebb = 1;
 const float default_scan_tolerance = .1; // SCAN_TOLERANCE 
 // shutter open/close parameters
-const int default_open_params[3] = {50,2000,200};   //milliamps,millisecs,millisecs 
-const int default_close_params[3]={50,1400,200};
+const int default_open_params[3] = {50,1000,100};   //milliamps,millisecs,millisecs 
+const int default_close_params[3]={50,1000,100};
 
 //!! BB thermistor coefs 
 #include "Tcal_rosr2.h"

@@ -62,7 +62,7 @@ float ReadEncoder (float ref)
             count++; 
         }
     }
-    Serial.print("angle = ");Serial.println(angle,3); 
+    //Serial.print("angle = ");Serial.println(angle,3); 
     if ( angle != (float)MISSING ) {
         //Serial.print("ref = ");Serial.println(ref,3);
         angle += ref;
