@@ -1,0 +1,131 @@
+THIS FILE: su_mossbay_rosr2.txt
+Editdate: 160520
+ROSR SERIAL NUMBER: 2
+
+	rosr2cal_151117:  0.8789 0.1656
+SSST SLOPE : 0.8789
+SSST OFFSET: 0.1656
+KT15 SERIAL NUMBER: 11733
+KT15 FILTER FILE: kt15/kt1585_sn11733.txt
+
+SCAN VIEW ANGLES: 265 325 45 135
+
+		DATA FILES ---------------------
+RT OUT PATH: data
+NO DATA WAIT TIME: 3600
+
+SERIAL HUB URL: 192.168.255.1
+IBOOT IP: 192.168.255.2
+PC IP: 192.168.255.10
+	#TEST IP: 192.168.255.12
+
+		ROSR -- 10001, simulate=0
+ROSR HUB COM NUMBER: 10001
+		GPS -- 10003, Fixed=-1, simulate=0
+GPS HUB COM NUMBER: 10003
+		MODEM -- 10004, Not connected=-1, simulate=0
+SBD HUB COM NUMBER: -1
+
+     KAIMEI SOCKET SERVER 10.198.5.1 4025
+TELNET SERVER IP: 0
+	TELNET SERVER IP: 192.168.255.10
+TELNET SERVER PORT: 
+
+	========================
+		HUB ADDRESS AND PORTS
+		PDS default: 192.168.255.1 (sometimes ...3)
+	========================
+SERIAL LINE: /dev/tty.PL2303-001013FA
+SERIAL SPEED: 9600
+
+
+	# CALIBRATION
+		#CAL EMIS: 0 = field use, compute e from angle,  ~=1 = calibration mode
+CALIBRATION EMISSIVITY: 0
+CAL SSST SLOPE: 1
+CAL SSST OFFSET: 0
+CAL SCAN VIEW ANGLES: 265 325 45 90
+		# INDEX -- (0,1,...) index.  Use for calibration case
+CALIBRATION VIEW POSITION : 3
+
+	=======================
+		BLACK BODY
+	=======================
+BLACK BODY EMISSIVITY : 1.0
+		## set Vref to 0 and the values from the 2*adc12-7 will be used.
+BB THERM VREF: 0
+BB TEMP Ref R: 10000
+		Resistances from testing with precision resistances. See notes 090909.
+BB RESISTORS: 10000, 10000, 10000, 10000, 10000, 10000
+		# Rref for wintemp and tt8temp
+APPERATURE THERM REF RESISTOR: 10000
+REF VOLTAGE FOR 12 BIT ADC: 4.0928
+		# Rref2 for four ysi apperature therms
+		## ROSR-01: 9995 9984 9997 9997
+		## ROSR-04: 10000 10000 10000 10000
+APPERATURE THERMS REF RESISTANCES: 10000 10000 10000 10000
+
+	========================
+		EXPERIMENT INFO
+	========================
+EXPERIMENT NAME: Qing Mossbay
+GEOGRAPHIC LOCATION: Moss Bay CA
+		two characters for a ship code
+PLATFORM NAME: RV JOHN MARTIN
+LOCATION ON PLATFORM: BRIDGE ROOF
+HEIGHT ABOVE SEA LEVEL m: 6
+SHIP TYPE: RV
+SHIP NAME: RV JOHN MARTIN
+CRUISE NAME: --
+	port or starboard
+PLATFORM SIDE: PORT
+
+	========================
+		QUALITY ERROR CHECK
+	========================
+MINIMUM EXPECTED LATITUDE: 5
+MAXIMUM EXPECTED LATITUDE: 90
+MINIMUM EXPECTED LONGITUDE: -180
+MAXIMUM EXPECTED LONGITUDE: 360
+MISSING VALUE: -999
+
+
+	========================
+		COMMENTS/LOG
+	========================
+COMMENTS:
+ ROSR2
+END
+
+	========================
+		GPS SETUP
+		NOTE: Use the Garmin-supplied Windows program to set the 17x for
+		9600 baud, 1-sec output, GPRMC only string.
+	========================
+##GPS MODEL NUMBER: GPS17X
+##GPS MIN SAMPLES FOR AVG: 3
+GPS AVERAGING TIME: 120
+	========================
+		FIXED POSITION -- NO GPS
+		(hub port=-1)
+	========================
+	# MOSS BAY
+GPS FIXED LATITUDE: 35
+GPS FIXED LONGITUDE: -122
+		Magnetic variation, + = East of true
+GPS FIXED VARIATION: 18.1
+
+	========================
+		ROSR
+	========================
+		Verbose mode prints out test messages and data.  VERBOSE = 1, NOT VERBOSE = 0
+		avgrosr.pl makes a file called data/tmp.txt.
+VERBOSE MODE: 0
+ROSR AVERAGING TIME (sec): 600
+SEA EMISSIVITY: 0.9870975
+APERATURE EMISSIVITY : 0.95
+MIN SAMPLES FOR AVG: 2
+	#SELF-HEAT FLAG: 1
+	========================
+		END SETUP FILE
+	========================
