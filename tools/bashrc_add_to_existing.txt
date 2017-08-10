@@ -30,8 +30,12 @@ echo "prompt k>>" > ~/.kermrc
 	&& echo "source $HOME/Dropbox/swmain/vim/myvimrc" > $HOME/.vimrc \
 	|| echo "source $HOME/swmain/vim/myvimrc" > $HOME/.vimrc
 
-	# color 
-export LSCOLORS="cxfxcxdxfxegedabagacad"
+	# color for mac os x
+    #export LSCOLORS="cxfxcxdxfxegedabagacad"
+    # color for linux
+LS_COLORS=$LS_COLORS:'di=0;91:fi=1;33:ex=0;92:' ; export LS_COLORS
+
+    # handy alias
 alias ls="ls -aG"
 alias ll="ls -laG"
 
