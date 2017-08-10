@@ -2,8 +2,10 @@
 #edit 20170726T035408Z
 
 #==========================================================
-    # DEFINE THE DAQ SYSTEM: ROSR NONE
+    # DEFINE THE DAQ SYSTEM: ROSR or NONE
 #==========================================================
+export DAQ="ROSR"
+
 # HomePath="/Users/rmr"
 [ -d $HOME/Dropbox ] \
 	&& export HomePath="$HOME/Dropbox" \
@@ -14,12 +16,12 @@ export MYLIB="$HomePath/swmain/perl"
 
 export PS1='\w/$ '
 
-export DAQ="ROSR"
+	# DAQPATH
 [ -d $HOME/Dropbox ] \
 	&& export DAQPATH="$HOME/Dropbox/swmain/apps" \
 	|| export DAQPATH="$HOME/swmain/apps"
 
-    # KERMIT RC =====================
+    # KERMRC
 echo "prompt k>>" > ~/.kermrc
 
    # VIMRC
@@ -28,12 +30,12 @@ echo "prompt k>>" > ~/.kermrc
 	&& echo "source $HOME/Dropbox/swmain/vim/myvimrc" > $HOME/.vimrc \
 	|| echo "source $HOME/swmain/vim/myvimrc" > $HOME/.vimrc
 
-# color 
+	# color 
 export LSCOLORS="cxfxcxdxfxegedabagacad"
 alias ls="ls -aG"
 alias ll="ls -laG"
 
-# ROSR
+	# BASHRC_ROSR
 if expr $DAQ = "ROSR" > /dev/null ; then
 test -f $DAQPATH/ROSR/sw/tools/bashrc_rosr.txt && . $_
 fi
