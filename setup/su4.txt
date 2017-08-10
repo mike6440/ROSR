@@ -1,4 +1,4 @@
-edit 170712
+Edit 170712
 THIS FILE: su4.txt
 
 	DATA FILES ---------------------
