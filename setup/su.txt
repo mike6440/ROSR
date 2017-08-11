@@ -1,20 +1,17 @@
-Edit 170712
-THIS FILE: su4.txt
+THIS FILE: su_mossbay_rosr2.txt
+Editdate: 160520
+ROSR SERIAL NUMBER: 2
 
-	DATA FILES ---------------------
-RT OUT PATH: data
-
-ROSR SERIAL NUMBER: 4
-	rosr4cal: tbd
-SSST SLOPE : 1
-SSST OFFSET: 0
-KT15 SERIAL NUMBER: 12228
-
-!! need cal file for this kt15
-KT15 FILTER FILE: kt15/kt1585_sn11935.txt
+	rosr2cal_151117:  0.8789 0.1656
+SSST SLOPE : 0.8789
+SSST OFFSET: 0.1656
+KT15 SERIAL NUMBER: 11733
+KT15 FILTER FILE: kt15/kt1585_sn11733.txt
 
 SCAN VIEW ANGLES: 265 325 45 135
 
+		DATA FILES ---------------------
+RT OUT PATH: data
 NO DATA WAIT TIME: 3600
 
 SERIAL HUB URL: 192.168.255.1
@@ -22,11 +19,11 @@ IBOOT IP: 192.168.255.2
 PC IP: 192.168.255.10
 	#TEST IP: 192.168.255.12
 
-	ROSR -- 10001, simulate=0
+		ROSR -- 10001, simulate=0
 ROSR HUB COM NUMBER: 10001
-	GPS -- 10003, Fixed=-1, simulate=0
+		GPS -- 10003, Fixed=-1, simulate=0
 GPS HUB COM NUMBER: 10003
-	MODEM -- 10004, Not connected=-1, simulate=0
+		MODEM -- 10004, Not connected=-1, simulate=0
 SBD HUB COM NUMBER: -1
 
      KAIMEI SOCKET SERVER 10.198.5.1 4025
@@ -43,7 +40,7 @@ SERIAL SPEED: 9600
 
 
 	# CALIBRATION
-	#CAL EMIS: 0 = field use, compute e from angle,  ~=1 = calibration mode
+		#CAL EMIS: 0 = field use, compute e from angle,  ~=1 = calibration mode
 CALIBRATION EMISSIVITY: 0
 CAL SSST SLOPE: 1
 CAL SSST OFFSET: 0
@@ -58,7 +55,6 @@ BLACK BODY EMISSIVITY : 1.0
 		## set Vref to 0 and the values from the 2*adc12-7 will be used.
 BB THERM VREF: 0
 BB TEMP Ref R: 10000
-!!! calibration coefs
 		Resistances from testing with precision resistances. See notes 090909.
 BB RESISTORS: 10000, 10000, 10000, 10000, 10000, 10000
 		# Rref for wintemp and tt8temp
@@ -72,14 +68,14 @@ APPERATURE THERMS REF RESISTANCES: 10000 10000 10000 10000
 	========================
 		EXPERIMENT INFO
 	========================
-EXPERIMENT NAME: burn in and test
-GEOGRAPHIC LOCATION: Seattle
+EXPERIMENT NAME: Qing Mossbay
+GEOGRAPHIC LOCATION: Casperwest
 		two characters for a ship code
-PLATFORM NAME: tbd
-LOCATION ON PLATFORM: tbd
-HEIGHT ABOVE SEA LEVEL m: 6
+PLATFORM NAME: RV
+LOCATION ON PLATFORM: ??
+HEIGHT ABOVE SEA LEVEL m: ??
 SHIP TYPE: RV
-SHIP NAME: JOHN MARTIN
+SHIP NAME:  ??
 CRUISE NAME: --
 	port or starboard
 PLATFORM SIDE: PORT
@@ -98,7 +94,7 @@ MISSING VALUE: -999
 		COMMENTS/LOG
 	========================
 COMMENTS:
- ROSR4 initial setup
+ ROSR2
 END
 
 	========================
