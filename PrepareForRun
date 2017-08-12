@@ -71,11 +71,6 @@ print"NEW SETUP FILE = $fsu\n";
 `cp $ENV{SETUPFILE} $fsu`;
 
 
-#========================
-# MODIFY THE SETUP FILE 
-#  THIS FILE = $fsu
-#perl -pi -e 's/: (.+)/: MIkes test/g if /^EXPERIMENT NAME/' tmp
-#========================
 # HEADER LINE
 $cmd=sprintf "perl -pi -e 's!: (.+)!: %s!g if /^THIS FILE/' %s", $fsu, $fsu;
 #print"\ncmd = $cmd\n";
@@ -86,9 +81,7 @@ $cmd=sprintf "perl -pi -e 's!: (.+)!: %s!g if /^RT OUT PATH/' %s", $fndata, $fsu
 #print"\ncmd = $cmd\n";
 system $cmd;
 
-printf"
-======= READY, %s==========
-", dtstr($dt0,'iso');
+printf"======= READY, %s==========\n", dtstr($dt0,'iso');
 
 # We want to save this to export it from the shell.
 open(F,'>tmp'); print F "$fsu\n"; close F;

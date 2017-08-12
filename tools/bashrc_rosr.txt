@@ -123,5 +123,8 @@ echo "prompt k>>" > ~/.kermrc
 alias rosrsbd="tail -f /tmp/sbd 2>/dev/null"
 alias sbdlog="tail -f ../data/sbdlog"
 
+    # alias
+alias daqlog="less $DAQDATAFOLDER/daqlog"
+
 cd $DAQSWFOLDER
 

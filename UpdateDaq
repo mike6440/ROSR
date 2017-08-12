@@ -11,19 +11,7 @@
 #14 * * * * $DAQSWFOLDER/UpdateDaq >> $DAQDATAFOLDER/daqlog
 			
 
-version="v10 141025"
-#export DAQFOLDER="$HOME/swmain/apps/ISAR3"
-#export DAQSWFOLDER=$DAQFOLDER"/sw"
-#export DAQLIB=$DAQFOLDER"/tools"
-#export MYLIB=$DAQLIB
-#export DAQDATAFOLDER=$DAQFOLDER"/data"
-#export SETUPFILE=$DAQFOLDER"/sw/setup/su.txt"
-#echo $PATH | grep -q -s $DAQSWFOLDER
-#if [ $? -eq 1 ] ; then
-#    PATH=$PATH\:$DAQSWFOLDER\:.
-#    export PATH
-#fi
-
+version="UpdateDaq v11 170812"
 cd $DAQSWFOLDER
 
 echo $version" ====================" >> $DAQDATAFOLDER/daqlog;
@@ -46,13 +34,11 @@ if [ $chk -eq 0 ] > /dev/null ; then
 	$DAQSWFOLDER/Cleanuprosr >> $DAQDATAFOLDER/daqlog
 		# STARTPRP
 	$DAQSWFOLDER/PrepareForRun >> $DAQDATAFOLDER/daqlog
-	screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_isar.txt
+	screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_rosr.txt
 		# START PROCESSES
 	screen -S ROSR -p 1 -X stuff "bash$(printf \\r)"
 	screen -S ROSR -p 1 -X stuff "G$(printf \\r)"
 	screen -S ROSR -p 2 -X stuff "GG$(printf \\r)"
-
-	#echo UpdateDaq, reboot exit >> $DAQDATAFOLDER/daqlog
 	exit 1;
 fi
 exit 0;
