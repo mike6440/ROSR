@@ -46,7 +46,7 @@ if [ $chk -eq 0 ] > /dev/null ; then
 	$DAQSWFOLDER/Cleanuprosr >> $DAQDATAFOLDER/daqlog
 		# STARTPRP
 	$DAQSWFOLDER/PrepareForRun >> $DAQDATAFOLDER/daqlog
-	screen -S ROSR -d -m -c $DAQFOLDER/tools/screenrc_isar.txt
+	screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_isar.txt
 		# START PROCESSES
 	screen -S ROSR -p 1 -X stuff "bash$(printf \\r)"
 	screen -S ROSR -p 1 -X stuff "G$(printf \\r)"
