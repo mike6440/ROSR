@@ -44,4 +44,9 @@ if expr $DAQ = "ROSR" > /dev/null ; then
 test -f $DAQPATH/ROSR/sw/tools/bashrc_rosr.txt && . $_
 fi
 
+    # BATTERY
+alias Bat='upower -i /org/freedesktop/UPower/devices/battery_BAT0 | \
+grep -E "state|percentage"
+
+
 #==== END INSERTED TEXT =======================================
