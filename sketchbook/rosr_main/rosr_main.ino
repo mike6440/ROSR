@@ -3,12 +3,8 @@
 // Therefore: there is ample space for more thermistor calibrations. I'm not sure about local
 //variable space.
 
-// !! ROSRnumber is in the programname 
-#define PROGRAMNAME "rosr_main_v30_r2"
-#define VERSION     "31"//
-#define EDITDATE    "20170809T012648Z" //"160812" spurs2
-const byte  EEPROM_ID = 16;  //!! change if you fool around with eeprom variables
-
+#define VERSION     "31"
+#define EDITDATE    "20170816T182035Z" 
 //v23 - ComputeSSST had issues. No more!
 //v24 - Added calibrated therm coefs for ROSR2
 //v25 - ek shutter control, and menu
@@ -21,6 +17,7 @@ const byte  EEPROM_ID = 16;  //!! change if you fool around with eeprom variable
 //		Better menu items. 'h','k','p','r' all loops
 //		remove eeprom from main menu
 //		shutter open/close parameters in eeprom
+//v31 - 
 //		use #include to customize for each rosr
 
 //NOTE ====== INCLUDES
@@ -28,7 +25,6 @@ const byte  EEPROM_ID = 16;  //!! change if you fool around with eeprom variable
 #include <math.h>
 #include <SoftwareSerial.h>
 #include <EEPROM.h>
-
 //Added for the ADS
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
@@ -36,6 +32,14 @@ Adafruit_ADS1115 ads0;  // ad0, u13, construct an ads1115 at address 0x48
 Adafruit_ADS1115 ads1(0x49);    // ad1, u16, construct an ads1115 at address 0x49
 Adafruit_ADS1115 ads2(0x4A);    // ad2, u14, construct an ads1115 at address 0x4A
 //Adafruit_ADS1115 ads3(0x4B);  // ad3, u17, spare,
+
+//==========================
+// !! CUSTOMIZE FOR ROSR NUMBER
+//==========================
+#include "header2.h"  // programname, version, eeprom_id
+#include "t-rad_table2.h"	// rad<->temp parameters
+#include "Tcal_rosr2.h"  ////!! BB thermistor coefs 
+
 
 //NOTE ====== DIGITAL LINES
 const int Serial4Tx = 2;    // Testing KT15 Tx;  TILT TX
@@ -236,12 +240,6 @@ const double    default_Rref[7] = {
   10000, 10000, 10000, 10000, 10000, 10000, 10000
 }; // BB11, BB12, BB21, BB22, Tktx, Twin, Tpwr
 
-//==========================
-// !! T-rad tables
-//==========================
-#include "t-rad_table2.h"
-// #include "t-rad_table4.h"
-
 const double default_Acorr = 1;
 const double default_Offset = 0;
 const double default_ebb = 1;
@@ -249,10 +247,6 @@ const float default_scan_tolerance = .1; // SCAN_TOLERANCE
 // shutter open/close parameters
 const int default_open_params[3] = {50,1000,100};   //milliamps,millisecs,millisecs 
 const int default_close_params[3]={50,1000,100};
-
-//!! BB thermistor coefs 
-#include "Tcal_rosr2.h"
-// #include "Tcal_rosr4.h"
 
 struct eeprom {
   byte id, Nbb, Nsky, Nocean, ShutterFlag, CalFlag;
