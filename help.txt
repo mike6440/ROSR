@@ -4,6 +4,7 @@
 
     #---- "sw" folder
 gtdaq                                       ->  cd to "~/swmain/apps/ROSR/sw/$ "
+Bat                                         ->  laptop battery status
 
     #---- TIME
 Date                                        ->  2015 10 19 18 03 57 Z
