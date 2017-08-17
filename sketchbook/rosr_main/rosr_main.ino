@@ -36,9 +36,9 @@ Adafruit_ADS1115 ads2(0x4A);    // ad2, u14, construct an ads1115 at address 0x4
 //==========================
 // !! CUSTOMIZE FOR ROSR NUMBER
 //==========================
-#include "header2.h"  // programname, version, eeprom_id
-#include "t-rad_table2.h"	// rad<->temp parameters
-#include "Tcal_rosr2.h"  ////!! BB thermistor coefs 
+#include "header3.h"  // programname, version, eeprom_id
+#include "t-rad_table3.h"	// rad<->temp parameters
+#include "Tcal_rosr3.h"  ////!! BB thermistor coefs 
 
 
 //NOTE ====== DIGITAL LINES
@@ -245,8 +245,8 @@ const double default_Offset = 0;
 const double default_ebb = 1;
 const float default_scan_tolerance = .1; // SCAN_TOLERANCE 
 // shutter open/close parameters
-const int default_open_params[3] = {50,1000,100};   //milliamps,millisecs,millisecs 
-const int default_close_params[3]={50,1000,100};
+const int default_open_params[3] = {50,900,100};   //milliamps,millisecs,millisecs 
+const int default_close_params[3]={50,900,100};
 
 struct eeprom {
   byte id, Nbb, Nsky, Nocean, ShutterFlag, CalFlag;
@@ -2456,8 +2456,8 @@ void PrintProgramID(void)
 
 
 // !! s/r float ReadEncoder (float ref)
-#include "readencoder1.h" //rosr1 and rosr2
-// #include "readencoder2.h" //rosr3, 4 and above
+//#include "readencoder1.h" //rosr1 and rosr2
+#include "readencoder2.h" //rosr3, 4 and above
 
 //============================================================================
 void        ReadKT15(double *irrad, double *irtemp)
