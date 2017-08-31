@@ -46,7 +46,7 @@ fi
 
     # BATTERY
 alias Bat='upower -i /org/freedesktop/UPower/devices/battery_BAT0 | \
-grep -E "state|percentage"
+grep -E "state|percentage"'
 
 
 #==== END INSERTED TEXT =======================================
