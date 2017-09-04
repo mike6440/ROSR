@@ -3,8 +3,6 @@
 // Therefore: there is ample space for more thermistor calibrations. I'm not sure about local
 //variable space.
 
-#define VERSION     "31"
-#define EDITDATE    "20170816T182035Z" 
 //v23 - ComputeSSST had issues. No more!
 //v24 - Added calibrated therm coefs for ROSR2
 //v25 - ek shutter control, and menu
@@ -35,10 +33,11 @@ Adafruit_ADS1115 ads2(0x4A);    // ad2, u14, construct an ads1115 at address 0x4
 
 //==========================
 // !! CUSTOMIZE FOR ROSR NUMBER
+// 2a means with swapped bb's
 //==========================
-#include "header3.h"  // programname, version, eeprom_id
-#include "t-rad_table3.h"	// rad<->temp parameters
-#include "Tcal_rosr3.h"  ////!! BB thermistor coefs 
+#include "header2a.h"  // programname, version, eeprom_id
+#include "t-rad_table2.h"	// rad<->temp parameters
+#include "Tcal_rosr2a.h"  ////!! BB thermistor coefs 
 
 
 //NOTE ====== DIGITAL LINES
@@ -2456,8 +2455,8 @@ void PrintProgramID(void)
 
 
 // !! s/r float ReadEncoder (float ref)
-//#include "readencoder1.h" //rosr1 and rosr2
-#include "readencoder2.h" //rosr3, 4 and above
+#include "readencoder1.h" //rosr1 and rosr2
+//#include "readencoder2.h" //rosr3, 4 and above
 
 //============================================================================
 void        ReadKT15(double *irrad, double *irtemp)

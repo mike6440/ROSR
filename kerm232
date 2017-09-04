@@ -57,13 +57,15 @@ expect ">>"
 ## CARRIER WATCH
 send "set carrier-watch off\r"
 expect ">>"
+## LOG
+send "log session ../data/capture.txt append\r"
+expect ">>"
 ## CONNECT 
 send "connect\r"
 expect {
 	"Conn*---"  {send_user "TTY CONNECTED\n"}
 	timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
 }
-
 
 set spawn_id $ISAR
 interact

@@ -1,7 +1,10 @@
 #!/usr/bin/perl -X
+# edit 170901
 
-@w = `ls /dev/tty*PL* 2>/dev/null`;
-@x = `ls /dev/tty*USB* 2>/dev/null`;
+@w = `find   /dev -iname tty*usb* -maxdepth 1 -print`;
+@x = `find   /dev -iname tty*PL* -maxdepth 1 -print`;
+#@x = `ls /dev/tty*PL* 2>/dev/null`;
+#@x = `ls /dev/tty*USB* 2>/dev/null`;
 @w=(@w,@x);
 if ( $#w < 0 ){exit 1}
 chomp($w[0]);
