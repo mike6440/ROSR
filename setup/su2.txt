@@ -1,14 +1,14 @@
-	#Edit 20170816T214157Z
-	#THIS FILE: su2.txt
+	#Edit 20170910T181716Z
+	#THIS FILE: CasperWest
 COMMENTS:
- ROSR2 setup for dock test
+ ROSR2 setup for CasperWest
 END
 	# DATA FILES
 RT OUT PATH: data
 ROSR SERIAL NUMBER: 2
 	# rosr2cal
-SSST SLOPE : 0.8789
-SSST OFFSET: 0.1656
+SSST SLOPE : 0.8984
+SSST OFFSET: 0.0626
 KT15 SERIAL NUMBER: 11733
 KT15 FILTER FILE: kt15/kt1585_sn11733.txt
 SCAN VIEW ANGLES: 265 325 45 135
@@ -29,17 +29,17 @@ TELNET SERVER PORT:
 	# ========================
 	#	EXPERIMENT INFO
 	# ========================
-EXPERIMENT NAME: UW dock test
+EXPERIMENT NAME: CasperWest
 GEOGRAPHIC LOCATION: Seattle
 		two characters for a ship code
-PLATFORM NAME: tbd
+PLATFORM NAME: FLIP
 LOCATION ON PLATFORM: tbd
-HEIGHT ABOVE SEA LEVEL m: 3
+HEIGHT ABOVE SEA LEVEL m: tbd
 SHIP TYPE: RV
-SHIP NAME: na
-CRUISE NAME: --
+SHIP NAME: FLIP
+CRUISE NAME: CasperWest
 	port or starboard
-PLATFORM SIDE: PORT
+PLATFORM SIDE: tbd
 	# ========================
 	# CALIBRATION
 	# ========================
@@ -81,11 +81,11 @@ GPS AVERAGING TIME: 120
 		FIXED POSITION -- NO GPS
 		(hub port=-1)
 	========================
-	# MOSS BAY
-GPS FIXED LATITUDE: 35
-GPS FIXED LONGITUDE: -122
+	# SAN DIEGO
+GPS FIXED LATITUDE: 32.71515
+GPS FIXED LONGITUDE: -117.21534
 		Magnetic variation, + = East of true
-GPS FIXED VARIATION: 18.1
+GPS FIXED VARIATION: 12.5
 	========================
 		ROSR
 	========================
