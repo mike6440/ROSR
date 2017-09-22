@@ -1,52 +1,46 @@
     ## edit 170810
     "Help" to read.   'q' to end.
-    "vim help.txt" to edit.  "<esc>:wq" to quit
 
     #---- "sw" folder
 gtdaq                                       ->  cd to "~/swmain/apps/ROSR/sw/$ "
 Bat                                         ->  laptop battery status
-
     #---- TIME
 Date                                        ->  2015 10 19 18 03 57 Z
 SetDate <password> yyyy MM dd hh mm ss      ->  sets the PC clock. UTC!
 example:
   SetDate r...r 2017 08 20 17 23 30<enter>
-
-    #--- START OPERATION
+    #--- START
 booton                                      ->  Power ON, wait two minutes.
+   note: allow 10 min after booton
 Startrosr                                   ->  Begin data collection
 rosrraw                                     ->  Confirm data flow  (^c to end)
-
-    #---- STOP OPERATION 
+    #---- STOP
 Stoprosr                                    ->  End data collection
 RosrShutdown                                -> Close shutter and power off.
-
     #---- ARCHIVE
 ArchiveRosr                                 -> Makes archive /home/rmr/rosrdata
 ClearRosrData                               -> Clears the data folder. (y or n)
-
     #---- POWER
 booton                                      ->  Power ON, ROSR begins operation in two minutes.
 bootoff                                     ->  Power OFF. See RosrShutdown.
 bootstatus                                  ->  current power status, ON or OFF.
-
     #---- DIRECT CONNECT
 P                                           -> direct connect to GPS
 I                                           -> direct connect to ROSR, "^\ q" to end
-  T                                         -> ROSR terminal mode
+^\ q                                        -> end direct connect. Hold down <Crtl> and '\'. Release and press 'q'. 
+    #---- MENU
+  T                                         -> ROSR test  '>' prompt
     ?                                       -> terminal menu
     fc                                      -> close shutter
     fo                                      -> open shutter
     g                                       -> Go. End terminal session. Start operation.
-^\ q                                        -> end direct connect. Hold down <Crtl> and '\'. Release and press 'q'. 
-
+   note jumps to operation automatically after 1 min.
     #---- VIEW DATA
 rosrsbd                                     ->  show WISBD packets, 10-min, ^c to end
 rosrraw                                     ->  show $WIROS raw data, 280 sec, ^c to end
 rosravg                                     ->  show PC avg file, 10 min averages (5,15,25,...,55), ^c to end
 rosrav                                      ->  show $WIRAV packets, 280 sec, ^c to end
 rosrst                                      ->  show $WIRST packets, 280 sec, ^c to end
-
     #-----------------------------
     #---- ROSR OUTPUT PACKETS 
     #-----------------------------

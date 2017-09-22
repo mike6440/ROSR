@@ -8,7 +8,7 @@
 //v25 - ek shutter control, and menu
 //v26 - Calibration edits, e_sea
 //v27 - New 485 circuit, pcb v2, for the encoder. See ReadEncoder()
-//v28 - See !! Revise thermistor coefficient subroutine for rosr3. New BB table for kt15.
+//v28 - Revise thermistor coefficient subroutine for rosr3. New BB table for kt15.
 //v29 - TMAX is too low. change from 50 to 70.  Add pitch_correct and roll_correct to eeprom
 //v30 - ready for improvement. 1. Changed ReadEncoder wait to 1000 microsecs from 900
 //		Reorganized how thermister coefs are handled. review '!!' notes.
@@ -17,6 +17,8 @@
 //		shutter open/close parameters in eeprom
 //v31 - 
 //		use #include to customize for each rosr
+//v32 - reduce the menu dead time from 600 sec to 120 sec
+//      But at power on it begins immediately.
 
 //NOTE ====== INCLUDES
 #include <string.h>
@@ -35,9 +37,9 @@ Adafruit_ADS1115 ads2(0x4A);    // ad2, u14, construct an ads1115 at address 0x4
 // !! CUSTOMIZE FOR ROSR NUMBER
 // 2a means with swapped bb's
 //==========================
-#include "header2a.h"  // programname, version, eeprom_id
-#include "t-rad_table2.h"	// rad<->temp parameters
-#include "Tcal_rosr2a.h"  ////!! BB thermistor coefs 
+#include "header4.h"  // programname, version, eeprom_id
+#include "t-rad_table4.h"	// rad<->temp parameters
+#include "Tcal_rosr4.h"  ////!! BB thermistor coefs 
 
 
 //NOTE ====== DIGITAL LINES
@@ -449,7 +451,7 @@ void loop() {
   Serial.setTimeout(1000); // 1 sec wait for a key entry
   //test Serial.println("Enter 'T' or 't' to go directly to test mode.");
   i = Serial.readBytes(buf, 1); // normal operation -- wait for key entry
-  if ( i > 0 || istart == 1) {
+  if ( i > 0 ) {  //|| istart == 1 //v31
     if ( buf[0] == 't' || buf[0] == 'T' || istart == 1) {
       menustart = millis();
       istart = 0; // normal operation
@@ -457,7 +459,7 @@ void loop() {
       Serial.setTimeout(10000); // 10 sec wait for a key entry
       //Serial.println("TEST mode.");
       while ( RunMode == TEST ) {
-        if ( millis() - menustart > 600000) {
+        if ( millis() - menustart > 60000) { //v31 600000
           break;
         }
         // prompt
@@ -2455,7 +2457,7 @@ void PrintProgramID(void)
 
 
 // !! s/r float ReadEncoder (float ref)
-#include "readencoder1.h" //rosr1 and rosr2
+#include "readencoder2.h" //rosr1 and rosr2
 //#include "readencoder2.h" //rosr3, 4 and above
 
 //============================================================================
