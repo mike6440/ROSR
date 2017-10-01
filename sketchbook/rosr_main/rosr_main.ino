@@ -2457,8 +2457,8 @@ void PrintProgramID(void)
 
 
 // !! s/r float ReadEncoder (float ref)
-#include "readencoder2.h" //rosr1 and rosr2
-//#include "readencoder2.h" //rosr3, 4 and above
+//#include "readencoder1.h" //rosr1 and rosr2
+#include "readencoder2.h" //rosr3, 4 and above
 
 //============================================================================
 void        ReadKT15(double *irrad, double *irtemp)
