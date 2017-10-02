@@ -2,14 +2,15 @@
 #Z_rosr_v6
 
 set PROGRAMNAME Z_rosr
-set VERSION 7
-set EDITDATE 160730; #160718; #151116,1437;	#150417;	#150404
+set VERSION 8
+set EDITDATE 171001; #160730; #160718; #151116,1437;	#150417;	#150404
 # 
 # V1 FROM Z_ROSR V20
 #v4 use getgpsraw program 
 #v5 tighten regex expression
 #v6 rosr3 
 #v7 rosr3 was hung up. I'll try to get it going.
+#v8 simulate_rosr
 
 puts "
 RUN PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE"
@@ -31,15 +32,24 @@ if [catch {open $setupfile} sufile] {
 global ROSR ROSRPID ROSRAV ROSRAVPID
 global infoname
 #========================================================
-		# PROCEDURE TO CONNECT TO ROSR
+#		PROCEDURE TO SIMULATE ROSR #v8
+#========================================================
+proc SpawnRosrSimulate { } {
+	global ROSR ROSRPID infoname
+		# Spawn simulate_prp
+	set ROSRPID [spawn perl simulate_rosr]
+	set ROSR $spawn_id
+	write_info $infoname "SPAWN ROSR SIMULATE, spawn_id = $ROSR, pid = $ROSRPID"
+}
+#========================================================
+		# PROCEDURE TO CONNECT TO ROSR #v8
 #============================================================
 proc SpawnRosr { hub_url rosrport} {
 	global ROSR ROSRPID infoname
 	if {$rosrport == 0} {
-		set ROSRPID [spawn perl simulate/rosr_simulator]
+		set ROSRPID [spawn perl simulate_rosr]
 		set ROSR $spawn_id 
 		write_info $infoname "SPAWN ROSR SIMULATE, spawn_id = $ROSR, pid = $ROSRPID"
-		send_user "ROSR SIMULATE\n"
 	} else {
 		set str [spawn_kermit $hub_url $rosrport]
 		set ROSR [lindex $str 0];    
@@ -47,7 +57,6 @@ proc SpawnRosr { hub_url rosrport} {
 		write_info $infoname "SPAWN ROSR KERMIT, IP=$hub_url, port=$rosrport, spawn_id=$ROSR, pid=$ROSRPID"
 	}
 }
-
 #==========================================
 #   PROCEDURE TO START AVGROSR PROGRAM
 #==========================================
@@ -189,14 +198,23 @@ spawn -noecho getsetupinfo $setupfile "ROSR HUB COM NUMBER"
 expect -re "(\.*)(\r)";
 set rosrport $expect_out(1,string)
 write_info $infoname  "ROSR HUB COM NUMBER: $rosrport"
+	# OPEN ROSR CONNECTOION - v8 include simulate
+spawn -noecho getsetupinfo $setupfile "SIMULATEFLAG"
+expect -re "(\.*)(\r)";
+set simulateflag $expect_out(1,string)
+if { $simulateflag == 1 } { 
+	send_user "SIMULATE ROSR\n";
+	SpawnRosrSimulate;
+} else {
+	send_user "STANDARD ROSR\n";
+	SpawnRosr $hub_url $rosrport
+}
 
 		#=================
 		# OPEN SET FILE NAMES AND NOTE TIME
 		#=================
 		# day0 = START JULIAN DAY
 set day0 0
-		# OPEN SERIAL PORTS
-SpawnRosr $hub_url $rosrport 
 		# OPEN AVG PROGRAMS
 SpawnAvgRosr $setupfile 
 

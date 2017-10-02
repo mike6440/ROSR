@@ -99,9 +99,7 @@ Startrosr () {
 Startrosrcal () {
 	KillScreen;
 	cd $DAQSWFOLDER; ./PrepareForRun; export RUNSETUPFILE=`cat tmp`;
-	#crontab $DAQSWFOLDER/tools/crontab_rosr.txt
 	screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_rosr.txt
-	#screen -S ROSR -p 1 -X stuff "GG$(printf \\r)"
 	screen -S ROSR -p 2 -X stuff "G$(printf \\r)"
 }
 

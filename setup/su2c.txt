@@ -10,6 +10,12 @@ KT15 FILTER FILE: kt15/kt1585_sn11733.txt
      #DATA FILES ---------------------
 RT OUT PATH: data
 ROSR SERIAL NUMBER: 2
+	# SIMULATE FLAG
+SIMULATEFLAG: 1
+	# FIXED TILT 0=no, 1=yes
+FIXED TILT FLAG: 0
+FIXED PITCH: 0.1
+FIXED ROLL: 0.1
      ========================
      #HUB ADDRESS AND PORTS
      #PDS default: 192.168.255.1 (sometimes ...3)

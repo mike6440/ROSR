@@ -25,8 +25,6 @@ proc SpawnGps { hub_ip gpsport} {
 		write_info $infoname "SPAWN GPS KERMIT, spawn_id = $GPS,  pid = $GPSPID"
 	}
 }
-
-
 #=====================================
 #   PROCEDURE TO START AVGGPS PROGRAM
 #==================================
@@ -185,11 +183,9 @@ while 1 {
 		}
 		write_info $infoname "New day: rawname = $rawname"
 	}
-	
 	#================
 	# EXPECT FUNCTION -- WAITING FOR RESPONSE
 	# ===============
-	
 	expect {
 		-i $GPS
 		"\\\$GPRMC*\\*??"  {
@@ -210,7 +206,6 @@ while 1 {
 			puts $F $rawstr
             #send_user "$rawstr\n";
 			close $F
-			
 					# SEND RAW TO AVG AND RCV RESPONSE
 			set timeout 1
 			set spawn_id $GPSAV
@@ -228,7 +223,6 @@ while 1 {
 			write_info $infoname "AVGGPS fails.  RE-START AVGGPS, spawn_id = $GPSAV,   pid = $GPSAVPID\n";
 		}
 		-re "<<(GPSAV,.*?)>>\r\n" {send_user "$expect_out(1,string)\n";}
-	
 		
 		#================== USER INPUT =========================================#
 		-i $user_spawn_id  
