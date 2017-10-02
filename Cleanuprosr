@@ -18,10 +18,12 @@ foreach $xx (@removelist){
 		if( $pscmd =~ /grep/){
 			#print"test 3 $pscmd\n";
 		} else {
-			#print"test 4 $pscmd\n";
+				# remove leading spaces
+			$pscmd =~ s/^\s+//;
 			@d=split/[ ]+/,$pscmd;
-			$cmd="kill -9 $d[0]";
-			#print"test 5 cmd = $cmd\n";
+			#$ii=0; foreach(@d){chomp($_); print"$ii, $d[$ii]\n"; $ii++} die;
+			$cmd="kill $d[0]";
+			print"$pscmd -- $cmd\n";
 			`$cmd`;
 		}
 	}
