@@ -1,5 +1,5 @@
     ## edit 170810
-    "Help" to read.   'q' to end.
+    'q' to end.
 
     #---- "sw" folder
 gtdaq                                       ->  cd to "~/swmain/apps/ROSR/sw/$ "
@@ -24,23 +24,26 @@ ClearRosrData                               -> Clears the data folder. (y or n)
 booton                                      ->  Power ON, ROSR begins operation in two minutes.
 bootoff                                     ->  Power OFF. See RosrShutdown.
 bootstatus                                  ->  current power status, ON or OFF.
-    #---- DIRECT CONNECT
+    #---- GPS DIRECT CONNECT
 P                                           -> direct connect to GPS
+    #---- ROSR DIRECT CONNECT
 I                                           -> direct connect to ROSR, "^\ q" to end
-^\ q                                        -> end direct connect. Hold down <Crtl> and '\'. Release and press 'q'. 
-    #---- MENU
   T                                         -> ROSR test  '>' prompt
     ?                                       -> terminal menu
     fc                                      -> close shutter
     fo                                      -> open shutter
     g                                       -> Go. End terminal session. Start operation.
    note jumps to operation automatically after 1 min.
+^\ q                                        -> end direct connect. Hold down <Crtl> and '\'. Release and press 'q'. 
     #---- VIEW DATA
 rosrsbd                                     ->  show WISBD packets, 10-min, ^c to end
 rosrraw                                     ->  show $WIROS raw data, 280 sec, ^c to end
 rosravg                                     ->  show PC avg file, 10 min averages (5,15,25,...,55), ^c to end
 rosrav                                      ->  show $WIRAV packets, 280 sec, ^c to end
 rosrst                                      ->  show $WIRST packets, 280 sec, ^c to end
+	#---- VIEW THE SU FILE, 'q' to end
+less setup/su.txt                           ->  shows the system setup file currently in use.
+
     #-----------------------------
     #---- ROSR OUTPUT PACKETS 
     #-----------------------------
