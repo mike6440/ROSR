@@ -21,7 +21,7 @@ DaqUpdate >> $DAQDATAFOLDER/daqlog
 
 chk=`cat /tmp/tmpdaq`;
 if [ $chk -eq 1 ] > /dev/null ; then
-#	echo UpdateDaq no reboot
+	echo OK
 	echo "UpdateDaq, no reboot." >> $DAQDATAFOLDER/daqlog
 	exit 0;
 fi

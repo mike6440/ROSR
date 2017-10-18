@@ -1,13 +1,16 @@
-	#Edit 20170910T181716Z
+	#Edit 171005  !! check these lines especially !!
 	#THIS FILE: CasperWest
 	adding simulate, v2
+	adding fixed tilt option, v2
 COMMENTS:
  ROSR2 setup for CasperWest
+ 171005--adding simulate, v2
+ 171005--adding fixed tilt option, v2
 END
-	# SIMULATE FLAG
-SIMULATEFLAG: 1
-	# FIXED TILT 0=no, 1=yes
-FIXED TILT FLAG: 0
+	# !! SIMULATE FLAG, v2
+SIMULATEFLAG: 0
+	# !! FIXED TILT 0=no, 1=yes  v2  !!
+FIXED TILT FLAG: 1
 FIXED PITCH: 0.1
 FIXED ROLL: 0.1
 	# DATA FILES

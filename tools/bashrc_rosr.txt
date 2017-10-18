@@ -79,8 +79,8 @@ rosrsbd () {
 
 
 	# SCREEN
-alias isscreen='echo "CHECK FOR A SCREEN"; screen -ls'
-alias gtscreen='echo "GO TO SCREEN"; screen -S ROSR -d -r'
+alias isscreen='screen -ls'
+alias gtscreen='screen -S ROSR -d -r'
 
 	# RUN CALLS
 alias G='cd $DAQSWFOLDER;  Z_rosr `cat tmp`'
