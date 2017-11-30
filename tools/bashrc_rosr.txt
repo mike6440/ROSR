@@ -104,7 +104,7 @@ Startrosrcal () {
 }
 
 	#STOP DATA COLLECTION SCREEN
-alias Stoprosr="KillScreen; Stopcron; Cleanuprosr;"
+alias Stoprosr="KillScreen > /dev/null 2>&1; Stopcron > /dev/null 2>&1; Cleanuprosr > /dev/null 2>&1;"
 
 	#START AND STOP CRONTAB
 alias Startcron="crontab $DAQSWFOLDER/tools/crontab_rosr.txt"
