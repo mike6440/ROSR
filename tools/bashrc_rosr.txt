@@ -88,7 +88,8 @@ alias GG='cd $DAQSWFOLDER;  Z_gps `cat tmp`'
 
 		#START SCREEN
 Startrosr () {
-	KillScreen;
+	echo "END DATA COLLECTION"
+	KillScreen > /dev/null 2>&1;
 	cd $DAQSWFOLDER; ./PrepareForRun; export RUNSETUPFILE=`cat tmp`;
 	crontab $DAQSWFOLDER/tools/crontab_rosr.txt
 	screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_rosr.txt
