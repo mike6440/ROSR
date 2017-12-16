@@ -21,8 +21,8 @@ if($#ARGV < 0){
 	$serverip=shift();
 	$serverport=shift();
 }
-# print"$serverip\n";
-# print"$serverport\n";
+#print"$serverip\n";
+#print"$serverport\n";
 
 # auto-flush on socket
 $| = 1;
