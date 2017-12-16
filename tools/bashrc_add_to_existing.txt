@@ -33,7 +33,7 @@ echo "prompt k>>" > ~/.kermrc
 	# color for mac os x
     #export LSCOLORS="cxfxcxdxfxegedabagacad"
     # color for linux
-LS_COLORS=$LS_COLORS:'di=0;91:fi=1;33:ex=0;92:' ; export LS_COLORS
+LS_COLORS=$LS_COLORS:'di=0;91:fi=1;34:ex=0;92:' ; export LS_COLORS
 
     # handy alias
 alias ls="ls -a --color=auto"
