@@ -32,7 +32,7 @@ alias I='cd $DAQSWFOLDER; 	./term_to_rosr $SETUPFILE'
 alias N='cd $DAQSWFOLDER; 	./term_to_sbd  $SETUPFILE'
 alias P='cd $DAQSWFOLDER; 	./term_to_gps  $SETUPFILE'
 
-alias Help="less help.txt"
+alias myhelp="less help.txt"
 
 		# CHECK DATA
 rosravg () {
