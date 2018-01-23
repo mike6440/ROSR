@@ -105,7 +105,6 @@ $header = $header."KT15 SERIAL NUMBER: $kt15sn\n";
 $filterfile = FindInfo($setupfile,'KT15 FILTER FILE', ': ');
 $header = $header."KT15 FILTER FILE: $filterfile\n";
 $filterfile = $ENV{DAQSWFOLDER}.'/'.$filterfile;
-
 if($calflag == 0){
 	$header = $header."CALIBRATION EMISSIVITY: $e_cal\n";
 	$header = $header."NORMAL RUN\n";
@@ -151,7 +150,6 @@ if($calflag == 0){
 	$header = $header."CALIBRATION VIEW POSITION: $calview\n";
 	$header = $header."CALIBRATION VIEW ANGLE (deg): $view[$calview]\n";
 }
-
 	# FIXED TILT #v5
 $fixedtiltflag = FindInfo($setupfile, "FIXED TILT FLAG",':'); # fixed tilt
 $fixedpitch = FindInfo($setupfile,'FIXED PITCH',':');

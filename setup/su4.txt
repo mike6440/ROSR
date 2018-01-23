@@ -22,11 +22,15 @@ SHIP NAME: THOMAS G. THOMPSON
 CRUISE NAME: --
 	port or starboard
 PLATFORM SIDE: STARBOARD
+	========================
 	# KT15 INFO --------------
+	========================
 KT15 FILTER FILE: kt15/kt1585-sn12228.txt
 SCAN VIEW ANGLES: 265 325 45 135
 NO DATA WAIT TIME: 3600
+	========================
 	# COMMS ------------
+	========================
 SERIAL HUB URL: 192.168.255.1
 IBOOT IP: 192.168.255.2
 PC IP: 192.168.255.10
@@ -42,9 +46,11 @@ SBD HUB COM NUMBER: -1
 TELNET SERVER IP: 0
 	TELNET SERVER IP: 192.168.255.10
 TELNET SERVER PORT: 
-	#SERIAL LINE: /dev/tty.PL2303-001013FA
-	#SERIAL SPEED: 9600
-	# CALIBRATION---------------
+SERIAL LINE: /dev/tty.PL2303-001013FA
+SERIAL SPEED: 9600
+	========================
+	# CALIBRATION
+	========================
 	#CAL EMIS: 0 = field use, compute e from angle,  ~=1 = calibration mode
 CALIBRATION EMISSIVITY: 0
 CAL SSST SLOPE: 1
@@ -107,6 +113,10 @@ GPS FIXED VARIATION: 18.1
 	========================
 		ROSR
 	========================
+FIXED TILT FLAG: 0
+FIXED PITCH: 0
+FIXED ROLL: 0
+
 		Verbose mode prints out test messages and data.  VERBOSE = 1, NOT VERBOSE = 0
 		avgrosr.pl makes a file called data/tmp.txt.
 VERBOSE MODE: 0
