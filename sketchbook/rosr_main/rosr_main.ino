@@ -17,8 +17,8 @@
 //		shutter open/close parameters in eeprom
 //v31 - 
 //		use #include to customize for each rosr
-//v32 - reduce the menu dead time from 600 sec to 120 sec
-//      But at power on it begins immediately.
+//v32 - reduce the menu dead time from 600 sec to 60 sec
+//      Also power on 1-min delay
 
 //NOTE ====== INCLUDES
 #include <string.h>
@@ -37,9 +37,9 @@ Adafruit_ADS1115 ads2(0x4A);    // ad2, u14, construct an ads1115 at address 0x4
 // !! CUSTOMIZE FOR ROSR NUMBER
 // 2a means with swapped bb's
 //==========================
-#include "header4.h"  // programname, version, eeprom_id
-#include "t-rad_table4.h"	// rad<->temp parameters
-#include "Tcal_rosr4.h"  ////!! BB thermistor coefs 
+#include "header1.h"  // !! programname, version, eeprom_id
+#include "t-rad_table1.h"	// !! rad<->temp parameters
+#include "Tcal_rosr1.h"  //!! BB thermistor coefs 
 
 
 //NOTE ====== DIGITAL LINES
@@ -451,15 +451,15 @@ void loop() {
   Serial.setTimeout(1000); // 1 sec wait for a key entry
   //test Serial.println("Enter 'T' or 't' to go directly to test mode.");
   i = Serial.readBytes(buf, 1); // normal operation -- wait for key entry
-  if ( i > 0 ) {  //|| istart == 1 //v31
-    if ( buf[0] == 't' || buf[0] == 'T' || istart == 1) {
+  if ( i > 0 || istart == 1) {   //v31 //v32
+    if ( buf[0] == 't' || buf[0] == 'T' ) { //v32  || istart == 1
       menustart = millis();
       istart = 0; // normal operation
       RunMode = TEST;
       Serial.setTimeout(10000); // 10 sec wait for a key entry
       //Serial.println("TEST mode.");
       while ( RunMode == TEST ) {
-        if ( millis() - menustart > 60000) { //v31 600000
+        if ( millis() - menustart > 60000) { //v31 600000, //v32 1 min wait 
           break;
         }
         // prompt
@@ -2457,8 +2457,8 @@ void PrintProgramID(void)
 
 
 // !! s/r float ReadEncoder (float ref)
-//#include "readencoder1.h" //rosr1 and rosr2
-#include "readencoder2.h" //rosr3, 4 and above
+#include "readencoder1.h" //rosr1 and rosr2
+// #include "readencoder2.h" //rosr3, 4 and above
 
 //============================================================================
 void        ReadKT15(double *irrad, double *irtemp)
