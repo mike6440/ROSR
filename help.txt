@@ -52,13 +52,15 @@ $WIROS,etime,drum,KT,Tkt,adc0,adc1,adc2,adc3,adc4,adc5,adc6,adc7,adc8,adc9,adc10
     adc11,vref,t11,t12,t21,t22,pit,rol,Tkt,Tktx,Twin,Tpwr,Vin,vrain,sec*chk<cr><lf>
 
     #----AV  rosrav
-$WIRAV,etime,vav0,vav1,vav2,vav3,k0,k1,k2,k3,ksd0,ksd1,ksd2,ksd3,t11,t12,t21,t22,tsd11,
-    tsd12,tsd21,tsd22,T1,T2,pav,psd,rav,rsd,ang,emis*chk
+$WIRAV,etime,vav0,vav1,vav2,vav3,k0,ksd0,k1,ksd1,k2,ksd2,k3,ksd3,t11,tsd11,t12,tsd12,
+   t21,tsd21,t22,tsd22,T1,T2,pav,psd,rav,rsd,ang,emis*chk
 where
  vavi, i=0..3 = view angle (bb1,bb2,sky,sea)
  ki, i=0..3 = kt15 rad (bb1,bb2,sky,sea)
  ksdi, i=0..3 = kt15 stdev (bb1,bb2,sky,sea)
- 
+ t11,tsd11 = mean BB1,thermister1 and stdev.
+ ditto for t12, t21, and t22
+  
     #----SSST  rosrst
 $WIRST,etime,vav0,vav1,vav2,vav3,k0,k1,k2,k3,T1,T2,ang,emis,ssst*chk
 where
