@@ -8,8 +8,13 @@ use perltools::MRutilities;
 use IO::Socket;
 
 # ip# and port from su.txt or command line.
-$serverip='127.0.0.1';
-$serverport='5555';
+if($#ARGV < 0){
+	$serverip=FindInfo(`cat tmp`,'TELNET SERVER IP',':');
+	$serverport=FindInfo(`cat tmp`,'TELNET SERVER PORT',':');
+} else {
+	$serverip=shift();
+	$serverport=shift();
+}
 print"socket = $serverip $serverport\n";
 
 my $sock = new IO::Socket::INET (
