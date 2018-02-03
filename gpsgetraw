@@ -54,21 +54,17 @@ else {
 	#$str='14 2017 07 13 18 21 49 $GPRMC,182149,V,4738.9764,N,12218.7869,W,,,130717,016.4,E*78';
 	#$str='14 2017 07 13 18 21 49 $GPRMC,040302.663,A,3939.7,N,10506.6,W,0.27,358.86,200804,018.1,E*7C';
 	chomp($str);
-	#print"xxx GPS str=$str\n";
-	$ir = index($str,"GPRMC");
-	if($ir>10){
-		$is = index($str,"\*");
-		$str1=substr($str,$ir-1);
-	# 	print"xxx str1=$str1\n";
-	# 	printf"xxx NmeaChecksum=%s,  Packet=%s\n", NmeaChecksum($str1), substr($str,$is+1);
-		if ( NmeaChecksum( $str1 ) eq substr($str,$is+1,2) ){
-			@w=split /[,\s]+/, $str1;
-			#foreach(@w){print"$_\n"}
+	if($str =~ /\$GPRMC/){
+		$ir = index($str,"GPRMC");
+		if($ir>10){
+			my $i1 = index($str,"\$");
+			my $i2 = index($str,"\*");
+			$str1=substr($str,$i1,$i2-$i1+3);
+			#print"str1=$str1\n";
 			@x=gprmc($str1,$missing);
-			#print"xxx gpmrc out\n";
-			#foreach(@x){print"xxx $_\n"}
+			#$ii=0;foreach(@x){print"$ii, $_\n";$ii++}
 			printf"%d,%.6f,%.6f,%.1f,%.0f,%.1f",$x[0],$x[1],$x[2],$x[3],$x[4],$x[5];
-		}
+		}	
 		else {print"$missing, $missing, $missing, $missing, $missing, $missing"}
 	} else {print"$missing, $missing, $missing, $missing, $missing, $missing";}
 }

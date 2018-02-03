@@ -1,8 +1,8 @@
 #!/usr/bin/expect --
 
 set PROGRAMNAME Z_gps
-set VERSION 08
-set EDITDATE 150414;	#150410;	#150214		;#141024  ;#130706
+set VERSION 09
+set EDITDATE 180202; #150414;	#150410;	#150214		;#141024  ;#130706
 
 set loguser 0;#   test 0-quiet, 1=verbose
 log_user $loguser;
@@ -10,6 +10,16 @@ log_user $loguser;
 global GPS GPSPID GPSAV GPSAVPID
 global infoname
 
+#========================================================
+#		PROCEDURE TO SIMULATE GPS #v9
+#========================================================
+proc SpawnGpsSimulate { } {
+	global GPS GPSPID infoname
+		# Spawn simulate_gps
+	set GPSPID [spawn perl simulate_gps]
+	set GPS $spawn_id
+	write_info $infoname "SPAWN GPS SIMULATE, spawn_id = $GPS, pid = $GPSPID"
+}
 #========================================================
 		# PROCEDURE TO CONNECT TO GPS  v3
 #============================================================
@@ -140,12 +150,24 @@ expect -re "(\.*)(\r)";
 set gpsport $expect_out(1,string)
 write_info $infoname  "GPS HUB COM NUMBER: $gpsport"
 
+	# OPEN GPS CONNECTOION
+spawn -noecho getsetupinfo $setupfile "SIMULATEFLAG"
+expect -re "(\.*)(\r)";
+set simulateflag $expect_out(1,string)
+if { $simulateflag == 1 } { 
+	send_user "SIMULATE ROSR\n";
+	SpawnGpsSimulate;
+} else {
+	send_user "STANDARD GPS\n";
+	SpawnGps $hub_ip $gpsport
+}
 		# OPEN TELNET CONNECTIO
-SpawnGps $hub_ip $gpsport
+#SpawnGps $hub_ip $gpsport
 write_info $infoname "GPS = $GPS, PID = $GPSPID\n";
 
 		# GPSAV PROGRAM
 SpawnAvgGps $setupfile
+
 
 # =====================
 # MAIN LOOP

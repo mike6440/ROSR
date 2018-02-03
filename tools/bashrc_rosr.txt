@@ -124,6 +124,6 @@ alias sbdlog="tail -f ../data/sbdlog"
 
     # alias
 alias daqlog="less $DAQDATAFOLDER/daqlog"
-
+alias Ping="ping -c3 "
 cd $DAQSWFOLDER
 

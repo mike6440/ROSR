@@ -78,7 +78,9 @@ else{
 }
 # make the packet
 #$str='$GPRMC,070951,A,3356.2135,N,13055.5039,E,000.1,051.6,160915,007.1,W*';# == 64';
-$str=$str.NmeaChecksum($str)."\r\n";
+my $chk=NmeaChecksum($str);
+print"return $chk\n";
+$str=$str.$chk."\r\n";
 print"$str";
 
 # send packet
