@@ -12,15 +12,15 @@ SIMULATEFLAG:0
 	========================
 		EXPERIMENT INFO
 	========================
-EXPERIMENT NAME: burn in and test
+EXPERIMENT NAME: Brothers
 GEOGRAPHIC LOCATION: Seattle
-		two characters for a ship code
+		characters for a ship code
 PLATFORM NAME: TGT
 LOCATION ON PLATFORM: 
-HEIGHT ABOVE SEA LEVEL m: 6
+HEIGHT ABOVE SEA LEVEL m: 16
 SHIP TYPE: RV
 SHIP NAME: THOMAS G. THOMPSON
-CRUISE NAME: 2018install
+CRUISE NAME: NZ2018
 	port or starboard
 PLATFORM SIDE: STARBOARD
 	========================
@@ -51,14 +51,17 @@ ROSR HUB COM NUMBER: 10001
 GPS HUB COM NUMBER: 10003
 	# SBD MODEM -- 10004, Not connected=-1, simulate=0
 SBD HUB COM NUMBER: -1
-		# TELNET SOCKET = 0 if not in use
+	==========================
+	# TELNET AND UDP SOCKET 
+	==========================
+		# 0 if not in use
 	TELNET SERVER IP: 0
     	# KAIMEI SOCKET 
     TELNET SERVER IP: 10.198.5.1
     TELNET SERVER PORT: 4025
     	# LOCAL TEST
-	TELNET SERVER IP: 192.168.255.10
-	TELNET SERVER PORT: 5555
+	TELNET SERVER IP: localhost
+	TELNET SERVER PORT: 33333
 		# RV THOMAS G THOMPSON
 TELNET SERVER IP: 10.43.12.12
 TELNET SERVER PORT: 33333
@@ -107,6 +110,7 @@ MISSING VALUE: -999
 	========================
 COMMENTS:
  ROSR4 initial setup
+ Installed on TGT 180201
 END
 
 	========================
@@ -121,12 +125,11 @@ GPS AVERAGING TIME: 120
 		FIXED POSITION -- NO GPS
 		(hub port=-1)
 	========================
-	# MOSS BAY
-GPS FIXED LATITUDE: 35
-GPS FIXED LONGITUDE: -122
+	# RMRCO +47.60332, -122.28807
+GPS FIXED LATITUDE: 47.60332
+GPS FIXED LONGITUDE: -122.28807
 		Magnetic variation, + = East of true
-GPS FIXED VARIATION: 18.1
-
+GPS FIXED VARIATION: 12
 	========================
 		ROSR
 	========================
