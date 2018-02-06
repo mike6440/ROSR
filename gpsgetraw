@@ -42,7 +42,8 @@ $setupfile = `cat tmp`;
 	# FIXED OR ACTUAL
 $gpsstatus=FindInfo($setupfile,'GPS HUB COM NUMBER',':');
 	# FIXED GPS POSITION
-if($gpsstatus==-1){
+#printf"gpsstatus=%d\n",$gpsstatus;
+if($gpsstatus == -1){
 	printf"%s,%s,0,0,%s",
 	  FindInfo($setupfile,"GPS FIXED LATITUDE",':'),
 	  FindInfo($setupfile,"GPS FIXED LONGITUDE",':'),

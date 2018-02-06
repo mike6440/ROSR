@@ -27,7 +27,7 @@ use perltools::MRutilities;
 # print"data = $ENV{DAQDATAFOLDER}\n";
 
 $setupfile=$ENV{SETUPFILE};
-# print"setupfile = $setupfile\n";
+print"setupfile = $setupfile\n";
 $e_cal = FindInfo($setupfile,'CALIBRATION EMISSIVITY', ':');  # black body emissivity
 if($e_cal == 0){
 	print"e_cal = $e_cal, RUN.\n";
