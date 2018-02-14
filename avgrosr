@@ -11,7 +11,7 @@ my $EDITDATE = '160719'; #'151006'; #'150719'; '150209';
 #v3 -- generalize the socktxx command.
 #v4 -- print out avg problem
 #v5 -- used the 'my' statement. I am not sure why.  Also add fixedtiltflag 
-
+#v6 -- choice of socktxx or udptss
 # EXAMPLE OF STRING FROM ROSR
 #2015,04,20,21,41,05,1429566060,47.603382,-122.288127,0.05,170,$WIROS,00.004622,265.05, 156445,17.98,2.836,2.841,0.391,2.469,2.155,2.154,1.730,2.764,4.096,3.558,-0.000,4.096,4.938,17.69,17.71,31.55,31.54,-2.4,-1.1,17.2,200.0,19.1,41.0,14.2,-0.0,  0*79
 #2015,04,20,21,37,42,1429565858,47.603372,-122.288128,0.00,170,$WIROS,00.004300,325.05, 189645,30.31,2.844,2.848,0.432,2.469,2.165,2.164,1.741,2.773,4.096,3.558,-0.000,4.096,4.938,17.55,17.57,31.34,31.33,-2.4,-1.1,29.5,200.0,19.0,40.7,14.2,-0.0,  0*7D
@@ -27,7 +27,7 @@ use perltools::Isar;
 use POSIX;
 
 #v5
-my ($setupfile,$pgmstart,$outpath,$e_cal,$telnetserverip,$header,$expname);
+my ($setupfile,$pgmstart,$outpath,$e_cal,$telnetserverip,$socketprogram,$header,$expname); #v6
 my ($rosrsn,$kt15sn,$filterfile,$location,$platform,$platformside,$side_location,$ht_above_sealevel);
 my ($Acorr,$CalOffset,$str,@view,$bb1view,$e_sea_0,$e_bb,$Tabs,$fnhdr);
 my ($tb1, $tb1sd, $tb2, $tb2sd,$e_a,$avgsecs,$fn,$fnavg);
@@ -85,8 +85,11 @@ if($e_cal == 0){
 $telnetserverip = FindInfo($setupfile,'TELNET SERVER IP',':');
 print"TELNET SERVER IP = $telnetserverip\n";
 if($telnetserverip==0){print"No telnet socket output\n"}
-else{$telnetserverport = FindInfo($setupfile,'TELNET SERVER PORT',':');
+else{
+	$telnetserverport = FindInfo($setupfile,'TELNET SERVER PORT',':');
 	print"TELNET SERVER PORT = $telnetserverport\n";
+	$socketprogram = FindInfo($setupfile,'TELNET PROGRAM',':');  # v6 udp or sock
+	print"TELNET PROGRAM = $socketprogram\n";                    # v6
 }
 
 #----------------- HEADER ----------------
@@ -413,8 +416,9 @@ while ( 1 ) {
 	}
 	close AVG;
 	
+		# v6 choose program
 	if($telnetserverip == 0){}
-	else{system "udptxx $telnetserverip $telnetserverport"}
+	else{system "$socketprogram $telnetserverip $telnetserverport"}   # v6
 	
 	##===========================
 	## SBD OUTPUT
