@@ -11,7 +11,7 @@
 #14 * * * * $DAQSWFOLDER/UpdateDaq >> $DAQDATAFOLDER/daqlog
 			
 
-version="UpdateDaq v11 170812"
+version="UpdateDaq v12 180319"
 cd $DAQSWFOLDER
 
 echo $version" ====================" >> $DAQDATAFOLDER/daqlog;

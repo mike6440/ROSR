@@ -1,4 +1,4 @@
-    ## edit 170810
+    ## edit 180319
 Note: 'q' to end the myhelp display.
     #---- "sw" folder
 gtdaq                                       ->  cd to "~/swmain/apps/ROSR/sw/$ "
@@ -12,15 +12,15 @@ example:
 nano setup/su.txt                           -> optional, edit as necessary.
     #--- START: Begin data collection as a background process.
 booton                                      ->  If needed: Power ON, wait 10 secs.
-Startrosr                                   ->  Begin data collection in background screen
-rosrraw                                     ->  Confirm data flow  (^c to end)
+Start                                       ->  Begin data collection in background screen
+Raw                                         ->  Confirm data flow  (^c to end)
     #--- STOP: Stop data collection.
-Stoprosr                                    ->  End data collection
+Stop                                        ->  End data collection
     #--- ARCHIVE: Create compressed archive in ~/rosrdata.
-ArchiveRosr                                 -> Makes archive /home/rmr/rosrdata
-ClearRosrData                               -> Clears the data folder. (y or n)
+Archive                                     -> Makes archive /home/rmr/rosrdata
+Wipe                                        -> Wipes the data folder. (y or n)
     #--- MID-CRUISE BACKUP, MONTHLY OR AS REQUIRED
-Stoprosr   ArchiveRosr   ClearRosrData [y]    Startrosr
+Stop   Archive   Wipe [y]    Start
 
     #-----------------------------
     #--- MISC COMMANDS
@@ -31,11 +31,11 @@ bootoff                                     ->  Power OFF. See RosrShutdown.
 bootstatus                                  ->  current power status, ON or OFF.
 RosrShutdown                                ->  Note: When in port: Close shutter and power off.
     #---- VIEW DATA
-rosrsbd                                     ->  show WISBD packets, 10-min, ^c to end
-rosrraw                                     ->  show $WIROS raw data, 280 sec, ^c to end
-rosravg                                     ->  show PC avg file, 10 min averages (5,15,25,...,55), ^c to end
-rosrav                                      ->  show $WIRAV packets, 280 sec, ^c to end
-rosrst                                      ->  show $WIRST packets, 280 sec, ^c to end
+Sbd                                         ->  show WISBD packets, 10-min, ^c to end
+Raw                                         ->  show $WIROS raw data, 280 sec, ^c to end
+Avg                                         ->  show PC avg file, 10 min averages (5,15,25,...,55), ^c to end
+Av                                          ->  show $WIRAV packets, 280 sec, ^c to end
+Sst                                         ->  show $WIRST packets, 280 sec, ^c to end
 	#--- VIEW THE SU FILE, 'q' to end
 less setup/su.txt                           ->  shows the system setup file currently in use.
     #--- GPS DIRECT CONNECT

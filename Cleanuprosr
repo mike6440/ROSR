@@ -6,24 +6,25 @@ chomp($usr);
 	#=================
 	# REMOVE ZOMBIES
 	#=================
-@removelist=("avgrosr","avggps","kermit","expect","perl");
+@removelist=("avgrosr","avggps","kermit","expect","perl","simulate_gps");
+#$ii=0; foreach(@removelist){print"test0 $ii, $_\n"; $ii++}
 foreach $xx (@removelist){
 	$cmd="ps -u $usr -o pid,command | grep \"$xx\"";
-	#print"test 1 cmd = $cmd\n";
+	#print"test1 cmd = $cmd\n";
 	@pslist = `$cmd`;
-	#$ii=0; foreach(@pslist){chomp($_); print"test 0 $ii, $pslist[$ii]\n"; $ii++}
+	#$ii=0; foreach(@pslist){chomp($_); print"test2 $ii, $pslist[$ii]\n"; $ii++}
 	foreach $pscmd (@pslist){
 		chomp($pscmd);
-		#print"test 2 $pscmd\n";
-		if( $pscmd =~ /grep/){
-			#print"test 3 $pscmd\n";
+		#print"test3 $pscmd\n"; 
+		if( $pscmd =~ /grep/ || $pscmd =~ /Cleanuprosr/){  # skip greps
+			#print"test4 $pscmd\n";  # do nothing
 		} else {
-				# remove leading spaces
-			$pscmd =~ s/^\s+//;
-			@d=split/[ ]+/,$pscmd;
-			#$ii=0; foreach(@d){chomp($_); print"$ii, $d[$ii]\n"; $ii++} die;
+			print"test5 $pscmd\n";  # do nothing
+			$pscmd =~ s/^\s+//;  # remove spaces
+			@d=split/[ ]+/,$pscmd; # split on spaces
+			#$ii=0; foreach(@d){chomp($_); print"test6 $ii, $d[$ii]\n"; $ii++} die;
 			$cmd="kill $d[0]";
-			print"$pscmd -- $cmd\n";
+			print"test7 $cmd\n";
 			`$cmd`;
 		}
 	}

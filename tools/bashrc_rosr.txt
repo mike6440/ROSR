@@ -41,6 +41,7 @@ rosravg () {
 	head -1 $xx
 	tail -f $xx
 }
+alias Avg="rosravg";
 gpsavg () {
 	cd $DAQSWFOLDER;
 	xx=`LastDataFolder gps_avg`
@@ -60,23 +61,26 @@ rosrraw () {
 	xx=`LastDataFolder rosr_raw`
 	tail -f $xx
 }
+alias Raw="rosrraw";
 rosrav () {
 	cd $DAQSWFOLDER;
 	echo "^c to end"
 	xx=`LastDataFolder rosr_av_`
 	tail -f $xx
 }
+alias Av="rosrav";
 rosrst () {
 	cd $DAQSWFOLDER;
 	echo "^c to end"
 	xx=`LastDataFolder rosr_sst`
 	tail -f $xx
 }
+alias Sst="rosrst";
 rosrsbd () {
 	cd $DAQSWFOLDER;
 	tail -f /tmp/sbd
 }
-
+alias Sbd="rosrsbd";
 
 	# SCREEN
 alias isscreen='screen -ls'
@@ -87,7 +91,7 @@ alias G='cd $DAQSWFOLDER;  Z_rosr `cat tmp`'
 alias GG='cd $DAQSWFOLDER;  Z_gps `cat tmp`'
 
 		#START SCREEN
-Startrosr () {
+Start () {
 	echo "END DATA COLLECTION"
 	KillScreen > /dev/null 2>&1;
 	cd $DAQSWFOLDER; ./PrepareForRun; export RUNSETUPFILE=`cat tmp`;
@@ -97,20 +101,22 @@ Startrosr () {
 	screen -S ROSR -p 2 -X stuff "G$(printf \\r)"
 	isscreen
 }
-Startrosrcal () {
+Startcal () {
 	KillScreen;
 	cd $DAQSWFOLDER; ./PrepareForRun; export RUNSETUPFILE=`cat tmp`;
 	screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_rosr.txt
 	screen -S ROSR -p 2 -X stuff "G$(printf \\r)"
 }
+alias Startrosr="Start";
+alias Startrosrcal="Startcal";
 
 	#STOP DATA COLLECTION SCREEN
-alias Stoprosr="KillScreen > /dev/null 2>&1; Stopcron > /dev/null 2>&1; Cleanuprosr > /dev/null 2>&1;"
+alias Stop="KillScreen > /dev/null 2>&1; Stopcron > /dev/null 2>&1; Cleanuprosr > /dev/null 2>&1; echo 'DAQ Stopped'"
+alias Stoprosr="Stop";
 
 	#START AND STOP CRONTAB
 alias Startcron="crontab $DAQSWFOLDER/tools/crontab_rosr.txt"
 alias Stopcron="crontab -r"
-
 
 #		PERL LIBRARY =============================
 export DAQLIB=$MYLIB
@@ -125,5 +131,8 @@ alias sbdlog="tail -f ../data/sbdlog"
     # alias
 alias daqlog="less $DAQDATAFOLDER/daqlog"
 alias Ping="ping -c3 "
+alias Archive="ArchiveRosr";
+alias Wipe="ClearRosrData";
+
 cd $DAQSWFOLDER
 
