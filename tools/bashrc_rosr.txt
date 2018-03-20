@@ -39,14 +39,14 @@ rosravg () {
 	cd $DAQSWFOLDER;
 	xx=`LastDataFolder rosr_avg`
 	head -1 $xx
-	tail -f $xx
+	tail $xx
 }
 alias Avg="rosravg";
 gpsavg () {
 	cd $DAQSWFOLDER;
 	xx=`LastDataFolder gps_avg`
 	head -1 $xx
-	tail -f $xx
+	tail $xx
 }
 		# RAW
 gpsraw () {
@@ -73,14 +73,9 @@ rosrst () {
 	cd $DAQSWFOLDER;
 	echo "^c to end"
 	xx=`LastDataFolder rosr_sst`
-	tail -f $xx
+	tail $xx
 }
-alias Sst="rosrst";
-rosrsbd () {
-	cd $DAQSWFOLDER;
-	tail -f /tmp/sbd
-}
-alias Sbd="rosrsbd";
+alias St="rosrst";
 
 	# SCREEN
 alias isscreen='screen -ls'
@@ -126,7 +121,8 @@ echo "prompt k>>" > ~/.kermrc
 
 	# MONITOR PROGRESS
 alias rosrsbd="tail -f /tmp/sbd 2>/dev/null"
-alias sbdlog="tail -f ../data/sbdlog"
+alias Sbd="cat /tmp/sbd"
+alias sbdlog="less ../data/sbdlog"
 
     # alias
 alias daqlog="less $DAQDATAFOLDER/daqlog"

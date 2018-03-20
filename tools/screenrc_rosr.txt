@@ -3,8 +3,8 @@ hardstatus string '%{= kG}[ %{G}%H %{g}][%= %{=kw}%?%-Lw%?%{r}(%{W}%n*%f%t%?(%u)
 
 # Default screens
 screen -t USER	0
-screen -t ROSR  1
-screen -t GPS   2
+screen -t GPS  1
+screen -t ROSR 2
 
 startup_message off # Turn off the splash screen
 
