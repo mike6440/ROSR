@@ -3,6 +3,7 @@
 use lib $ENV{MYLIB};
 use perltools::MRtime;
 use perltools::MRutilities;
+use Time::Zone;
 
 my @f = ('rosr_raw','rosr_avg','gps_raw','gps_avg');
 my @d = (600, 1800, 600, 600);
@@ -11,35 +12,19 @@ my @v = ();
 #       rosr_raw   1521529544      3    600   OK
 print"  file       last sec        dif  lim   status\n";
 printf"  NOW =      %10d\n",now();
+my $os=tz_local_offset();
+
 	# SELECT STREAM
 my $is;
 for($is=0; $is<=$#f; $is++){
 	my $f=$f[$is];
-
-		# LAST RECORD TIME
-	my $cmd = sprintf("LastDataTime %s",$f);
-	my $s = `$cmd`;
-	chomp($s); 
-	my @s = split /[ ]+/, $s;
-	#printf"    %d", $s[1];
-
-		# THE AGE OF THE RECORD
-	if($s[1]==0){
-		print"$f    0 -- RECORD FAILURE.\n",$f;
-		push @v,0;		
-	} else {
-		my $age = now() - $s[1];
-		#print"    $age     $d[$is]";
-		#     rosr_avg    1521528000    750     1800    OK
-		#print"daq fname   last rec      diff    limit   status\n";
-		printf"%10s   %10d   %4d   %4d   ",$f,$s[1],$age,$d[$is];
-		if ($age > $d[$is]){print"FAIL\n"; push @v,0}
-		else{ print"OK\n"; push @v, 1;  }
-	}
+		# FILE MOD TIME
+	my $mtime = (stat `LastDataFolder $f`)[9]-$os;
+	my $age = now() - $mtime;
+	printf"%10s   %10d   %4d   %4d   ",$f,$mtime,$age,$d[$is];
+	if ($age > $d[$is]){print"FAIL\n"; push @v,0}
+	else{ print"OK\n"; push @v, 1;  }
 }
-
-#print"Verify = @v\n";
-
 my $good=1;
 print"@v\n";
 foreach(@v){if($_ == 0){$good=0}}

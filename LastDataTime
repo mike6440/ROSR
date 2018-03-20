@@ -1,5 +1,6 @@
 #!/usr/bin/perl -X
 #   ./LastAvg rad_avg (or 'gps_avg', 'wxt_raw', etc)
+# edit 180320  #v2
 
 use lib $ENV{MYLIB};
 use perltools::MRtime;
@@ -9,7 +10,8 @@ my $a = shift();
 
 my $s = `LastDataRecord $a`;
 chomp $s;
-$str =~ s/^\s+//;  # remove leading blanks
+$s =~ s/^\s+//;  # remove leading blanks  #v2 was named $str; bad
+#print"$a:  $s\n";
 
 my $recno;  
 my $dt;
