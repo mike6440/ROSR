@@ -52,8 +52,7 @@ gpsavg () {
 gpsraw () {
 	cd $DAQSWFOLDER;
 	echo "^c to end"
-	xx=`LastDataFolder gps_raw`
-	tail -f $xx
+	tail `LastDataFolder gps_raw`
 }
 rosrraw () {
 	cd $DAQSWFOLDER;
@@ -65,15 +64,13 @@ alias Raw="rosrraw";
 rosrav () {
 	cd $DAQSWFOLDER;
 	echo "^c to end"
-	xx=`LastDataFolder rosr_av_`
-	tail -f $xx
+	tail `LastDataFolder rosr_av`
 }
 alias Av="rosrav";
 rosrst () {
 	cd $DAQSWFOLDER;
 	echo "^c to end"
-	xx=`LastDataFolder rosr_sst`
-	tail $xx
+	tail `LastDataFolder rosr_sst`
 }
 alias St="rosrst";
 
