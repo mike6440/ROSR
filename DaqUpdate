@@ -5,8 +5,8 @@ use perltools::MRtime;
 use perltools::MRutilities;
 use Time::Zone;
 
-my @f = ('rosr_raw','rosr_avg','gps_raw','gps_avg');
-my @d = (600, 1800, 600, 600);
+my @f = ('rosr_raw','rosr_avg');
+my @d = (600, 1800);
 my @v = ();
 
 #       rosr_raw   1521529544      3    600   OK
