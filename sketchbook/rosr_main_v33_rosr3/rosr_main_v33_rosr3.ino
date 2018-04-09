@@ -1,8 +1,7 @@
 //v28,160715 Arduino compile: Sketch uses 38,026 bytes (14%) of program storage space. Maximum is 253,952 bytes.
-//Global variables use 5,753 bytes (70%) of dynamic memory, leaving 2,439 bytes for local variables. Maximum is 8,192 bytes.
-// Therefore: there is ample space for more thermistor calibrations. I'm not sure about local
-//variable space.
-
+//  Global variables use 5,753 bytes (70%) of dynamic memory, leaving 2,439 bytes for local variables. Maximum is 8,192 bytes.
+//  Therefore: there is ample space for more thermistor calibrations. I'm not sure about local
+//  variable space.
 //v23 - ComputeSSST had issues. No more!
 //v24 - Added calibrated therm coefs for ROSR2
 //v25 - ek shutter control, and menu
@@ -19,6 +18,10 @@
 //		use #include to customize for each rosr
 //v32 - reduce the menu dead time from 600 sec to 60 sec
 //      Also power on 1-min delay
+//v33 - 180408
+//      temp resolution to .01
+//      include REF internal temp
+//		NMEA header is $WIssf,vv, where ss=S/N, f=format, vv = version number (=33 for this version)
 
 //NOTE ====== INCLUDES
 #include <string.h>
@@ -37,9 +40,9 @@ Adafruit_ADS1115 ads2(0x4A);    // ad2, u14, construct an ads1115 at address 0x4
 // !! CUSTOMIZE FOR ROSR NUMBER
 // 2a means with swapped bb's
 //==========================
-#include "header1.h"  // !! programname, version, eeprom_id
-#include "t-rad_table1.h"	// !! rad<->temp parameters
-#include "Tcal_rosr1.h"  //!! BB thermistor coefs 
+#include "header3.h"  // !! programname, version, eeprom_id
+#include "t-rad_table3.h"	// !! rad<->temp parameters
+#include "Tcal_rosr3.h"  //!! BB thermistor coefs 
 
 
 //NOTE ====== DIGITAL LINES
@@ -490,7 +493,10 @@ void loop() {
 
   // OUTPUT STRING
   // header
-  strcpy(OutStr, "$WIROS,\0");
+  //strcpy(OutStr, "$WIROS,\0");
+  strcpy(OutStr,"$WI");
+  strcat(OutStr,SERIALNUMBER); strcat(OutStr,FORMAT);  //033
+  strcat(OutStr,",");strcat(OutStr,VERSION);strcat(OutStr,","); //$WI033,33,
 
   // Elapsed time, days, since startup
   ElapsedTime(buf);
@@ -584,22 +590,22 @@ void loop() {
   }
   // HOUSEKEEPING
   Tkt = KTanalogTemp(vmean[2]);
-  floatToString(buf, Tkt, 1, 4);
+  floatToString(buf, Tkt, 2, 5);  //v33
   strcat(OutStr, buf);
   strcat(OutStr, ",");
   Tktx = ThermistorTemp(vmean[11], Vref, ee.Rref[4], 0); // 0 = standard steinhart-hart coefs
-  floatToString(buf, Tktx, 1, 4);
+  floatToString(buf, Tktx, 2, 5);  //v33
   strcat(OutStr, buf);
   strcat(OutStr, ",");
   Twin = ThermistorTemp(vmean[7], Vref, ee.Rref[5], 0); // 0 = standard steinhart-hart coefs
-  floatToString(buf, Twin, 1, 4);
+  floatToString(buf, Twin, 2, 5);  //v33
   strcat(OutStr, buf);
   strcat(OutStr, ",");
   Tpwr = ThermistorTemp(vmean[6], Vref, ee.Rref[6], 0); // 0 = standard steinhart-hart coefs
-  floatToString(buf, Tpwr, 1, 4);
+  floatToString(buf, Tpwr, 2, 5);  //v33
   strcat(OutStr, buf);
   strcat(OutStr, ",");
-  ddum = vmean[9] * 4; // Vin
+  ddum = vmean[9] * 4.03 + 0.5; // Vin + diode drop     //v33
   floatToString(buf, ddum, 1, 4);
   strcat(OutStr, buf);
   strcat(OutStr, ",");
@@ -1130,7 +1136,7 @@ void    Action(char *cmd)
   else if (cmd[0] == 'k') {
     fsum1 = fsq1 = fsum2 = fsq2 = 0;
     nsum = 0;
-    Serial.println(" N  RAD  IRT");
+    Serial.println(" N  RAD  REF");
     ix = 0;
     while (! Serial.available()) {
       // index
@@ -2457,13 +2463,13 @@ void PrintProgramID(void)
 
 
 // !! s/r float ReadEncoder (float ref)
-#include "readencoder1.h" //rosr1 and rosr2
-// #include "readencoder2.h" //rosr3, 4 and above
+//#include "readencoder1.h" //rosr1 and rosr2
+#include "readencoder2.h" //rosr3, 4 and above
 
 //============================================================================
 void        ReadKT15(double *irrad, double *irtemp)
 {
-  char e[10], chrin;
+  char e[16], chrin;
   byte i, count;
   double ddum;
 
@@ -2482,11 +2488,12 @@ void        ReadKT15(double *irrad, double *irtemp)
   while (Serial3.available()) {
     Serial3.read();
   }
-  Serial3.println("TEMP");
-  i = Serial3.readBytesUntil('\n', e, 7);
-  e[i] = '\0';
+  //Serial3.println("TEMP"); //v33
+  Serial3.println("REF"); //v33
+  i = Serial3.readBytesUntil('\n', e, 11);
+  for(i=0;i<5;i++){e[i]=e[i+6];}
+  e[5] = '\0';
   *irtemp = atof(e);
-
   return;
 }
 

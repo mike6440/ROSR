@@ -57,8 +57,14 @@ I                                           -> direct connect to ROSR, "^\ q" to
     #---- ROSR OUTPUT PACKETS 
     #-----------------------------
     #--- RAW  (rosrraw)  2 sec output from ROSR
-$WIROS,etime,drum,KT,Tkt,adc0,adc1,adc2,adc3,adc4,adc5,adc6,adc7,adc8,adc9,adc10,
-    adc11,vref,t11,t12,t21,t22,pit,rol,Tkt,Tktx,Twin,Tpwr,Vin,vrain,sec*chk<cr><lf>
+$WIssf,vv,etime,drum,RAD,REF,adc0,adc1,adc2,adc3,adc4,adc5,adc6,adc7,
+adc8,adc9,adc10,adc11,vref,t11,t12,t21,t22,pit,rol,Tanalog,Tktcase,Twindow,
+Tpwr,Vin,vrain,sec*chk<cr><lf>
+where ss=serialnumber, f = format number, vv=sw version number
+example:
+$WI033,33,00.002314,135.00, 159367,24.47,2.727,2.731,0.143,2.467,1.838,1.833,2.040,2.708
+,0.815,0.564,-0.001,2.679,4.933,19.74,19.76,38.45,38.49,-0.0,-0.8,-57.10,20.76,20.18,
+33.88, 2.8,-0.0,  0*78
 
     #--- AV  (rosrav) 280 sec output from ROSR
 $WIRAV,etime,vav0,vav1,vav2,vav3,k0,ksd0,k1,ksd1,k2,ksd2,k3,ksd3,t11,tsd11,t12,tsd12,

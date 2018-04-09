@@ -1,0 +1,12 @@
+                                      bb11  bb12  0-100 5ref/2  bb21  bb22  Tpwr   Twin    10K   bat/4 rain   ktcase  adc3*2  
+$WIROS,etime,    drum,   RAD,   TEMP, adc0, adc1, adc2, adc3,   adc4, adc5, adc6,  adc7,   adc8, adc9, adc10, adc11,  vref,   t11,  t12,  t21,  t22,   pit, rol,   Tanalog,Tktcase,Twindow,Tpwr, Vin, vrain, sec*chk<cr><lf>
+$WIROS,00.003336,135.05, 245320,48.27,2.088,2.090,0.223,2.460,  1.461,1.457,-0.000,2.034,  0.789,0.532,-0.001,2.010,  4.921,  32.71,32.72,47.81,47.86, 3.7, 5.6,   -33.0,  34.4,   33.9,   0.0,  2.1, -0.0,  0  *42
+After repair
+$WIROS,00.000543,265.02, 153276,16.48,2.889,2.893,0.138,2.468,  2.569,2.560,2.316,2.882,  0.568,0.568,-0.001,2.870,   4.937,  16.56,16.59,23.00,23.07, 3.9,-20.0,  -58.7,  17.0,   16.8,   28.1, 2.3, -0.0,  0*44
+
+Above line is from Spurs 2016
+
+1. adc6, Tpwr is missing.  This is the thermistor on the Cincon.  J6/1 - 2 -->> repaired a shorted wire
+
+2. adc9 = vin/4 should be 3.7 approx.
+   
