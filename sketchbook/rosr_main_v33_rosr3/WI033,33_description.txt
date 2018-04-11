@@ -1,0 +1,50 @@
+This is the raw record that comes from the ROSRapproximately each 2 sec. The new 
+format (3) has the following enhancements:
+1. Header now includes serial number, format ID and software version number.
+2. The "REF" field provides the KT15 internal reference temperature.
+3. The miscellaneous temperatures, Tktcase, Twin, etc. are reported to 0.01C. 
+
+ WIssf,vv etime     drum     RAD   REF   bb11   bb12 KT15+ RF/2  bb21  bb22  pwr   
+$WI033,33,00.000119,325.02, 198747,24.40,2.729,2.732,0.180,2.467,1.847,1.842,1.995,
+
+ win    TKT15+ VIN/4  vrain kts   vref   T11  T12   T21    T22   pit  rol  KT15+ Tktcase 
+2.709,0.710,  0.563,-0.001,2.674,4.933,19.71,19.74,38.24,38.28, 0.0,-0.7,-45.88,20.86,
+
+Twin   Tpwr  Vin  Vrain Sec Chk
+20.18,34.86, 2.8,-0.0,  0*24
+
+WI			Weather Instrument
+ss			Serial number, 03
+f			Format identifier, 1-F, currently 3
+vv			Software version number, 33
+etime		Elapsed time since power, dd.hhmmss
+drum		Drum angle, typically [265,325,45,135] measured from zenith. 
+RAD			KT15 digital output for RAD command
+REF			KT15 digital output for REF command. This is the internal ref temperature.
+bb11		volts at Blackbody 1, thermistor 1.
+bb12		volts at Blackbody 1, thermistor 2.
+KT15+		volts at 100 ohm resistor for KT15 0-100 ma current loop.
+RF/2		+5 ref voltage in a 10K-10K resistor divider. 
+bb21		volts at Blackbody 2, thermistor 1.
+bb22		volts at Blackbody 2, thermistor 2.
+pwr			voltage at thermistor mounted on the Power regulator. 
+win			voltage at thermistor mounted in the body at the window. 
+TKT15+		not used. A 10K resistor is used.
+VIN/4		Input voltage divided by 4.
+vrain		Voltage of the rain detector divided by 4. 0 or 1.1 if raining.
+kts			Voltage of thermistor mounted on KT15 case.
+vref		2 * RF/2 voltage, ~5.0. Used in thermistor calculation.
+T11			bb11 temperature with precision SHH coefficients.
+T12			bb12 temperature with precision SHH coefficients.
+T21			bb21 temperature with precision SHH coefficients.
+T22			bb22 temperature with precision SHH coefficients.
+pit			pitch angle, positive for bow up, deg.
+rol			roll angle, positive for port up, deg.
+KT15+		Computed target from KT15 analog out.
+Tktcase		KT15 case temperature from external thermistor.
+Twin		Window temperature from win thermistor
+Tpwr		Temperature of the case of the power regulator.
+Vin			Input voltage
+Vrain		Rain sensor voltage
+Sec			Seconds to wait after rain stops before flap opens.
+Chk			NMEA checksum

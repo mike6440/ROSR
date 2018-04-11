@@ -1,4 +1,0 @@
-NEEDED UPGRADES
-
-1. CHANGE "TEMP" TO "AMB" on ReadKT15()
-
