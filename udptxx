@@ -21,7 +21,7 @@ if($#ARGV < 0){
 	$serverip=shift();
 	$serverport=shift();
 }
-print"Socket -- $serverip $serverport\n";
+#print"Socket -- $serverip $serverport\n";
 
 # auto-flush on socket
 $| = 1;
@@ -43,9 +43,7 @@ my $socket = new IO::Socket::INET (
     PeerPort => $serverport,
     Proto => 'udp',
 );
-#print"socktx connecting $serverip $serverport\n";
 die "cannot connect to the server $!\n" unless $socket;
-#print "connected to the server\n";
 
 
 my ($fn, $str, @w);
@@ -56,30 +54,36 @@ if( -f $fn ){
 	#print"$fn exists.\n";
 	$str=`tail -1 $fn`;
 	chomp($str);
-	print"tail=$str\n";
-	@w=split /[, ]+/, $str;
-	$str=sprintf "\$ROSST,$w[1]$w[2]$w[3],$w[4]$w[5]$w[6],";
-	#test gps
-	if($w[7]<-90 || $w[8]<-180 || $w[7]>90 || $w[8]>360 ){
-		$str=$str.'I,,,,,';
-	} else {
-		$str=$str."V,$w[7],$w[8],$w[9],$w[10],";
-	}
-	# test ssst
-	if($w[11]<0 || $w[11]>50){
-		$str=$str.'I,*';
-	} else {
-		$str=$str."V,$w[11]*";
-	}
-	#$str=sprintf "\$ROSST,$w[1]$w[2]$w[3],$w[4]$w[5]$w[6],V,$w[7],$w[8],$w[9],$w[10],V,$w[11]*";
+    if($str =~ /[a-zA-Z]/)
+    {
+        print"Bad record\n";
+        $str=sprintf"\$ROSST,%s,M,,,,,M,*",dtstr(now(),'csv'); # bad record
+    }
+    else
+    {
+	    @w=split /[, ]+/, $str;
+	    $str=sprintf "\$ROSST,$w[1]$w[2]$w[3],$w[4]$w[5]$w[6],";
+	    #test gps
+	    if($w[7]<-90 || $w[8]<-180 || $w[7]>90 || $w[8]>360 ){
+		    $str=$str.'I,,,,,';
+	    } else {
+		    $str=$str."V,$w[7],$w[8],$w[9],$w[10],";
+	    }
+	    # test ssst
+	    if($w[11]<0 || $w[11]>50){
+		    $str=$str.'I,*';
+	    } else {
+		    $str=$str."V,$w[11]*";
+	    }
+	    #$str=sprintf "\$ROSST,$w[1]$w[2]$w[3],$w[4]$w[5]$w[6],V,$w[7],$w[8],$w[9],$w[10],V,$w[11]*";
+    }
 }
 else{
-	$str=sprintf"\$ROSST,%s,M,,,,,M,*",dtstr(now(),'csv');
+	$str=sprintf"\$ROSST,%s,M,,,,,M,*",dtstr(now(),'csv');  # bad record
 }
 # make the packet
 #$str='$GPRMC,070951,A,3356.2135,N,13055.5039,E,000.1,051.6,160915,007.1,W*';# == 64';
 my $chk=NmeaChecksum($str);
-print"return $chk\n";
 $str=$str.$chk."\r\n";
 print"$str";
 

@@ -1,6 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -X
 # see https://www.thegeekstuff.com/2010/07/perl-tcp-udp-socket-programming/
-
+# v6 
+#  call   udprxx [ip port]
+#              or
+#         udprss  ->> ip and port from setupfile
 # SERVER MODULE WAITS FOR A REQUEST
 
 use lib $ENV{DAQLIB};
