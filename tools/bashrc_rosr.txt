@@ -1,7 +1,7 @@
-# BASH SETUP FOR ISAR3
-# edit 20170619T145359Z 
+# BASH SETUP
+# edit 20180415T181625Z 
 #
-export PS1='\w/$ '
+##export PS1='\w/$ ' 
 export EDITOR="vi"
 alias Top="top -u -s5"
 alias Date='date -u "+%Y %m %d %H %M %S Z"'
@@ -29,8 +29,8 @@ export SETUPFILE=$DAQSWFOLDER"/setup/su.txt"
 
 # TEST CALLS
 alias I='cd $DAQSWFOLDER; echo "NOTE: ^\ q to exit";	./term_to_rosr $SETUPFILE'
-alias N='cd $DAQSWFOLDER; 	./term_to_sbd  $SETUPFILE'
-alias P='cd $DAQSWFOLDER; 	./term_to_gps  $SETUPFILE'
+alias N='cd $DAQSWFOLDER; ./term_to_sbd  $SETUPFILE'
+alias P='cd $DAQSWFOLDER; ./term_to_gps  $SETUPFILE'
 
 alias Help="help"
 alias help="less help.txt"
@@ -50,30 +50,31 @@ gpsavg () {
 	tail $xx
 }
 		# RAW
-gpsraw () {
+gpsraw () { 
 	cd $DAQSWFOLDER;
-	echo "^c to end"
-	tail `LastDataFolder gps_raw`
+	echo "NOTE: ^c to end"
+	tail -f `LastDataFolder gps_raw`
 }
+alias Gps="gpsraw"
 rosrraw () {
 	cd $DAQSWFOLDER;
-	echo "^c to end"
+	echo "NOTE: ^c to end"
 	xx=`LastDataFolder rosr_raw`
 	tail -f $xx
 }
 alias Raw="rosrraw";
 rosrav () {
 	cd $DAQSWFOLDER;
-	echo "^c to end"
+	#echo "^c to end"
 	tail `LastDataFolder rosr_av`
 }
 alias Av="rosrav";
 rosrst () {
 	cd $DAQSWFOLDER;
-	echo "^c to end"
+	#echo "^c to end"
 	tail `LastDataFolder rosr_sst`
 }
-alias St="rosrst";
+alias Sst="rosrst";
 
 	# SCREEN
 alias isscreen='screen -ls'
@@ -85,26 +86,28 @@ alias GG='cd $DAQSWFOLDER;  Z_gps `cat tmp`'
 
 		#START SCREEN
 Start () {
-	echo "END DATA COLLECTION"
-	KillScreen > /dev/null 2>&1;
-	cd $DAQSWFOLDER; ./PrepareForRun; export RUNSETUPFILE=`cat tmp`;
-	crontab $DAQSWFOLDER/tools/crontab_rosr.txt
-	screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_rosr.txt
-	screen -S ROSR -p 1 -X stuff "GG$(printf \\r)"
-	screen -S ROSR -p 2 -X stuff "G$(printf \\r)"
-	isscreen
+    touch ~/tmp/daqstart;
+    KillScreen > /dev/null 2>&1;
+    cd $DAQSWFOLDER; 
+    PrepareForRun; 
+    export RUNSETUPFILE=`cat tmp`;
+    crontab $DAQSWFOLDER/tools/crontab_rosr.txt
+    screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_rosr.txt
+    screen -S ROSR -p 2 -X stuff "GG$(printf \\r)"
+    screen -S ROSR -p 1 -X stuff "G$(printf \\r)"
+    isscreen
 }
 Startcal () {
 	KillScreen;
 	cd $DAQSWFOLDER; ./PrepareForRun; export RUNSETUPFILE=`cat tmp`;
 	screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_rosr.txt
-	screen -S ROSR -p 2 -X stuff "G$(printf \\r)"
+	screen -S ROSR -p 1 -X stuff "G$(printf \\r)"
 }
 alias Startrosr="Start";
 alias Startrosrcal="Startcal";
 
 	#STOP DATA COLLECTION SCREEN
-alias Stop="KillScreen > /dev/null 2>&1; Stopcron > /dev/null 2>&1; Cleanuprosr > /dev/null 2>&1; echo 'DAQ Stopped'"
+alias Stop="rm ~/tmp/daqstart > /dev/null 2>&1; KillScreen > /dev/null 2>&1; Stopcron > /dev/null 2>&1; Cleanuprosr > /dev/null 2>&1; echo 'DAQ Stopped'"
 alias Stoprosr="Stop";
 
 	#START AND STOP CRONTAB
@@ -129,4 +132,14 @@ alias Archive="ArchiveRosr";
 alias Wipe="ClearRosrData";
 
 cd $DAQSWFOLDER
+
+alias bootlog="tail ~/tmp/bootlog"
+# restart set AutoStartFlag in /etc/rc.local (ubuntu > 16.04)
+if [ -e ${HOME}/tmp/AutoStartFlag ] 
+    then
+    rm ${HOME}/tmp/AutoStartFlag
+    dd=$(date -u "+%Y%m%d,%H%M%SZ")
+    echo "Bootbash  $dd" >> ${HOME}/tmp/bootlog
+    ifdaqstart
+fi
 

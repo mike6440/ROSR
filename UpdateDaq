@@ -28,17 +28,17 @@ fi
 
 if [ $chk -eq 0 ] > /dev/null ; then
 	echo REBOOT
-	echo "REBOOT." >> $DAQDATAFOLDER/daqlog
-		# STOPPRP
-	#$DAQSWFOLDER/KillScreen >> $DAQDATAFOLDER/daqlog
-	#$DAQSWFOLDER/Cleanuprosr >> $DAQDATAFOLDER/daqlog
+	echo "UPDATEDAQ REBOOT ." >> $DAQDATAFOLDER/daqlog
+		# STOP
+	$DAQSWFOLDER/KillScreen >> $DAQDATAFOLDER/daqlog
+	$DAQSWFOLDER/Cleanuprosr >> $DAQDATAFOLDER/daqlog
 		# STARTPRP
-	#$DAQSWFOLDER/PrepareForRun >> $DAQDATAFOLDER/daqlog
-	#screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_rosr.txt
+	$DAQSWFOLDER/PrepareForRun >> $DAQDATAFOLDER/daqlog
+	screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_rosr.txt
 		# START PROCESSES
 	#screen -S ROSR -p 1 -X stuff "bash$(printf \\r)"
-	#screen -S ROSR -p 1 -X stuff "G$(printf \\r)"
-	#screen -S ROSR -p 2 -X stuff "GG$(printf \\r)"
+	screen -S ROSR -p 1 -X stuff "G$(printf \\r)"
+	screen -S ROSR -p 2 -X stuff "GG$(printf \\r)"
 	exit 1;
 fi
 exit 0;

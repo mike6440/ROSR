@@ -14,24 +14,24 @@ use perltools::MRtime;
 
 	## DATA PATH
 my $datapath="$ENV{HomePath}/swmain/apps/ROSR";
-print"data path = $datapath\n";
+#print"data path = $datapath\n";
 
 	## ARCHIVE PATH
 my $archivepath="$ENV{HomePath}/rosrdata";
-print"Archive path=$archivepath\n";
+#print"Archive path=$archivepath\n";
 if(! -d $archivepath){
-	print"Create $archivepath\n";
+	#print"Create $archivepath\n";
 	`mkdir $archivepath`;
 }
 
 	## TAR FILE NAME
 my $tarname=sprintf "rosrarchive_%s.tar.gz",dtstr(now(),'iso');
-print"tarname=$tarname\n";
+print"ArchiveRosr $tarname\n";
 
 
 	## TAR COMMAND
 my $cmd = sprintf "cd $datapath; tar -zcf $archivepath/$tarname .";
-print"$cmd\n";
+#print"$cmd\n";
 system $cmd;
 
 exit 0;

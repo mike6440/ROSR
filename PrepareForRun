@@ -23,16 +23,12 @@ use lib "$ENV{DAQLIB}";
 use perltools::MRtime;
 use perltools::MRutilities;
 
-# print"home = $ENV{HOME}\n";
-# print"data = $ENV{DAQDATAFOLDER}\n";
-
 $setupfile=$ENV{SETUPFILE};
-print"setupfile = $setupfile\n";
 $e_cal = FindInfo($setupfile,'CALIBRATION EMISSIVITY', ':');  # black body emissivity
 if($e_cal == 0){
-	print"e_cal = $e_cal, RUN.\n";
+	print"PrepareForRun: e_cal = $e_cal, RUN.\n";
 } else {
-	print"e_cal = $e_cal, CALIBRATION.\n";
+	print"PrepareForRun: e_cal = $e_cal, CALIBRATION.\n";
 }
 
 #=========================
@@ -45,8 +41,6 @@ if ( ! -d $fndata ) {
 	#print"DATA FOLDER IS MISSING, CREATE NEW\n";
 	`mkdir $fndata`;
 }
-# print"MAIN DATA FOLDER: $fndata\n";
-
 
 #========================
 # CREATE THE NEW DATA FOLDER FOR THIS RUN
@@ -73,15 +67,12 @@ $fsu = sprintf "%s/su_%s.txt", $fndata, dtstr($dt0,'iso');
 
 # HEADER LINE
 $cmd=sprintf "perl -pi -e 's!: (.+)!: %s!g if /^THIS FILE/' %s", $fsu, $fsu;
-#print"\ncmd = $cmd\n";
 system $cmd;
 
 # OUT PATH
 $cmd=sprintf "perl -pi -e 's!: (.+)!: %s!g if /^RT OUT PATH/' %s", $fndata, $fsu;
 #print"\ncmd = $cmd\n";
 system $cmd;
-
-#printf"======= READY, %s==========\n", dtstr($dt0,'iso');
 
 # We want to save this to export it from the shell.
 open(F,'>tmp'); print F "$fsu\n"; close F;

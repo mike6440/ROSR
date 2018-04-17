@@ -1,0 +1,31 @@
+#!/bin/bash
+# This is called by bashrc hence at boottime
+
+if [ -e ~/tmp/daqstart ]
+then
+        # daq was running at reboot.
+    echo `date -u "+%y%m%d,%H%M%Sz"`--Backup data and re-start DAQ >> ~/tmp/bootlog
+    #echo `date -u "+%y%m%d,%H%M%Sz"`--Backup data and re-start DAQ
+    
+        # STOP
+    crontab -r 2>/dev/null
+    $DAQSWFOLDER/KillScreen >> ~/tmp/bootlog
+    $DAQSWFOLDER/ArchiveRosr >> ~/tmp/bootlog
+    $DAQSWFOLDER/ClearRosrData y >> ~/tmp/bootlog
+        # START
+    $DAQSWFOLDER/PrepareForRun >> ~/tmp/bootlog
+    echo SCREEN create >> ~/tmp/bootlog
+    screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_rosr.txt
+        # START PROCESSES
+    echo CRONTAB create >> ~/tmp/bootlog
+    crontab $DAQSWFOLDER/tools/crontab_rosr.txt  2>/dev/null
+    echo BEGIN DAQ >> ~/tmp/bootlog
+    #screen -S ROSR -p 0 -X stuff "bash$(printf \\r)"
+    screen -S ROSR -p 1 -X stuff "G$(printf \\r)"
+    screen -S ROSR -p 2 -X stuff "GG$(printf \\r)"
+    #screen -l >> ~/tmp/bootlog
+else
+	echo `date -u "+%y%m%d,%H%M%Sz"`--REBOOT. No DAQ. >> ~/tmp/bootlog
+fi
+
+

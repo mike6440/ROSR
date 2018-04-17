@@ -1,3 +1,4 @@
+
 #Add this to the end of any .bashrc on any new unix/linux pc.
 #edit 20170726T035408Z
 
@@ -14,7 +15,11 @@ export DAQ="ROSR"
     # PERL LIBRARY =============================
 export MYLIB="$HomePath/swmain/perl"
 
-export PS1='\w/$ '
+##export PS1='\w/$ '
+if [ -n "$SSH_CLIENT" ]; then text=" ssh-session"
+fi
+export PS1='\[\e[1;32m\]\u@\h:\w${text}$\[\e[m\] '
+
 
 	# DAQPATH
 [ -d $HOME/Dropbox ] \
