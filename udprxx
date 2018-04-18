@@ -34,7 +34,7 @@ my $sock = new IO::Socket::INET (
 	#LocalHost => $serverip,
 	LocalPort => $serverport,
 	Proto => 'udp',
-	Listen => 1,
+	#Listen => 1,
 	Reuse => 1
 ) or die "[!!] Could not create socket: $!\n";
 
