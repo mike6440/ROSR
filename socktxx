@@ -3,6 +3,11 @@
 # Builds the $ROSST packet and sends through the socket.
 # sends $ROSST,%s,M,,,,,M,*5A if there is no data. 
 
+# Input: 
+#  $#ARGV=-1    socktxx (no args) :: uses su.txt for ip and port; computes ROSST string
+#   $#ARGV=0    socktxx "string" :: uses su.txt for ip and port; sends "string"
+#   $#ARGV=1    socktxx ip port  :: computes ROSST string and send it to ip/port.
+#   $#ARGV=2    socktxx ip port "string" :: sends "string" to ip/port.
 
 use lib $ENV{DAQLIB};
 use perltools::MRtime;
@@ -14,14 +19,18 @@ use perltools::MRutilities;
 use IO::Socket::INET;
 
 # ip# and port from su.txt or command line.
-if($#ARGV < 0){
+if($#ARGV == -1 || $#ARGV == 0)
+{
 	$serverip=FindInfo(`cat tmp`,'TELNET SERVER IP',':');
 	$serverport=FindInfo(`cat tmp`,'TELNET SERVER PORT',':');
-} else {
+} 
+elsif($#ARGV == 1 || $#ARGV == 2) 
+{
 	$serverip=shift();
 	$serverport=shift();
 }
-#print"Socket -- $serverip $serverport\n";
+else {}
+print"[!!]Socket -- $serverip $serverport\n";
 
 # auto-flush on socket
 $| = 1;
@@ -32,38 +41,38 @@ my $socket = new IO::Socket::INET (
     PeerPort => $serverport,
     Proto => 'tcp',
 );
-#print"socktx connecting $serverip $serverport\n";
-die "cannot connect to the server $!\n" unless $socket;
-#print "connected to the server\n";
+die "Cannot connect to the server $!\n" unless $socket;
 
+# DEFINE $str
 my ($fn, $str, @w);
-# data to send to a server
-$fn=`LastDataFolder rosr_avg`;
-#print"fn=$fn\n";
-if( -f $fn ){
-	#print"$fn exists.\n";
-	$str=`tail -1 $fn`;
-	chomp($str);
-	print"tail=$str\n";
-	@w=split /[, ]+/, $str;
-	$str=sprintf "\$ROSST,$w[1]$w[2]$w[3],$w[4]$w[5]$w[6],";
-	#test gps
-	if($w[7]<-90 || $w[8]<-180 || $w[7]>90 || $w[8]>360 ){
-		$str=$str.'I,,,,,';
-	} else {
-		$str=$str."V,$w[7],$w[8],$w[9],$w[10],";
+if($#ARGV == 0 || $#ARGV == 2){
+	$str=shift();
+} else {
+	# data to send to a server
+	$fn=`LastDataFolder rosr_avg`;
+	if( -f $fn ){
+		$str=`tail -1 $fn`;
+		chomp($str);
+		@w=split /[, ]+/, $str;
+		$str=sprintf "\$ROSST,$w[1]$w[2]$w[3],$w[4]$w[5]$w[6],";
+		#test gps
+		if($w[7]<-90 || $w[8]<-180 || $w[7]>90 || $w[8]>360 ){
+			$str=$str.'I,,,,,';
+		} else {
+			$str=$str."V,$w[7],$w[8],$w[9],$w[10],";
+		}
+		# test ssst
+		if($w[11]<0 || $w[11]>50){
+			$str=$str.'I,*';
+		} else {
+			$str=$str."V,$w[11]*";
+		}
 	}
-	# test ssst
-	if($w[11]<0 || $w[11]>50){
-		$str=$str.'I,*';
-	} else {
-		$str=$str."V,$w[11]*";
+	else{
+		$str=sprintf"\$ROSST,%s,M,,,,,M,\*",dtstr(now(),'csv');
 	}
-	#$str=sprintf "\$ROSST,$w[1]$w[2]$w[3],$w[4]$w[5]$w[6],V,$w[7],$w[8],$w[9],$w[10],V,$w[11]*";
 }
-else{
-	$str=sprintf"\$ROSST,%s,M,,,,,M,*",dtstr(now(),'csv');
-}
+
 # make the packet
 #$str='$GPRMC,070951,A,3356.2135,N,13055.5039,E,000.1,051.6,160915,007.1,W*';# == 64';
 $str=$str.NmeaChecksum($str)."\r\n";
