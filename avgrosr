@@ -2,8 +2,8 @@
 #avgrosr_v3
 
 my $PROGRAMNAME = 'avgrosr';
-my $VERSION = '5';  
-my $EDITDATE = '160719'; #'151006'; #'150719'; '150209';
+my $VERSION = '7';  
+my $EDITDATE = '180420';
 # DAQ PROCESSING OF ROSR DATA 
 #v01 -- taken from avgisar, v17.
 #v01a -- flexible for port and stbd install
@@ -12,6 +12,8 @@ my $EDITDATE = '160719'; #'151006'; #'150719'; '150209';
 #v4 -- print out avg problem
 #v5 -- used the 'my' statement. I am not sure why.  Also add fixedtiltflag 
 #v6 -- choice of socktxx or udptss
+#v7 tcp/udp header
+
 # EXAMPLE OF STRING FROM ROSR
 #2015,04,20,21,41,05,1429566060,47.603382,-122.288127,0.05,170,$WIROS,00.004622,265.05, 156445,17.98,2.836,2.841,0.391,2.469,2.155,2.154,1.730,2.764,4.096,3.558,-0.000,4.096,4.938,17.69,17.71,31.55,31.54,-2.4,-1.1,17.2,200.0,19.1,41.0,14.2,-0.0,  0*79
 #2015,04,20,21,37,42,1429565858,47.603372,-122.288128,0.00,170,$WIROS,00.004300,325.05, 189645,30.31,2.844,2.848,0.432,2.469,2.165,2.164,1.741,2.773,4.096,3.558,-0.000,4.096,4.938,17.55,17.57,31.34,31.33,-2.4,-1.1,29.5,200.0,19.0,40.7,14.2,-0.0,  0*7D
@@ -40,10 +42,8 @@ $Nrecs=0;
 # FIND THE SETUP FILE
 #=======================
 if ( $#ARGV == 0 ) {
-	print "read setup file from command line\n";
 	$setupfile = shift();
 } else {
-	print"read setup file from environment\n";
 	$setupfile = $ENV{SETUPFILE};
 }
 if ( ! -f $setupfile ) {
@@ -52,9 +52,8 @@ if ( ! -f $setupfile ) {
 }
 print "SETUPFILE = $setupfile\n";
 my $pgmstart=now();
-printf "Run time = %s\n", dtstr(now(), 'ssv');
+#printf "Run time = %s\n", dtstr(now(), 'ssv');
 
-my $str;
 
 #===================
 # DEFINE OUT PATH
@@ -83,19 +82,23 @@ if($e_cal == 0){
 # TELNET SERVER
 #======================
 $telnetserverip = FindInfo($setupfile,'TELNET SERVER IP',':');
-print"TELNET SERVER IP = $telnetserverip\n";
+#print"TELNET SERVER IP = $telnetserverip\n";
 if($telnetserverip==0){print"No telnet socket output\n"}
 else{
 	$telnetserverport = FindInfo($setupfile,'TELNET SERVER PORT',':');
-	print"TELNET SERVER PORT = $telnetserverport\n";
+	#print"TELNET SERVER PORT = $telnetserverport\n";
 	$socketprogram = FindInfo($setupfile,'TELNET PROGRAM',':');  # v6 udp or sock
-	print"TELNET PROGRAM = $socketprogram\n";                    # v6
+	#print"TELNET PROGRAM = $socketprogram\n";                    # v6
 }
 
+$str="\"PROGRAM: $PROGRAMNAME V$VERSION, Edit $EDITDATE,  RUN  ".dtstr(now(),'short')."\""; 
+if($telnetserverip == 0){}
+else{
+	system "$socketprogram $telnetserverip $telnetserverport $str";
+}   # v7
+
 #----------------- HEADER ----------------
-$header = "PROGRAM: $PROGRAMNAME (Version $VERSION, Editdate $EDITDATE)
-RUN TIME: " . dtstr(now()) . "utc
-POINT OF CONTACT: Michael Reynolds, michael\@rmrco.com\n";
+$header = "PROGRAM: $PROGRAMNAME (Version $VERSION, Editdate $EDITDATE)  RUN TIME: " . dtstr(now()) . "utc  POINT OF CONTACT: Michael Reynolds, michael\@rmrco.com\n";
 
 $expname = FindInfo($setupfile,'EXPERIMENT NAME', ': ');
 $header = $header."EXPERIMENT NAME: $expname\n";
