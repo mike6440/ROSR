@@ -1,8 +1,8 @@
 # BASH SETUP
 # edit 20180415T181625Z 
 #
-##export PS1='\w/$ ' 
-export EDITOR="vi"
+
+export EDITOR="vim"
 alias Top="top -u -s5"
 alias Date='date -u "+%Y %m %d %H %M %S Z"'
 
@@ -24,67 +24,67 @@ if [ $? -eq 1 ] ; then
     export PATH
 fi
 
-	# SETUP FILE NAME
+    # SETUP FILE NAME
 export SETUPFILE=$DAQSWFOLDER"/setup/su.txt"
 
 # TEST CALLS
-alias I='cd $DAQSWFOLDER; echo "NOTE: ^\ q to exit";	./term_to_rosr $SETUPFILE'
+alias I='cd $DAQSWFOLDER; echo "NOTE: ^\ q to exit";    ./term_to_rosr $SETUPFILE'
 alias N='cd $DAQSWFOLDER; ./term_to_sbd  $SETUPFILE'
 alias P='cd $DAQSWFOLDER; ./term_to_gps  $SETUPFILE'
 
 alias Help="help"
 alias help="less help.txt"
 
-		# CHECK DATA
+        # CHECK DATA
 rosravg () {
-	cd $DAQSWFOLDER;
-	xx=`LastDataFolder rosr_avg`
-	head -1 $xx
-	tail $xx
+    cd $DAQSWFOLDER;
+    xx=`LastDataFolder rosr_avg`
+    head -1 $xx
+    tail $xx
 }
 alias Avg="rosravg";
 gpsavg () {
-	cd $DAQSWFOLDER;
-	xx=`LastDataFolder gps_avg`
-	head -1 $xx
-	tail $xx
+    cd $DAQSWFOLDER;
+    xx=`LastDataFolder gps_avg`
+    head -1 $xx
+    tail $xx
 }
-		# RAW
+        # RAW
 gpsraw () { 
-	cd $DAQSWFOLDER;
-	echo "NOTE: ^c to end"
-	tail -f `LastDataFolder gps_raw`
+    cd $DAQSWFOLDER;
+    echo "NOTE: ^c to end"
+    tail -f `LastDataFolder gps_raw`
 }
 alias Gps="gpsraw"
 rosrraw () {
-	cd $DAQSWFOLDER;
-	echo "NOTE: ^c to end"
-	xx=`LastDataFolder rosr_raw`
-	tail -f $xx
+    cd $DAQSWFOLDER;
+    echo "NOTE: ^c to end"
+    xx=`LastDataFolder rosr_raw`
+    tail -f $xx
 }
 alias Raw="rosrraw";
 rosrav () {
-	cd $DAQSWFOLDER;
-	#echo "^c to end"
-	tail `LastDataFolder rosr_av_`
+    cd $DAQSWFOLDER;
+    #echo "^c to end"
+    tail `LastDataFolder rosr_av_`
 }
 alias Av="rosrav";
 rosrst () {
-	cd $DAQSWFOLDER;
-	#echo "^c to end"
-	tail `LastDataFolder rosr_sst`
+    cd $DAQSWFOLDER;
+    #echo "^c to end"
+    tail `LastDataFolder rosr_sst`
 }
 alias Sst="rosrst";
 
-	# SCREEN
+    # SCREEN
 alias isscreen='screen -ls'
 alias gtscreen='screen -S ROSR -d -r'
 
-	# RUN CALLS
+    # RUN CALLS
 alias G='cd $DAQSWFOLDER;  Z_rosr `cat tmp`'
 alias GG='cd $DAQSWFOLDER;  Z_gps `cat tmp`'
 
-		#START SCREEN
+        #START SCREEN
 Start () {
     touch ~/tmp/daqstart;
     KillScreen > /dev/null 2>&1;
@@ -98,29 +98,29 @@ Start () {
     isscreen
 }
 Startcal () {
-	KillScreen;
-	cd $DAQSWFOLDER; ./PrepareForRun; export RUNSETUPFILE=`cat tmp`;
-	screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_rosr.txt
-	screen -S ROSR -p 1 -X stuff "G$(printf \\r)"
+    KillScreen;
+    cd $DAQSWFOLDER; ./PrepareForRun; export RUNSETUPFILE=`cat tmp`;
+    screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_rosr.txt
+    screen -S ROSR -p 1 -X stuff "G$(printf \\r)"
 }
 alias Startrosr="Start";
 alias Startrosrcal="Startcal";
 
-	#STOP DATA COLLECTION SCREEN
+    #STOP DATA COLLECTION SCREEN
 alias Stop="rm ~/tmp/daqstart > /dev/null 2>&1; KillScreen > /dev/null 2>&1; Stopcron > /dev/null 2>&1; Cleanuprosr > /dev/null 2>&1; echo 'DAQ Stopped'"
 alias Stoprosr="Stop";
 
-	#START AND STOP CRONTAB
+    #START AND STOP CRONTAB
 alias Startcron="crontab $DAQSWFOLDER/tools/crontab_rosr.txt"
 alias Stopcron="crontab -r"
 
-#		PERL LIBRARY =============================
+#       PERL LIBRARY =============================
 export DAQLIB=$MYLIB
 
-	# KERMIT RC =====================
+    # KERMIT RC =====================
 echo "prompt k>>" > ~/.kermrc
 
-	# MONITOR PROGRESS
+    # MONITOR PROGRESS
 alias rosrsbd="tail -f /tmp/sbd 2>/dev/null"
 alias Sbd="cat /tmp/sbd"
 alias sbdlog="less ../data/sbdlog"
