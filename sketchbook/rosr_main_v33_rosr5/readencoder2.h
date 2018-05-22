@@ -13,6 +13,8 @@ float ReadEncoder (float ref)
 	byte i = 0;                         // number of bytes in the buffer.
 	float angle = MISSING;
 	byte e[4];
+		// =900 for rosr1--3. For rosr4 I needed to use 1000 for reliable operation.
+	unsigned int readdelay = 1000;
 
 	while ( count < 2 )  { // test
 		// Turn to transmit 485
@@ -23,17 +25,16 @@ float ReadEncoder (float ref)
 			Serial1.read();
 		}
 		// position command -- send 0x1E
+		//Serial.print("re: ");Serial.println(EncCmd,HEX);
 		Serial1.write(EncCmd);
-		// =900 for rosr1--3. For rosr4 I needed to use 1000 for reliable operation.
-		delayMicroseconds(1000); // !! short delay for tx to complete
-		// back to receive 485
-		digitalWrite(SEITX, LOW);
+		delayMicroseconds(readdelay); // !! short delay for tx to complete
+		digitalWrite(SEITX, LOW);  // 485 -> rx
 		delay(20); // 
-		// get bytes
+			// get bytes
 		i = 0;
 		while ( Serial1.available() ) {
 			e[i] = Serial1.read();
-			//Serial.print("byte ");Serial.print(i,DEC);Serial.print(" = ");Serial.println(e[i],DEC);
+			//Serial.print("byte ");Serial.print(i,HEX);Serial.print(" = ");Serial.println(e[i],DEC);
 			i++;
 			if(i>2) break;
 		}

@@ -41,8 +41,8 @@ Adafruit_ADS1115 ads2(0x4A);    // ad2, u14, construct an ads1115 at address 0x4
 // 2a means with swapped bb's
 //==========================
 #include "header3.h"  // !! programname, version, eeprom_id
-#include "t-rad_table3.h"	// !! rad<->temp parameters
-#include "Tcal_rosr3.h"  //!! BB thermistor coefs 
+#include "t-rad_table5.h"	// !! rad<->temp parameters
+#include "Tcal_rosr5.h"  //!! BB thermistor coefs 
 
 
 //NOTE ====== DIGITAL LINES
