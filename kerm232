@@ -29,6 +29,12 @@ if {$argc == 0} {
 
 # START PROCESS -- KERMIT FOR ISAR MODEM
 spawn kermit
+expect {
+	"assword" {
+		send "r0srr0sr\n"
+	}
+	">>" { send "\n" }
+}
 set ISAR $spawn_id
 set timeout 4
 

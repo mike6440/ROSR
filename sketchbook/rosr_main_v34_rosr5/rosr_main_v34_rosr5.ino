@@ -495,9 +495,10 @@ void loop() {
 
   // OUTPUT STRING
   // header
-  //strcpy(OutStr, "$WIROS,\0");
+  // WI + SN + Format  eg "WI052" sn=05, format=2
   strcpy(OutStr,"$WI");
   strcat(OutStr,SERIALNUMBER); strcat(OutStr,FORMAT);  //033
+  // sketch version
   strcat(OutStr,",");strcat(OutStr,VERSION);strcat(OutStr,","); //$WI033,33,
 
   // Elapsed time, days, since startup
