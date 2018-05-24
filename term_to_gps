@@ -3,8 +3,9 @@
 
 # v3 141016 
 # v4 180523 -- include COM2 to mini PC
+# 20180524T030502Z
+log_user 0;
 
-log_user 0
 set setupfile "$env(DAQSWFOLDER)/setup/su.txt"
 
 #==============
@@ -45,8 +46,8 @@ if { [string first "dev" $hubip] == -1 } {
 	## OPEN THE PORT
 	send "set host $hubip $portnumber\r"
 	expect ">>"
-	send_user "set host $hubip $portnumber\n";
-
+	#send_user "set host $hubip $portnumber\n";
+	
 	## FINE TUNING TCP/IP
 	send "set tcp keepalive on\r\n"
 	expect ">>"
@@ -69,7 +70,6 @@ if { [string first "dev" $hubip] == -1 } {
 		"Conn*---"  {send_user "CONNECTED\r\n"}
 		timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
 	}
-
 	set spawn_id $PDS
 	interact
 
@@ -82,24 +82,28 @@ if { [string first "dev" $hubip] == -1 } {
 		}
 		">>" { send "\n" }
 	}
-	set ROSR $spawn_id
+	set GPS $spawn_id
 	set timeout 4
 	expect {
-		-i ROSR
+		-i GPS
 		timeout {"KERMIT FAILS TO OPEN\n"; exit 1}
 		">>"
 	}
+	
 	spawn -noecho getsetupinfo $setupfile "SERIAL GPS"
 	expect -re "(\.*)(\r)";
 	set gpscom $expect_out(1,string)
 	send_user "SERIAL GPS: $gpscom\n"
-	
+	log_user 1;
+
 	## OPEN THE PORT
+	set spawn_id $GPS
+	#send_user "set line $gpscom\n";
 	send "set line $gpscom\r"
 	expect ">>"
-	#send_user "set line $gpscom\n";
 	## SPEED
-	send "set speed 9600\r"
+	#send_user "set speed 9600\n"
+	send "set speed 9600\r\n"
 	## DUPLEX
 	send "set duplex full\r"
 	expect ">>"
@@ -121,7 +125,7 @@ if { [string first "dev" $hubip] == -1 } {
 		"Conn*---"  {send_user "TTY CONNECTED\n"}
 		timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
 	}
-	set spawn_id $ROSR
+	set spawn_id $GPS
 	interact
 }
 exit; 

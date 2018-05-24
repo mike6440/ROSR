@@ -2,7 +2,7 @@
 #kermit_serial_connect.ex
 #Note: the file .kermrc has the command "prompt k>>"
 
-set log_user 0
+log_user 0
 
 ## DEFINE THE PORTS
 set argc [llength $argv]
