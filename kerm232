@@ -14,10 +14,10 @@ set argc [llength $argv]
 #	puts "--------------------------------"
 
 if {$argc == 0} {
-	set inport [exec FindUSBPort]
+	set inport [exec FindCOMPort]
 	set bd 9600
 } elseif {$argc == 1} {
-	set inport [exec FindUSBPort]
+	set inport [exec FindCOMPort]
 	set bd [lindex $argv 0];
 } else {
 	set inport [lindex $argv 0]
@@ -28,7 +28,7 @@ if {$argc == 0} {
 
 
 # START PROCESS -- KERMIT FOR ISAR MODEM
-spawn kermit
+spawn sudo kermit
 expect {
 	"assword" {
 		send "r0srr0sr\n"

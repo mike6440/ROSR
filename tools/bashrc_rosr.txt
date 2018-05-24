@@ -28,7 +28,7 @@ fi
 export SETUPFILE=$DAQSWFOLDER"/setup/su.txt"
 
 # TEST CALLS
-alias I='cd $DAQSWFOLDER; echo "NOTE: ^\ q to exit";    ./term_to_rosr $SETUPFILE'
+alias I='cd $DAQSWFOLDER; echo "NOTE: ^\ q to exit";    ./kerm232'
 alias N='cd $DAQSWFOLDER; ./term_to_sbd  $SETUPFILE'
 alias P='cd $DAQSWFOLDER; ./term_to_gps  $SETUPFILE'
 

@@ -1,87 +1,129 @@
 #!/usr/bin/expect --
-#term_to_isar 
 #Note: the file .kermrc has the command "prompt k>>"
-#111221 - remove ping
 
-# KERMIT CONNECTION TO PDS752 COM 1
+# v3 141016 
+# v4 180523 -- include COM2 to mini PC
 
 log_user 0
-#==============
-# READ THE COMMAND LINE
-# COMMANDS
-# 1. SETUP FILE PATH AND NAME, /setup/test_setup.txt
-# 2. SIMULATE- dddd where eac d=0/1
-#      order of d's is [cdu][rad][tcm][gps][wxt] "crcgw"
-#==============
-set argc [llength $argv]
-# NO CMD LINE ARGS ==>> HELP
-if { $argc == 0} {
-	set setupfile "$env(DAQSWFOLDER)/setup/su.txt"
-} else {
-	# SETUP FILE DEFINED
-	set setupfile [lindex $argv 0]
-	
-	## SEE IF THE SETUP FILE EXISTS
-	if [catch {open $setupfile} sufile] {
-		puts "Setup file open fails, exit 1"
-		exit 1
-	} else {
-		puts "SETUP FILE $setupfile EXISTS"
-	}
-}
+set setupfile "$env(DAQSWFOLDER)/setup/su.txt"
+
 #==============
 ## READ SETUP FILE FOR IP ADDRESS
 #==============
 spawn -noecho getsetupinfo $setupfile "SERIAL HUB URL"
 expect -re "(\.*)(\r)";
 set hubip $expect_out(1,string)
-#set hubip env(HUBIP)
 send_user "SERIAL HUB URL: $hubip\n"
-#==============
-## READ SETUP FILE FOR PORT NUMBER
-#==============
-spawn -noecho getsetupinfo $setupfile "GPS HUB COM NUMBER"
-expect -re "(\.*)(\r)";
-set portnumber $expect_out(1,string)
-send_user "GPS PORT NUMBER: $portnumber\n"
 
-# 111221-remove ping as unnecessary.
+## SERIAL SERVER VIA ETHERNET
+if { [string first "dev" $hubip] == -1 } {
+	send_user "serial server hub\n"
+	#==============
+	## READ SETUP FILE FOR PORT NUMBER
+	#==============
+	spawn -noecho getsetupinfo $setupfile "GPS HUB COM NUMBER"
+	expect -re "(\.*)(\r)";
+	set portnumber $expect_out(1,string)
+	send_user "GPS PORT NUMBER: $portnumber\n"
 
-# START PROCESS -- KERMIT FOR ISAR MODEM
-spawn kermit
-set PDS $spawn_id
-set timeout 4
+	# START PROCESS -- KERMIT FOR MODEM
+	spawn sudo kermit
+	expect {
+		"assword" {
+			send "r0srr0sr\n"
+		}
+		">>" { send "\n" }
+	}
+	set PDS $spawn_id
+	set timeout 4
 
-expect {
-	timeout {"KERMIT FAILS TO OPEN\n"; exit 1}
-	">>"
+	expect {
+		timeout {"KERMIT FAILS TO OPEN\n"; exit 1}
+		">>"
+	}
+
+	## OPEN THE PORT
+	send "set host $hubip $portnumber\r"
+	expect ">>"
+	send_user "set host $hubip $portnumber\n";
+
+	## FINE TUNING TCP/IP
+	send "set tcp keepalive on\r\n"
+	expect ">>"
+	send "set tcp linger\r\n"
+	expect ">>"
+	send "set tcp nodelay on\r\n"
+	expect ">>"
+			# v2 
+	send "set telnet echo local\r\n"
+	expect ">>"
+
+	## this is important for using the rsr menu
+	## raw means send CR by itself, not CRLF and NOT CRNul
+	send "set telnet newline-mode nvt raw\r\n"
+	expect ">>"
+
+	## CONNECT 
+	send "connect\r"
+	expect {
+		"Conn*---"  {send_user "CONNECTED\r\n"}
+		timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
+	}
+
+	set spawn_id $PDS
+	interact
+
+## RS232 SERIAL DIRECT TO COM	
+} else {
+	spawn sudo kermit
+	expect {
+		"assword" {
+			send "r0srr0sr\n"
+		}
+		">>" { send "\n" }
+	}
+	set ROSR $spawn_id
+	set timeout 4
+	expect {
+		-i ROSR
+		timeout {"KERMIT FAILS TO OPEN\n"; exit 1}
+		">>"
+	}
+	spawn -noecho getsetupinfo $setupfile "SERIAL GPS"
+	expect -re "(\.*)(\r)";
+	set gpscom $expect_out(1,string)
+	send_user "SERIAL GPS: $gpscom\n"
+	
+	## OPEN THE PORT
+	send "set line $gpscom\r"
+	expect ">>"
+	#send_user "set line $gpscom\n";
+	## SPEED
+	send "set speed 9600\r"
+	## DUPLEX
+	send "set duplex full\r"
+	expect ">>"
+	## LOCAL ECHO
+	send "set local-echo on\r"
+	expect ">>"
+	## FLOW CONTROL
+	send "set flow none\r"
+	expect ">>"
+	## CARRIER WATCH
+	send "set carrier-watch off\r"
+	expect ">>"
+	## LOG
+	send "log session ../data/capture.txt append\r"
+	expect ">>"
+	## CONNECT 
+	send "connect\r"
+	expect {
+		"Conn*---"  {send_user "TTY CONNECTED\n"}
+		timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
+	}
+	set spawn_id $ROSR
+	interact
 }
-
-## OPEN THE PORT
-send "set host $hubip $portnumber\r"
-expect ">>"
-send_user "set host $hubip $portnumber\n";
-
-## FINE TUNING TCP/IP
-send "set tcp keepalive on 0\r\n"
-expect ">>"
-send "set tcp linger 0\r\n"
-expect ">>"
-send "set tcp nodelay on\r\n"
-expect ">>"
-send "set telnet echo local\r\n"
-expect ">>"
-
-
-## CONNECT 
-send "connect\r"
-expect {
-	"Conn*---"  {send_user "GPS CONNECTED\n"}
-	timeout {send_user "GPS TIMEOUT, NO CONNECT"; exit 1}
-}
-
-
-set spawn_id $PDS
-interact
+exit; 
 
 exit 0
