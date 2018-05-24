@@ -94,7 +94,6 @@ if { [string first "dev" $hubip] == -1 } {
 	expect -re "(\.*)(\r)";
 	set gpscom $expect_out(1,string)
 	send_user "SERIAL GPS: $gpscom\n"
-	log_user 1;
 
 	## OPEN THE PORT
 	set spawn_id $GPS
