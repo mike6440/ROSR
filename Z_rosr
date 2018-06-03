@@ -2,7 +2,7 @@
 #Z_rosr_v6
 
 set PROGRAMNAME Z_rosr
-set VERSION 8
+set VERSION 9
 set EDITDATE 171001; #160730; #160718; #151116,1437;	#150417;	#150404
 # 
 # V1 FROM Z_ROSR V20
@@ -11,6 +11,7 @@ set EDITDATE 171001; #160730; #160718; #151116,1437;	#150417;	#150404
 #v6 rosr3 
 #v7 rosr3 was hung up. I'll try to get it going.
 #v8 simulate_rosr
+#v9 include serial server or rs232
 
 puts "
 RUN PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE"
@@ -42,19 +43,22 @@ proc SpawnRosrSimulate { } {
 	write_info $infoname "SPAWN ROSR SIMULATE, spawn_id = $ROSR, pid = $ROSRPID"
 }
 #========================================================
-		# PROCEDURE TO CONNECT TO ROSR #v8
+		# PROCEDURE TO CONNECT TO ROSR
 #============================================================
-proc SpawnRosr { hub_url rosrport} {
+proc SpawnRosr { hubip rosrport} {
 	global ROSR ROSRPID infoname
-	if {$rosrport == 0} {
-		set ROSRPID [spawn perl simulate_rosr]
-		set ROSR $spawn_id 
-		write_info $infoname "SPAWN ROSR SIMULATE, spawn_id = $ROSR, pid = $ROSRPID"
-	} else {
-		set str [spawn_kermit $hub_url $rosrport]
+	if { [string first "dev" $hubip] == -1 } {
+		set str [spawn_kermit $hubip $rosrport]
 		set ROSR [lindex $str 0];    
 		set ROSRPID [lindex $str 1];
-		write_info $infoname "SPAWN ROSR KERMIT, IP=$hub_url, port=$rosrport, spawn_id=$ROSR, pid=$ROSRPID"
+		send_user "SPAWN ROSR KERMIT, IP=$hubip, port=$rosrport, spawn_id=$ROSR, pid=$ROSRPID\n"
+		write_info $infoname "SPAWN ROSR KERMIT, IP=$hubip, port=$rosrport, spawn_id=$ROSR, pid=$ROSRPID"
+	} else {
+		set str [spawn_kermit232 $hubip]
+		set ROSR [lindex $str 0];    
+		set ROSRPID [lindex $str 1];
+		write_info $infoname "SPAWN KERMIT232, IP=$hubip, spawn_id=$ROSR, pid=$ROSRPID"
+		send_user "SPAWN KERMIT232, IP=$hubip, spawn_id=$ROSR, pid=$ROSRPID\n"
 	}
 }
 #==========================================
@@ -95,7 +99,7 @@ proc write_info {fname str} {
 #	serialport = full path name for the serial port, e.g. /dev/tty.usbserial0
 #   baud = desired baud rate, e.g. 9600
 #============================================
-proc spawn_kermit {hub_url portnumber} {
+proc spawn_kermit {hubip portnumber} {
 	global infoname
 			# START PROCESS -- KERMIT
 	set pid [spawn kermit]
@@ -105,7 +109,7 @@ proc spawn_kermit {hub_url portnumber} {
 	}
 	
 			# OPEN THE PORT
-	send "set host $hub_url $portnumber\r"
+	send "set host $hubip $portnumber\r"
 	expect ">>"
 	send "set tcp keepalive on 0\r\n"
 	expect ">>"
@@ -124,6 +128,60 @@ proc spawn_kermit {hub_url portnumber} {
 	expect {
 		timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
 		"Conn*---"  { }  #v15
+	}
+	set out $spawn_id;
+	lappend out $pid
+	return $out
+}
+#===========================================================================
+# PROCEDURE TO CONNECT RS232 TO A PORT USING KERMIT
+# input
+#	serialport = full path name for the serial port, e.g. /dev/tty.usbserial0
+#   baud = desired baud rate, e.g. 9600
+#============================================
+proc spawn_kermit232 {hubip} {
+	global infoname
+			# START PROCESS -- KERMIT
+	set pid [spawn sudo kermit]
+	expect {
+		"assword" {
+			send "r0srr0sr\n"
+		}
+		">>" { send "\n" }
+	}
+	send_user "!> pid = $pid\n";
+	set timeout 4
+	expect {
+		timeout {"KERMIT FAILS TO OPEN\n"; exit 1}
+		">>"
+	}
+			# OPEN THE PORT
+	## OPEN THE PORT
+	send "set line $hubip\r"
+	expect ">>"
+	#send_user "set line $hubip\n";
+	## SPEED
+	send "set speed 9600\r"
+	## DUPLEX
+	send "set duplex full\r"
+	expect ">>"
+	## LOCAL ECHO
+	send "set local-echo on\r"
+	expect ">>"
+	## FLOW CONTROL
+	send "set flow none\r"
+	expect ">>"
+	## CARRIER WATCH
+	send "set carrier-watch off\r"
+	expect ">>"
+	## LOG
+	send "log session ../data/capture.txt append\r"
+	expect ">>"
+	## CONNECT 
+	send "connect\r"
+	expect {
+		"Conn*---"  {send_user "232 CONNECTED\n"}
+		timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
 	}
 	set out $spawn_id;
 	lappend out $pid
@@ -148,12 +206,6 @@ write_info $infoname "  ========== BEGIN PROGRAM $PROGRAMNAME ============="
 write_info $infoname "PROGRAM $PROGRAMNAME, Version $VERSION, Editdate $EDITDATE, Runtime [timestamp -gmt -format "%Y%m%d,%H%M%S"]"
 write_info $infoname "INFORMATION FILE: $infoname"
 write_info $infoname  "RT OUT PATH: $datapath"
-
-	# PDS SERIAL HUB URL AND OFFSET
-spawn -noecho getsetupinfo $setupfile "SERIAL HUB URL"
-expect -re "(\.*)(\r)";
-set hub_url $expect_out(1,string)
-write_info $infoname  "SERIAL HUB URL: $hub_url"
 
 	# CALIBRATION FLAG
 spawn -noecho getsetupinfo $setupfile "CALIBRATION EMISSIVITY"
@@ -193,21 +245,26 @@ if { $e_cal == 0 } {
 	write_info $infoname "CAL MODE."
 	send_user "CALIBRATION MODE.\n"
 }
-		## ROSR PORT
+	# PDS SERIAL HUB URL AND OFFSET
+spawn -noecho getsetupinfo $setupfile "SERIAL HUB URL"
+expect -re "(\.*)(\r)";
+set hubip $expect_out(1,string)
+write_info $infoname  "SERIAL HUB URL: $hubip"
+	## ROSR PORT
 spawn -noecho getsetupinfo $setupfile "ROSR HUB COM NUMBER"
 expect -re "(\.*)(\r)";
 set rosrport $expect_out(1,string)
 write_info $infoname  "ROSR HUB COM NUMBER: $rosrport"
-	# OPEN ROSR CONNECTOION - v8 include simulate
+	# SIMULATION ?
 spawn -noecho getsetupinfo $setupfile "SIMULATEFLAG"
 expect -re "(\.*)(\r)";
 set simulateflag $expect_out(1,string)
 if { $simulateflag == 1 } { 
-	send_user "SIMULATE ROSR\n";
+	send_user "SIMULATE ROSR...\n";
 	SpawnRosrSimulate;
 } else {
-	send_user "STANDARD ROSR\n";
-	SpawnRosr $hub_url $rosrport
+	send_user "OPEN SERIAL CONNECTION...\n";
+	SpawnRosr $hubip $rosrport
 }
 
 		#=================
