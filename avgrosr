@@ -2,8 +2,8 @@
 #avgrosr_v3
 
 my $PROGRAMNAME = 'avgrosr';
-my $VERSION = '7';  
-my $EDITDATE = '180420';
+my $VERSION = '7.1';  
+my $EDITDATE = '180604';
 # DAQ PROCESSING OF ROSR DATA 
 #v01 -- taken from avgisar, v17.
 #v01a -- flexible for port and stbd install
@@ -108,7 +108,7 @@ $header = $header."ROSR SERIAL NUMBER: $rosrsn\n";
 
 $kt15sn = FindInfo($setupfile,'KT15 SERIAL NUMBER', ': ');  # KT15 SN: $kt15sn
 $header = $header."KT15 SERIAL NUMBER: $kt15sn\n";
-$filterfile = FindInfo($setupfile,'KT15 FILTER FILE', ': ');
+$filterfile = FindInfo($setupfile,'KT15 FILTER FILE');
 $header = $header."KT15 FILTER FILE: $filterfile\n";
 $filterfile = $ENV{DAQSWFOLDER}.'/'.$filterfile;
 if($calflag == 0){
@@ -252,7 +252,7 @@ while ( ReadNextRecord() == NO ) {}
 ##FIRST SAMPLE TIME MARKS
 ##==============
 ($dt_samp, $dt1, $dt2) = ComputeSampleEndPoints ( $record{dt}, $avgsecs, $SampleFlag);
-printf"<<NEXT SAMPLE: dt_samp=%s, dt1=%s, dt2=%s>>\r\n", dtstr($dt_samp,'short'), dtstr($dt1,'short'), dtstr($dt2,'short');
+#printf"<<NEXT SAMPLE: dt_samp=%s, dt1=%s, dt2=%s>>\r\n", dtstr($dt_samp,'short'), dtstr($dt1,'short'), dtstr($dt2,'short');
 
 #==================
 # LOOP TO FIRST GOOD DATA RECORD
@@ -284,7 +284,7 @@ while ( 1 ) {
 				AccumulateStats();
 			}
 			else { 
-				writeTMP(sprintf("Skip first drum, $record{drum}"));
+				#writeTMP(sprintf("Skip first drum, $record{drum}"));
 			}
 			$Lastdrum = $record{drum};
 		}
@@ -521,10 +521,10 @@ sub ReadNextRecord
 	chomp($str=<STDIN>);
 		## COMMANDS
 	if ( $str =~ /quit/i ) {print"QUIT\n"; exit 0 }
-	if($str =~ /\$WIROS/ )	{									# identifies a data string
+	if($str =~ /\$WI/ )	{					# identifies a data string
 		$str1=$str;
 		$str1 =~ s/^.*\$/\$/;
-		#writeTMP(sprintf("Received packet: $str1\n"));
+		#print("xx Received packet: $str1\n");die;
  		my $strchk=substr($str,-2);
  		my $nmeachk=NmeaChecksum( substr($str1,0,-3));
  			# CHECKSUMS AGREE
@@ -535,7 +535,8 @@ sub ReadNextRecord
 			
 			## CHECK TIMECODE -- SKIP REPEATS
 			if ( $dat[13] =~ /[^,0-9\-\s\.TZ]+/ || $tcxlast gt $dat[13] ) {
-				writeTMP(sprintf"ReadNextRecord: tcxlast=%s,  tmcode=%s -- skip repeats",$tcxlast,$dat[13]);
+				#writeTMP(sprintf"ReadNextRecord: tcxlast=%s,  tmcode=%s -- skip repeats",$tcxlast,$dat[13]);
+				#writeTMP("ReadNextRecord: tcxlast,  tmcode -- skip repeats");
 				$tcxlast=$dat[13];
 				return (NO);
 			}
@@ -674,6 +675,7 @@ sub ReadNextRecord
 				if ( $record{vin} < 9 || $record{vin} > 20 ) { $record{vin} = $missing; }
 				if ( $record{vrain} < -.5 || $record{vrain} > 5 ) { $record{vrain} = $missing; }
 				printf "<<%s>>\n",$str;
+				#writeTMP(sprintf("<<%s>>\n",$str));
 				return( YES );  # means we like the data here.
 			}
 		}
@@ -881,7 +883,7 @@ sub MakeRadTable_planck
 # Parameters: $kt15sn, $filterpath
 {
 	$fnm = shift();  # v101
-	
+	#print"filterfile $fnm\n"; die;
 	@Ttable = ();  # output temperature vector
 	@Rtable = (); # output normalized radiance vector
 	#writeTMP( "MakeRadTable_planck: Make T-R table -- Using Planck Equation");
@@ -1224,6 +1226,7 @@ sub ComputeTarget
 #==================================================================
 sub writeTMP {
 	my $str = shift();
+	printf"xx $str\n";
 	open TMP, ">>/tmp/avgrosr.txt" or die("OPEN TMP FAILS\n");
 	print TMP "$str\n";
 	close TMP;

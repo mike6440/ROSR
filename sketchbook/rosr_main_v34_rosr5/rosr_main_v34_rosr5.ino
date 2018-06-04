@@ -43,10 +43,9 @@ Adafruit_ADS1115 ads2(0x4A);    // ad2, u14, construct an ads1115 at address 0x4
 // !! CUSTOMIZE FOR ROSR NUMBER
 // 2a means with swapped bb's
 //==========================
-#include "header3.h"  // !! programname, version, eeprom_id
+#include "header5.h"  // !! programname, version, eeprom_id
 #include "t-rad_table5.h"	// !! rad<->temp parameters
 #include "Tcal_rosr5.h"  //!! BB thermistor coefs 
-
 
 //NOTE ====== DIGITAL LINES
 const int Serial4Tx = 2;    // Testing KT15 Tx;  TILT TX

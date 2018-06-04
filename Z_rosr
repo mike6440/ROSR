@@ -2,8 +2,8 @@
 #Z_rosr_v6
 
 set PROGRAMNAME Z_rosr
-set VERSION 9
-set EDITDATE 171001; #160730; #160718; #151116,1437;	#150417;	#150404
+set VERSION 9.1
+set EDITDATE 180603;  #171001; #160730; #160718; #151116,1437;	#150417;	#150404
 # 
 # V1 FROM Z_ROSR V20
 #v4 use getgpsraw program 
@@ -12,6 +12,7 @@ set EDITDATE 171001; #160730; #160718; #151116,1437;	#150417;	#150404
 #v7 rosr3 was hung up. I'll try to get it going.
 #v8 simulate_rosr
 #v9 include serial server or rs232
+#v9.1 -- trying to get it to work
 
 puts "
 RUN PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE"
@@ -41,6 +42,7 @@ proc SpawnRosrSimulate { } {
 	set ROSRPID [spawn perl simulate_rosr]
 	set ROSR $spawn_id
 	write_info $infoname "SPAWN ROSR SIMULATE, spawn_id = $ROSR, pid = $ROSRPID"
+	send_user "SPAWN ROSR SIMULATE, spawn_id = $ROSR, pid = $ROSRPID\n"
 }
 #========================================================
 		# PROCEDURE TO CONNECT TO ROSR
@@ -298,24 +300,29 @@ while 1 {
 	if {$day1 != $day0} {
 		set day0 $day1
 		set fname [timestamp -format "%y%m%d" -seconds $dt]
-		write_info $infoname "NEW DAY $fname";
 		set rwname "$datapath/rosr_raw_$fname.txt";
 		set avname "$datapath/rosr_av_$fname.txt";
 		set sstname "$datapath/rosr_sst_$fname.txt";
-		write_info $infoname "---NEW DAY $fname---"
+		send_user "NEW DAY $fname\n"
+		write_info $infoname "NEW DAY $fname---"
 		write_info $infoname "rwname = $rwname"
 		write_info $infoname "avname = $avname"
 		write_info $infoname "sstname = $sstname"
 	}
 	#================
 	# EXPECT FUNCTION -- WAITING FOR RESPONSE
+	# $WI033,33,00.020751,264.92, 157093,24.21,2.727,2.728,0.397,2.471,
+	# 1.656,1.655,4.096,4.096,4.096,3.544,-0.000,2.814,4.942,19.87,19.87,
+	# 42.86,42.90,-1.2,-1.8,18.95,18.19,200.00,200.00,14.8,-0.0,  0*18
 	# ===============
+	#send_user "zz test\n";
+	#set timeout 4
 	expect { 
-		-i $ROSR 
-		-re "\\\$WIR...*\\*..\\n?" {
+		-i $ROSR
+		-re "\\\$WI0...*\\*..\\n?" { 
 			set rawstr [string trimright $expect_out(0,string)]
-			if { [string match {*\$WIROS*} $rawstr ] } {
-				set s1 [string first "\$WIROS" $rawstr];
+			if { [string match {*\$WI0*} $rawstr ] } {
+				set s1 [string first "\$WI0" $rawstr];
 				set s2 [string first "\*" $rawstr $s1]
 				set str [string range $rawstr $s1 [expr $s2+2]]
 				
@@ -323,14 +330,14 @@ while 1 {
 				set gpstr [exec gpsgetraw]
 				
 				set str [timestamp -gmt -format "%Y,%m,%d,%H,%M,%S,"]$gpstr,$rawstr 
-				send_user "$str -- "; 
 				set F [open $rwname a 0600]
 				puts $F $str  ;
 				close $F
 				# SEND TO ROSRAV AND ROSRAV FOR RESPONSE
 				send -i $ROSRAV "$str\r"
 				expect -i $ROSRAV -re "<<.*>>\\n?" {
-					send_user "\n";
+					set avgreply [string trimright $expect_out(0,string)]
+					send_user "$avgreply\n";
 				}
 			} 
 			if { [string match {*\$WIRAV*} $rawstr ] } {
