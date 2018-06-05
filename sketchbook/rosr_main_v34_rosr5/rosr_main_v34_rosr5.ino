@@ -635,6 +635,7 @@ void loop() {
   b = checksum_nmea(OutStr + 1);
   Serial.print(OutStr);
   Serial.print("*");
+  if(b<16) Serial.print("0");
   Serial.print(b, HEX);
   Serial.print("\r\n");
 
@@ -813,12 +814,14 @@ void loop() {
       b = checksum_nmea(AvStr + 1);
       Serial.print(AvStr);
       Serial.print("*");
+      if(b<16) Serial.print("0");
       Serial.print(b, HEX);
       Serial.print("\r\n");
       // SsstStr
       b = checksum_nmea(SsstStr + 1);
       Serial.print(SsstStr);
       Serial.print("*");
+      if(b<16) Serial.print("0");
       Serial.print(b, HEX);
       Serial.print("\r\n");
 

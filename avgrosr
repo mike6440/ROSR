@@ -61,17 +61,12 @@ my $pgmstart=now();
 $outpath =  FindInfo($setupfile,'RT OUT PATH', ': ');
 if ( ! -d $outpath ) { print"!! RT OUT PATH ERROR, $outpath\n"; die }
 
-
-open TMP, ">/tmp/avgrosr.txt" or die("OPEN TMP FAILS\n");
-print TMP "BEGIN\n";
-close TMP;
-
 #=======================
 #CAL EMIS: 0 = field use, compute e from angle,  ~=1 = calibration mode
 #  During calibration thus is the bath target emissivity. Usually == 1.
 #======================
 $e_cal = FindInfo($setupfile,'CALIBRATION EMISSIVITY', ':');  # black body emissivity
-writeTMP("e_cal = $e_cal");
+#writeTMP("e_cal = $e_cal");
 if($e_cal == 0){
 	$calflag=0;
 } else {
@@ -313,7 +308,7 @@ while ( 1 ) {
 		$tb1sd+=$samp_tb12{std}*$samp_tb12{std}
 	}
 	if($ns>=1){$tb1=$tb1/$ns; $tb1sd=sqrt($tb1sd/$ns)}
-	writeTMP(sprintf "BB1 Mean Temp = %.2f +/- %.2f C",$tb1,$tb1sd);
+	#writeTMP(sprintf "BB1 Mean Temp = %.2f +/- %.2f C",$tb1,$tb1sd);
 	
 		# MEAN BB2 TEMP AND STDEV
 	if($samp_tb21{mn}>-20){
@@ -328,7 +323,7 @@ while ( 1 ) {
 		$tb2sd+=$samp_tb22{std}*$samp_tb22{std}
 	}
 	if($ns>=1){$tb2/=$ns; $tb2sd=sqrt($tb2sd/$ns)}
-	writeTMP(sprintf "BB2 Mean Temp = %.2f +/- %.2f C",$tb2,$tb2sd);
+	#writeTMP(sprintf "BB2 Mean Temp = %.2f +/- %.2f C",$tb2,$tb2sd);
 	
 	
 	#===========================
@@ -337,7 +332,7 @@ while ( 1 ) {
 	my $fn = sprintf "rosr_avg_%s.txt",dtstr(now(),'date');
 	$fnavg = $outpath . '/' . $fn;
 	open(AVG, ">>$fnavg") or die"OPEN DATA FILE FAILS";	
-	writeTMP("AVG file $fnavg is open");
+	#writeTMP("AVG file $fnavg is open");
 # @VARS = ('dtgps','lat','lon','sog','cog');
 # @VARS = (@VARS,'drum','kt','tktd','v0','v1','v2','v3','v4','v5','v6','v7','v8','v9','v10','v11');
 # @VARS = (@VARS,'vref','tb11','tb12','tb21','tb22','pitch','roll','tkt','tktx','twin','tpwr','vin','vrain' );
@@ -362,10 +357,10 @@ while ( 1 ) {
 		# $rtr = ditto for radiance.
 		@x = ( $tb1, $tb2, $samp_kt[$bb1view * 5], $samp_kt[$bb2view * 5], $samp_kt[$skyview * 5], $samp_kt[$seaview * 5], 
 			$view[3], $samp_pitch{mn}, $samp_roll{mn}, $e_sea_0, $e_bb, $Acorr, $CalOffset, 0, $missing, $ttr, $rtr);
-		writeTMP(sprintf"Compute sst, x = @x");
+		#writeTMP(sprintf"Compute sst, x = @x");
 		($T_skin, $T_uncorr, $T_corr, $e_sea) = ComputeSSST( @x );
-		writeTMP(sprintf "T_skin = %.3f, T_corr=%.3f, T_uncorr=%.3f", $T_skin, $T_corr, $T_uncorr);
-		writeTMP(sprintf "lat=%.6f,   lon=%.6f,   sog=%.1f,   cog=%.1f",$samp_lat{mn},$samp_lon{mn},$samp_sog{mn},$samp_cog{mn});
+		#writeTMP(sprintf "T_skin = %.3f, T_corr=%.3f, T_uncorr=%.3f", $T_skin, $T_corr, $T_uncorr);
+		#writeTMP(sprintf "lat=%.6f,   lon=%.6f,   sog=%.1f,   cog=%.1f",$samp_lat{mn},$samp_lon{mn},$samp_sog{mn},$samp_cog{mn});
 		#=========================
 		# AVG OUTPUT
 		#=========================
@@ -378,7 +373,7 @@ while ( 1 ) {
 			$samp_pitch{mn}, $samp_pitch{std},	$samp_roll{mn}, $samp_roll{std}, $samp_vrain{mn}; 
 		print"AVG RUN: $str\n";
 		print AVG "$str\n";
-		writeTMP("AVG RUN:$str");
+		#writeTMP("AVG RUN:$str");
 	} else {	
 		#=====================================================
 		# CALIBRATION MODE - COMPUTETARGET
@@ -415,7 +410,7 @@ while ( 1 ) {
 			maxvalue($samp_kt[$calview*5],$missing), $e_cal;
 		print"AVG CAL: $str\n";
 		print AVG "$str\n";
-		writeTMP("AVG CAL:$str");
+		#writeTMP("AVG CAL:$str");
 	}
 	close AVG;
 	
@@ -489,7 +484,7 @@ while ( 1 ) {
 	$chksum=NmeaChecksum($str);
 	$str=$str.$chksum;
 		# WRITE SBD
-	writeTMP("SBD:$str");
+	#writeTMP("SBD:$str");
 	print "$str\r\n";	
 	open SBD, ">/tmp/sbd" or die("OPEN SBD FAILS\n");
 	print SBD "$str\n";
@@ -497,7 +492,7 @@ while ( 1 ) {
 		# PREPARE FOR THE NEXT AVERAGE
 	ClearAccumulatorArrays();		# Prepare for averaging first record
 	($dt_samp, $dt1, $dt2) = ComputeSampleEndPoints( $record{dt}, $avgsecs, 0);	#increment $dt1 and $dt2 
-	writeTMP(sprintf "NEXT SAMPLE: dt_samp=%s, dt1=%s, dt2=%s\n", dtstr($dt_samp,'short'), dtstr($dt1,'short'), dtstr($dt2,'short'));
+	#writeTMP(sprintf "NEXT SAMPLE: dt_samp=%s, dt1=%s, dt2=%s\n", dtstr($dt_samp,'short'), dtstr($dt1,'short'), dtstr($dt2,'short'));
 	AccumulateStats(); 			# deals with the current record
 }
 exit(0);
@@ -778,7 +773,7 @@ sub AccumulateStats
 			#writeTMP("AccumulateStats: iv = $iv");
 			$d1 = $view[$iv] - $drum_pointing_uncertainty;  $d2 = $view[$iv] + $drum_pointing_uncertainty;  # sector limits
 			if ( $x >= $d1 && $x <= $d2 ) {
-				writeTMP(sprintf"view=%.2f, kt=%.0f", $x, $y);
+				#writeTMP(sprintf"view=%.2f, kt=%.0f", $x, $y);
 				#==================
 				# Put kt15 into in the correct bin
 				# Skip the first record in each view
