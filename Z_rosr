@@ -2,8 +2,8 @@
 #Z_rosr_v6
 
 set PROGRAMNAME Z_rosr
-set VERSION 9.1
-set EDITDATE 180603;  #171001; #160730; #160718; #151116,1437;	#150417;	#150404
+set VERSION 9.2
+set EDITDATE 180608;
 # 
 # V1 FROM Z_ROSR V20
 #v4 use getgpsraw program 
@@ -13,6 +13,7 @@ set EDITDATE 180603;  #171001; #160730; #160718; #151116,1437;	#150417;	#150404
 #v8 simulate_rosr
 #v9 include serial server or rs232
 #v9.1 -- trying to get it to work
+#v9.2 -- debug. Fix wirav and wirst files
 
 puts "
 RUN PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE"
@@ -308,7 +309,20 @@ while 1 {
 		write_info $infoname "rwname = $rwname"
 		write_info $infoname "avname = $avname"
 		write_info $infoname "sstname = $sstname"
+		set str "\$WIssf,vv,etime,drum,RAD,REF,adc0,adc1,adc2,adc3,adc4,adc5,adc6,adc7,adc8,adc9,adc10,adc11,vref,t11,t12,t21,t22,pit,rol,Tanalog,Tktcase,Twindow,Tpwr,Vin,vrain,sec*chk<cr><lf>"
+		set F [open $rwname a 0600]
+		puts $F $str ;
+		close $F
+		set str "\$WIRAV,etime,vav0,vav1,vav2,vav3,k0,ksd0,k1,ksd1,k2,ksd2,k3,ksd3,t11,tsd11,t12,tsd12,t21,tsd21,t22,tsd22,T1,T2,pav,psd,rav,rsd,ang,emis*chk";
+		set F [open $avname a 0600]
+		puts $F $str  ;
+		close $F
+		set str "\$WIRST,etime,vav0,vav1,vav2,vav3,k0,k1,k2,k3,T1,T2,ang,emis,ssst*chk";
+		set F [open $sstname a 0600]
+		puts $F $str  ;
+		close $F
 	}
+
 	#================
 	# EXPECT FUNCTION -- WAITING FOR RESPONSE
 	# $WI033,33,00.020751,264.92, 157093,24.21,2.727,2.728,0.397,2.471,
@@ -319,13 +333,12 @@ while 1 {
 	#set timeout 4
 	expect { 
 		-i $ROSR
-		-re "\\\$WI0...*\\*..\\n?" { 
+		-re "\\\$WI...*\\*..\\n?" { 
 			set rawstr [string trimright $expect_out(0,string)]
 			if { [string match {*\$WI0*} $rawstr ] } {
 				set s1 [string first "\$WI0" $rawstr];
 				set s2 [string first "\*" $rawstr $s1]
 				set str [string range $rawstr $s1 [expr $s2+2]]
-				
 				# GPS
 				set gpstr [exec gpsgetraw]
 				

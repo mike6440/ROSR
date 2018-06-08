@@ -1,5 +1,5 @@
 # BASH SETUP
-# edit 20180415T181625Z 
+# edit 20180608T150505Z
 #
 
 export EDITOR="vim"
@@ -53,31 +53,36 @@ gpsavg () {
 gpsraw () { 
     cd $DAQSWFOLDER;
     echo "NOTE: ^c to end"
-    tail -f `LastDataFolder gps_raw`
+    xx=`LastDataFolder gps_raw`
+    tail $xx
 }
 alias Gps="gpsraw"
 rosrraw () {
     cd $DAQSWFOLDER;
     echo "NOTE: ^c to end"
     xx=`LastDataFolder rosr_raw`
+    head -1 $xx
     tail -f $xx
 }
 alias Raw="rosrraw";
 rosrav () {
     cd $DAQSWFOLDER;
-    #echo "^c to end"
-    tail `LastDataFolder rosr_av_`
+    xx=`LastDataFolder rosr_av`
+    head -1 $xx
+    tail $xx
 }
 alias Av="rosrav";
 rosrst () {
     cd $DAQSWFOLDER;
-    #echo "^c to end"
-    tail `LastDataFolder rosr_sst`
+    xx=`LastDataFolder rosr_sst`
+    head -1 $xx
+    tail $xx
 }
 alias Sst="rosrst";
 
     # SCREEN
 alias isscreen='screen -ls'
+alias iss='screen -ls'
 alias gtscreen='screen -S ROSR -d -r'
 
     # RUN CALLS
@@ -86,16 +91,21 @@ alias GG='cd $DAQSWFOLDER;  Z_gps `cat tmp`'
 
         #START SCREEN
 Start () {
-    touch ~/tmp/daqstart;
-    KillScreen > /dev/null 2>&1;
-    cd $DAQSWFOLDER; 
-    PrepareForRun; 
-    export RUNSETUPFILE=`cat tmp`;
-    crontab $DAQSWFOLDER/tools/crontab_rosr.txt
-    screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_rosr.txt
-    screen -S ROSR -p 2 -X stuff "GG$(printf \\r)"
-    screen -S ROSR -p 1 -X stuff "G$(printf \\r)"
-    isscreen
+        ps cax | grep Z_rosr > /dev/null   # Z_prp is the app in question
+        if [ $? -eq 0 ]; then
+			echo "DAQ is already running."
+        else
+			touch ~/tmp/daqstart;
+			KillScreen > /dev/null 2>&1;
+			cd $DAQSWFOLDER;
+			PrepareForRun > /dev/null;
+			export RUNSETUPFILE=`cat tmp`;
+			crontab $DAQSWFOLDER/tools/crontab_rosr.txt
+			screen -S ROSR -d -m -c $DAQSWFOLDER/tools/screenrc_rosr.txt
+			screen -S ROSR -p 2 -X stuff "GG$(printf \\r)"
+			screen -S ROSR -p 1 -X stuff "G$(printf \\r)"
+			isscreen
+        fi
 }
 Startcal () {
     KillScreen;
@@ -134,10 +144,11 @@ alias Wipe="ClearRosrData";
 cd $DAQSWFOLDER
 
 alias bootlog="tail ~/tmp/bootlog"
+alias llb="ls -l ~/tmp"
 # restart set AutoStartFlag in /etc/rc.local (ubuntu > 16.04)
 if [ -e ${HOME}/tmp/AutoStartFlag ] 
     then
-    rm ${HOME}/tmp/AutoStartFlag
+    rm -f ${HOME}/tmp/AutoStartFlag
     dd=$(date -u "+%Y%m%d,%H%M%SZ")
     echo "Bootbash  $dd" >> ${HOME}/tmp/bootlog
     ifdaqstart

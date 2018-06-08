@@ -34,7 +34,7 @@ Call \"Archive\" to backup all collected data.
 }
 if($ans =~ /y/i){
 	print"ClearRosrData\n";
-	my $cmd="rm -r $datapath/*";
+	my $cmd="rm -rf $datapath/*";
 	#print"cmd=$cmd\n";
 	system $cmd;
 } else {
