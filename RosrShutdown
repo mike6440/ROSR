@@ -4,8 +4,8 @@
 # the shutter. Quit connection and bootoff the power.
 
 set PROGRAMNAME ShutDown
-set VERSION 1
-set EDITDATE 151019
+set VERSION 2
+set EDITDATE 180608
 
 # Connect to ROSR. Go to terminal mode.  'd325' points the drum inside.
 #   'fc' closes the shutter.  'bootoff' shuts off the power.
@@ -17,7 +17,6 @@ log_user $loguser;
 
 		# SETUP FILE DEFINED
 set setupfile "setup/su.txt";
-send_user "setup file = $setupfile\n";
 		## SEE IF THE SETUP FILE EXISTS
 if [catch {open $setupfile} sufile] {
 	puts "Setup file open fails, exit 1"
@@ -28,11 +27,19 @@ global ROSR ROSRPID
 #========================================================
 		# PROCEDURE TO CONNECT TO ROSR
 #============================================================
-proc SpawnRosr { hub_url rosrport} {
+proc SpawnRosr { hubip rosrport} {
 	global ROSR ROSRPID
-	set str [spawn_kermit $hub_url $rosrport]
-	set ROSR [lindex $str 0];    
-	set ROSRPID [lindex $str 1];
+	if { [string first "dev" $hubip] == -1 } {
+		set str [spawn_kermit $hubip $rosrport]
+		set ROSR [lindex $str 0];    
+		set ROSRPID [lindex $str 1];
+		send_user "SPAWN ROSR KERMIT, IP=$hubip, port=$rosrport, spawn_id=$ROSR, pid=$ROSRPID\n"
+	} else {
+		set str [spawn_kermit232 $hubip]
+		set ROSR [lindex $str 0];    
+		set ROSRPID [lindex $str 1];
+		send_user "SPAWN KERMIT232, IP=$hubip, spawn_id=$ROSR, pid=$ROSRPID\n"
+	}
 }
 #===========================================================================
 # PROCEDURE TO CONNECT TO A PORT USING KERMIT
@@ -40,8 +47,7 @@ proc SpawnRosr { hub_url rosrport} {
 #	serialport = full path name for the serial port, e.g. /dev/tty.usbserial0
 #   baud = desired baud rate, e.g. 9600
 #============================================
-proc spawn_kermit {hub_url portnumber} {
-	global infoname
+proc spawn_kermit {hubip portnumber} {
 			# START PROCESS -- KERMIT
 	set pid [spawn kermit]
 	expect {
@@ -50,7 +56,7 @@ proc spawn_kermit {hub_url portnumber} {
 	}
 	
 			# OPEN THE PORT
-	send "set host $hub_url $portnumber\r"
+	send "set host $hubip $portnumber\r"
 	expect ">>"
 	send "set tcp keepalive on 0\r\n"
 	expect ">>"
@@ -74,20 +80,73 @@ proc spawn_kermit {hub_url portnumber} {
 	lappend out $pid
 	return $out
 }
+#===========================================================================
+# PROCEDURE TO CONNECT RS232 TO A PORT USING KERMIT
+# input
+#	serialport = full path name for the serial port, e.g. /dev/tty.usbserial0
+#   baud = desired baud rate, e.g. 9600
+#============================================
+proc spawn_kermit232 {hubip} {
+			# START PROCESS -- KERMIT
+	set pid [spawn sudo kermit]
+	expect {
+		"assword" {
+			send "r0srr0sr\n"
+		}
+		">>" { send "\n" }
+	}
+	send_user "!> pid = $pid\n";
+	set timeout 4
+	expect {
+		timeout {"KERMIT FAILS TO OPEN\n"; exit 1}
+		">>"
+	}
+			# OPEN THE PORT
+	## OPEN THE PORT
+	send "set line $hubip\r"
+	expect ">>"
+	#send_user "set line $hubip\n";
+	## SPEED
+	send "set speed 9600\r"
+	## DUPLEX
+	send "set duplex full\r"
+	expect ">>"
+	## LOCAL ECHO
+	send "set local-echo on\r"
+	expect ">>"
+	## FLOW CONTROL
+	send "set flow none\r"
+	expect ">>"
+	## CARRIER WATCH
+	send "set carrier-watch off\r"
+	expect ">>"
+	## LOG
+	send "log session ../data/capture.txt append\r"
+	expect ">>"
+	## CONNECT 
+	send "connect\r"
+	expect {
+		"Conn*---"  {send_user "232 CONNECTED\n"}
+		timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
+	}
+	set out $spawn_id;
+	lappend out $pid
+	return $out
+}
 #==================== END PROCEDURES =============================================
 
 
 	# PDS SERIAL HUB URL AND OFFSET
 spawn -noecho getsetupinfo $setupfile "SERIAL HUB URL"
 expect -re "(\.*)(\r)";
-set hub_url $expect_out(1,string)
+set hubip $expect_out(1,string)
 	# ROSR PORT
 spawn -noecho getsetupinfo $setupfile "ROSR HUB COM NUMBER"
 expect -re "(\.*)(\r)";
 set rosrport $expect_out(1,string)
-send_user "hub ip: $hub_url   port:$rosrport\n";
+send_user "hub ip: $hubip   port:$rosrport\n";
 		# OPEN SERIAL PORTS
-SpawnRosr $hub_url $rosrport 
+SpawnRosr $hubip $rosrport 
 set spawn_id $ROSR
 
 	# SEND G TO BE SURE WE ARE sampling
@@ -109,8 +168,12 @@ send \028
 send "q"
 
 	# bootoff
-exec bootoff
-send_user "bootoff\n";
+set ip [exec getsetupinfo "setup/su.txt" "IBOOT IP"]
+if { $ip == 0 } { 
+	send_user "No iboot in this system\n"
+} else { 
+	exec bootoff
+}
 
 send_user "FINISHED\n";
-exit;
+exit 0;
