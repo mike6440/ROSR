@@ -5,5 +5,6 @@ setupifconfig
 udpserver
 udpclient
 *-bu
-
+other
+other/*
 

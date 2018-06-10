@@ -16,7 +16,7 @@ export DAQ="ROSR"
 export MYLIB="$HomePath/swmain/perl"
 
 export PS1='\w/$ '
-if [ -n "$SSH_CLIENT" ]; then text=" ssh:"
+if [ -n "$SSH_CLIENT" ]; then text="ssh:"
 export PS1='\[\e[1;32m\]${text} \W$ \[\e[m\]'
 fi
 

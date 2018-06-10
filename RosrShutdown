@@ -3,16 +3,16 @@
 # left in the menu. Then 't' to go to menu, prompt='>'. Command 'fc' closes
 # the shutter. Quit connection and bootoff the power.
 
-set PROGRAMNAME ShutDown
+set PROGRAMNAME RosrShutDown
 set VERSION 2
 set EDITDATE 180608
 
 # Connect to ROSR. Go to terminal mode.  'd325' points the drum inside.
 #   'fc' closes the shutter.  'bootoff' shuts off the power.
 
-puts "RUN PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE"
+# puts "RUN PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE"
 
-set loguser 1;		#   test 0-quiet, 1=verbose
+set loguser 0;		#   test 0-quiet, 1=verbose
 log_user $loguser;
 
 		# SETUP FILE DEFINED
@@ -33,12 +33,12 @@ proc SpawnRosr { hubip rosrport} {
 		set str [spawn_kermit $hubip $rosrport]
 		set ROSR [lindex $str 0];    
 		set ROSRPID [lindex $str 1];
-		send_user "SPAWN ROSR KERMIT, IP=$hubip, port=$rosrport, spawn_id=$ROSR, pid=$ROSRPID\n"
+		#send_user "SPAWN ROSR KERMIT, IP=$hubip, port=$rosrport, spawn_id=$ROSR, pid=$ROSRPID\n"
 	} else {
 		set str [spawn_kermit232 $hubip]
 		set ROSR [lindex $str 0];    
 		set ROSRPID [lindex $str 1];
-		send_user "SPAWN KERMIT232, IP=$hubip, spawn_id=$ROSR, pid=$ROSRPID\n"
+		#send_user "SPAWN KERMIT232, IP=$hubip, spawn_id=$ROSR, pid=$ROSRPID\n"
 	}
 }
 #===========================================================================
@@ -95,7 +95,7 @@ proc spawn_kermit232 {hubip} {
 		}
 		">>" { send "\n" }
 	}
-	send_user "!> pid = $pid\n";
+	#send_user "!> pid = $pid\n";
 	set timeout 4
 	expect {
 		timeout {"KERMIT FAILS TO OPEN\n"; exit 1}
@@ -156,7 +156,7 @@ sleep 1
 send "t"
 expect {
 	timeout {send_user "timeout waiting for prompt\n"}
-	">" {send_user "Prompt received\n"}
+	">" {}
 }
 send "fc\r"
 expect {
@@ -170,7 +170,7 @@ send "q"
 	# bootoff
 set ip [exec getsetupinfo "setup/su.txt" "IBOOT IP"]
 if { $ip == 0 } { 
-	send_user "No iboot in this system\n"
+	send_user "No iboot in this DAQ\n"
 } else { 
 	exec bootoff
 }
