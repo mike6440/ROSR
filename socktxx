@@ -12,10 +12,6 @@
 use lib $ENV{DAQLIB};
 use perltools::MRtime;
 use perltools::MRutilities;
-# use perltools::MRsensors;
-# use perltools::MRstatistics;
-# use perltools::Isar;
-# use POSIX;
 use IO::Socket::INET;
 
 # ip# and port from su.txt or command line.
@@ -50,6 +46,7 @@ if($#ARGV == 0 || $#ARGV == 2){
 } else {
 	# data to send to a server
 	$fn=`LastDataFolder rosr_avg`;
+	chomp($fn);
 	if( -f $fn ){
 		$str=`tail -1 $fn`;
 		chomp($str);

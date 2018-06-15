@@ -2,19 +2,13 @@
 
 # SERVER MODULE WAITS FOR A REQUEST
 
-use lib $ENV{DAQLIB};
-use perltools::MRtime;
-use perltools::MRutilities;
+# use lib $ENV{DAQLIB};
+# use perltools::MRtime;
+# use perltools::MRutilities;
 use IO::Socket;
 
-# ip# and port from su.txt or command line.
-if($#ARGV < 0){
-	$serverip=FindInfo(`cat tmp`,'TELNET SERVER IP',':');
-	$serverport=FindInfo(`cat tmp`,'TELNET SERVER PORT',':');
-} else {
-	$serverip=shift();
-	$serverport=shift();
-}
+$serverip=shift();
+$serverport=shift();
 print"socket = $serverip $serverport\n";
 
 my $sock = new IO::Socket::INET (
@@ -33,7 +27,5 @@ while(1){
 	while(<$new_sock>) {
 	    print $_;
 	}
-	#print"\n";
 }
-
 close($sock);

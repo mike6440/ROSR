@@ -1,0 +1,67 @@
+#!/usr/bin/perl -w
+if($#ARGV<0){
+	print '
+PROGRAM sockrx
+Call: perl sockrx IP PORT [FILENAME]
+where
+  perl call the perl program. (\'./\' works also.)
+  IP is the address to the local computer, e.g. 10.1.10.86
+  PORT is the desired port, e.g. 5555
+  FILENAME (optional) defines a file where collected data are stored.
+
+Example:
+  perl sockrx 10.1.10.86 5555 /tmp/prpdata.txt
+or
+  ./sockrx 10.1.10.86 5555 		-> to display data only.
+
+WARNING: IP and PORT must be defined in the setup file in the PRP folder.
+  edit: ~/swmain/apps/PRP/sw/setup/su.txt
+          TELNET PROGRAM: socktxx          -> client, sends message
+          TELNET SERVER IP: 10.1.10.86     -> target IP#
+          TELNET SERVER PORT: 5555         -> available port #
+
+';
+	exit 1;
+};
+
+
+
+use IO::Socket;
+
+# IP# AND PORT FROM SU.TXT OR COMMAND LINE.
+$serverip=$ARGV[0];
+$serverport=$ARGV[1];
+print"socket = $serverip $serverport\n";
+
+# SAVE TO FILE
+my $recordflag=0;
+if ($#ARGV >= 2){
+	$datfile = $ARGV[2];
+	$recordflag=1;
+	print"record data to $datfile\n";
+}
+
+my $sock = new IO::Socket::INET (
+	LocalHost => $serverip,
+	LocalPort => $serverport,
+	Proto => 'tcp',
+	Listen => 1,
+	Reuse => 1,
+);
+die "Could not create socket: $!\n" unless $sock;
+
+my ($size,$new_sock,$str);
+$str="ok\n";
+while(1){
+	$new_sock = $sock->accept();
+	while(<$new_sock>) {
+		$str=$_;
+	    print $str;
+	    if($recordflag == 1){
+	 		open(F,">>$datfile") or die;
+		    print F $str; 
+	    	close F;
+	    }
+	}
+}
+close($sock);
