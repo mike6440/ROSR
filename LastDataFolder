@@ -14,10 +14,10 @@
 my (@x,$str,$dat);
 
 if($#ARGV<0){
-	@x = `find $ENV{DAQDATAFOLDER} -name data_* -print`;
+	@x = `find $ENV{DAQDATAFOLDER} -name data_* -print | sort`;
 } else {
 	$dat = $ARGV[0];
-	$str="find $ENV{DAQDATAFOLDER} -name *$dat"."_* -print";
+	$str="find $ENV{DAQDATAFOLDER} -name *$dat"."_* -print | sort";
 	@x = `$str`;
 }
 if( $#x < 0 ){print"0";exit 1}

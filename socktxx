@@ -43,14 +43,15 @@ die "Cannot connect to the server $!\n" unless $socket;
 my ($fn, $str, @w);
 if($#ARGV == 0 || $#ARGV == 2){
 	$str=shift();
+	chomp($str);
 } else {
 	# data to send to a server
-	$fn=`LastDataFolder rosr_avg`;
+	$fn=`LastDataRecord rosr_avg`;
 	chomp($fn);
-	if( -f $fn ){
-		$str=`tail -1 $fn`;
-		chomp($str);
-		@w=split /[, ]+/, $str;
+	if( $fn eq 0 ){
+		$str=sprintf"\$ROSST,%s,M,,,,,M,\*",dtstr(now(),'csv');
+	} else {
+		@w=split /[, ]+/, $fn;
 		$str=sprintf "\$ROSST,$w[1]$w[2]$w[3],$w[4]$w[5]$w[6],";
 		#test gps
 		if($w[7]<-90 || $w[8]<-180 || $w[7]>90 || $w[8]>360 ){
@@ -64,9 +65,6 @@ if($#ARGV == 0 || $#ARGV == 2){
 		} else {
 			$str=$str."V,$w[11]*";
 		}
-	}
-	else{
-		$str=sprintf"\$ROSST,%s,M,,,,,M,\*",dtstr(now(),'csv');
 	}
 }
 

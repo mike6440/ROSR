@@ -1,19 +1,18 @@
 #!/usr/bin/perl -X
 #   ./LastAvg rad_avg (or 'gps_avg', 'wxt_raw', etc)
 
-my $s = `LastDataFolder`;
-chomp $s;
-#print"datafolder = $s\n";
-
+if($#ARGV<0){print"
+  LastDataRecord error.  Include data file tag,
+  e.g. \"LastDataRecord rosr_av\".
+"}
 my $a = shift();
+my $s = `LastDataFolder $a`;
+chomp $s;
+# print"datafolder = $s\n"; die;
 
-my @rw = `ls -1 $s/$a*.txt 2>/dev/null`;
-#foreach(@rw){chomp($_); print"$_\n"}
-
-if ($#rw < 0 ){exit 1}
+if ($s eq 0 ){print"0"; exit 1}
 else {
-	chomp($fz=$rw[$#rw]); 
-	$fz =~ s/^\s+//;
-	system "tail -1 $fz";
+	$s =~ s/^\s+//;
+	system "tail -1 $s";
 	exit 0;
 }

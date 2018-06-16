@@ -1,105 +1,102 @@
-    ## edit 180319
+##### edit 180615
 Note: 'q' to end the myhelp display.
-    #---- "sw" folder
-gtdaq                                       ->  cd to "~/swmain/apps/ROSR/sw/$ "
-Bat                                         ->  laptop PC battery status
-    #---- TIME: Make sure the PC time is accurate
-Date                                        ->  2015 10 19 18 03 57 Z
-SetDate <password> yyyy MM dd hh mm ss      ->  sets the PC clock. Note: always UTC!
-example:
-  SetDate password 2017 08 20 17 23 30<enter>
-    #--- EDIT SETUP: The setup text file contains calibrations, IP#s and more
-nano setup/su.txt                           -> optional, edit as necessary.
-    #--- START: Begin data collection as a background process.
-booton                                      ->  If needed: Power ON, wait 10 secs.
-Start                                       ->  Begin data collection in background screen
-Raw                                         ->  Confirm data flow  (^c to end)
-    #--- STOP: Stop data collection.
-Stop                                        ->  End data collection
-    #--- ARCHIVE: Create compressed archive in ~/rosrdata.
-Archive                                     -> Makes archive /home/rmr/rosrdata
-Wipe                                        -> Wipes the data folder. (y or n)
-    #--- MID-CRUISE BACKUP, MONTHLY OR AS REQUIRED
-Stop   Archive   Wipe [y]    Start
+  gtdaq                                       ->  cd to "~/swmain/apps/ROSR/sw/$ "
+  iss                                         ->  is the DAQ running
+#--TIME---------
+  Date                                        ->  2015 10 19 18 03 57 Z
+  SetDate <password> yyyy MM dd hh mm ss      ->  sets the PC clock. Note: always UTC!
+  example:
+    SetDate password 2017 08 20 17 23 30<enter>
+#-SETUP--------
+  less setup/su.txt                           ->  shows the system setup file currently in use.
+  nano setup/su.txt                           -> optional, edit as necessary.
+#-START-----------
+  booton (optional)                           ->  If needed: Power ON, wait 10 secs.
+  Start                                       ->  Begin data collection in background screen
+  Raw                                         ->  Confirm data flow  (^c to end)
+#-STOP-----------
+  Stop                                        ->  End data collection
+#-ARCHIVE-----------
+  Archive                                     -> Makes archive /home/rmr/rosrdata
+  Wipe                                        -> Wipes the data folder. (y or n)
+#-BACKUP-----------
+  Stop; Archive;  Wipe [y];    Start;         -> Interim backup to protect data.
+#-SHUTDOWN-----------
+  RosrShutdown                                ->  Note: When in port: Close shutter and power off.
 
-    #-----------------------------
-    #--- MISC COMMANDS
-    #-----------------------------
-    #--- POWER: 
-booton                                      ->  Power ON, ROSR begins operation in two minutes.
-bootoff                                     ->  Power OFF. See RosrShutdown.
-bootstatus                                  ->  current power status, ON or OFF.
-RosrShutdown                                ->  Note: When in port: Close shutter and power off.
-    #---- VIEW DATA
-Sbd                                         ->  show WISBD packets, 10-min, ^c to end
-Raw                                         ->  show $WIROS raw data, 280 sec, ^c to end
-Avg                                         ->  show PC avg file, 10 min averages (5,15,25,...,55), ^c to end
-Av                                          ->  show $WIRAV packets, 280 sec, ^c to end
-Sst                                         ->  show $WIRST packets, 280 sec, ^c to end
-	#--- VIEW THE SU FILE, 'q' to end
-less setup/su.txt                           ->  shows the system setup file currently in use.
-    #--- GPS DIRECT CONNECT
-P                                           -> direct connect to GPS
-    #--- ROSR DIRECT CONNECT
-I                                           -> direct connect to ROSR, "^\ q" to end
-  T                                         -> ROSR test  '>' prompt
-    e                                       -> contents of the eeprom
-    ?                                       -> terminal menu
-    fc                                      -> close shutter
-    fo                                      -> open shutter
-    g                                       -> Go. End terminal session. Start operation.
-   note jumps to operation automatically after 1 min inactivity.
-    #---- END DIRECT CONNECT
-^\ q                                        -> end direct connect. 
-                                               Press <Crtl> and '\'. Release and press 'q'. 
+#-MISC COMMANDS
+#-POWER----------- 
+  booton                                      ->  Power ON, ROSR begins operation in two minutes.
+  bootoff                                     ->  Power OFF. See RosrShutdown.
+  bootstatus                                  ->  current power status, ON or OFF.
+  Bat                                         ->  laptop PC battery status
+#--VIEW DATA-----------
+  Raw                                         ->  show $WIROS raw data, 280 sec, ^c to end
+  Avg                                         ->  show PC avg file, 10 min averages (5,15,25,...,55), ^c to end
+  Av                                          ->  show $WIRAV packets, 280 sec, ^c to end
+  Sst                                         ->  show $WIRST packets, 280 sec, ^c to end
+  Sbd                                         ->  show WISBD packets, 10-min, ^c to end
+#-GPS DIRECT CONNECT-----------
+  P                                           -> direct connect to GPS
+#-ROSR DIRECT CONNECT-----------
+  I                                           -> direct connect to ROSR, "^\ q" to end
+    T                                         -> ROSR test  '>' prompt
+      e                                       -> contents of the eeprom
+      ?                                       -> terminal menu
+      fc                                      -> close shutter
+      fo                                      -> open shutter
+      g                                       -> Go. End terminal session. Start operation.
+  note jumps to operation automatically after 1 min inactivity.
+#-END DIRECT CONNECT-----------
+  ^\ q                                        -> end direct connect. 
 
-    #-----------------------------
-    #---- ROSR OUTPUT PACKETS 
-    #-----------------------------
-    #--- RAW  (rosrraw)  2 sec output from ROSR
-$WIssf,vv,etime,drum,RAD,REF,adc0,adc1,adc2,adc3,adc4,adc5,adc6,adc7,
-adc8,adc9,adc10,adc11,vref,t11,t12,t21,t22,pit,rol,Tanalog,Tktcase,Twindow,
-Tpwr,Vin,vrain,sec*chk<cr><lf>
-where ss=serialnumber, f = format number, vv=sw version number
-example:
-$WI033,33,00.002314,135.00, 159367,24.47,2.727,2.731,0.143,2.467,1.838,1.833,2.040,2.708
-,0.815,0.564,-0.001,2.679,4.933,19.74,19.76,38.45,38.49,-0.0,-0.8,-57.10,20.76,20.18,
-33.88, 2.8,-0.0,  0*78
+#-----------------------------
+#--ROSR OUTPUT PACKETS 
+#-----------------------------
+#-RAW-----------          (rosrraw)  2 sec output from ROSR
+  $WIssf,vv,etime,drum,RAD,REF,adc0,adc1,adc2,adc3,adc4,adc5,adc6,adc7,
+  adc8,adc9,adc10,adc11,vref,t11,t12,t21,t22,pit,rol,Tanalog,Tktcase,Twindow,
+  Tpwr,Vin,vrain,sec*chk<cr><lf>
+  where ss=serialnumber, f = format number, vv=sw version number
+  example:
+  $WI033,33,00.002314,135.00, 159367,24.47,2.727,2.731,0.143,2.467,1.838,1.833,2.040,2.708
+  ,0.815,0.564,-0.001,2.679,4.933,19.74,19.76,38.45,38.49,-0.0,-0.8,-57.10,20.76,20.18,
+  33.88, 2.8,-0.0,  0*78
 
-    #--- AV  (rosrav) 280 sec output from ROSR
-$WIRAV,etime,vav0,vav1,vav2,vav3,k0,ksd0,k1,ksd1,k2,ksd2,k3,ksd3,t11,tsd11,t12,tsd12,
-   t21,tsd21,t22,tsd22,T1,T2,pav,psd,rav,rsd,ang,emis*chk
-where
- vavi, i=0..3 = view angle (bb1,bb2,sky,sea)
- ki, i=0..3 = kt15 rad (bb1,bb2,sky,sea)
- ksdi, i=0..3 = kt15 stdev (bb1,bb2,sky,sea)
- t11,tsd11 = mean BB1,thermister1 and stdev.
- ditto for t12, t21, and t22
+#-Av-----------            (rosrav) 280 sec output from ROSR
+  $WIRAV,etime,vav0,vav1,vav2,vav3,k0,ksd0,k1,ksd1,k2,ksd2,k3,ksd3,t11,tsd11,t12,tsd12,
+     t21,tsd21,t22,tsd22,T1,T2,pav,psd,rav,rsd,ang,emis*chk
+  where
+   vavi, i=0..3 = view angle (bb1,bb2,sky,sea)
+   ki, i=0..3 = kt15 rad (bb1,bb2,sky,sea)
+   ksdi, i=0..3 = kt15 stdev (bb1,bb2,sky,sea)
+   t11,tsd11 = mean BB1,thermister1 and stdev.
+   ditto for t12, t21, and t22
   
-    #--- SSST  (rosrst)   280 sec output from ROSR
-$WIRST,etime,vav0,vav1,vav2,vav3,k0,k1,k2,k3,T1,T2,ang,emis,ssst*chk
-where
- vavi, i=0..3 = avg view angle (bb1,bb2,sky,sea)
- ki, i=0..3 = kt15 avg rad (bb1,bb2,sky,sea)
+#-Sst-----------             (rosrst)   280 sec output from ROSR
+  $WIRST,etime,vav0,vav1,vav2,vav3,k0,k1,k2,k3,T1,T2,ang,emis,ssst*chk
+  where
+   vavi, i=0..3 = avg view angle (bb1,bb2,sky,sea)
+   ki, i=0..3 = kt15 avg rad (bb1,bb2,sky,sea)
 
-    #--- AVG DATA (rosravg)  10 min output from DAQ 
-ix UTC lat lon sog cog ssst ssstu T1 T2 k1 k2 ksea ksky emis pit sdpit rol sdrol rain
+#-Avg-----------              (rosravg)  10 min output from DAQ 
+  ix UTC lat lon sog cog ssst ssstu T1 T2 k1 k2 ksea ksky emis pit sdpit rol sdrol rain
 
-    #----SBD  (rosrsbd)  10 min output from DAQ 
-$WISBD yyyyMMdd hhmmss lat lon sog cog ssst pi sdpi ro sdro emis
-    k1 k2 ksky ksea T1 T2 vrain
+#-SBD-----------               (rosrsbd)  10 min output from DAQ 
+  $WISBD yyyyMMdd hhmmss lat lon sog cog ssst pi sdpi ro sdro emis
+      k1 k2 ksky ksea T1 T2 vrain
 
-    #--- TELNET/UDP OUTPUT TO SHIP   10 min output from DAQ 
-$ROSST,yyyyMMdd,hhmmss,V1,lat,lon,sogmps,cogT,V2,ssst*chk
- where
- yyyyMMdd,hhmmss = UTC
- V1 = GPS quality: M=missing, I=Invalid, V=valid
- lat,lon = avg 10 min position,
- sogmps,cogT = speed (m/s), true course
- V2 = SSST quality: M=missing, I=Invalid, V=valid
- SSST= skin temp (degC)
-example: 
-  $ROSST,20180203,155000,V,29.99997,-145.42247,7.4,268,V,23.520*71
+#-TELNET/UDP-----------          OUTPUT TO SHIP   10 min output from DAQ 
+  $ROSST,yyyyMMdd,hhmmss,V1,lat,lon,sogmps,cogT,V2,ssst*chk
+   where
+   yyyyMMdd,hhmmss = UTC
+   V1 = GPS quality: M=missing, I=Invalid, V=valid
+   lat,lon = avg 10 min position,
+   sogmps,cogT = speed (m/s), true course
+   V2 = SSST quality: M=missing, I=Invalid, V=valid
+   SSST= skin temp (degC)
+  example: 
+    $ROSST,20180203,155000,V,29.99997,-145.42247,7.4,268,V,23.520*71
   
------ END -----------------
+---END -----------------
 
