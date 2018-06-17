@@ -1,7 +1,7 @@
 ##### edit 180615
 Note: 'q' to end the myhelp display.
   gtdaq                                       ->  cd to "~/swmain/apps/ROSR/sw/$ "
-  iss                                         ->  is the DAQ running
+  iss                                         ->  is the DAQ running?
 #--TIME---------
   Date                                        ->  2015 10 19 18 03 57 Z
   SetDate <password> yyyy MM dd hh mm ss      ->  sets the PC clock. Note: always UTC!
