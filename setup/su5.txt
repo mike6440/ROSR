@@ -23,7 +23,7 @@ NO DATA WAIT TIME: 3600
 SERIAL HUB URL: /dev/ttyS0
 SERIAL GPS: /dev/ttyS1
 	SERIAL HUB URL: 192.168.255.1
-	# iboot ip, 0=> not connected
+	# iboot ip, 0=>not connected
 IBOOT IP: 0
 	PC IP: 192.168.255.10
 	PC IP1: 192.168.255.11

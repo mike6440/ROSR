@@ -1,4 +1,4 @@
-##### edit 180615
+##### edit 180617
 Note: 'q' to end the myhelp display.
   gtdaq                                       ->  cd to "~/swmain/apps/ROSR/sw/$ "
   iss                                         ->  is the DAQ running?
@@ -97,6 +97,18 @@ Note: 'q' to end the myhelp display.
    SSST= skin temp (degC)
   example: 
     $ROSST,20180203,155000,V,29.99997,-145.42247,7.4,268,V,23.520*71
+
+
+#-----------------------------
+#--PC PREPARATION
+#-----------------------------
+  Suspend                           never
+  Time zone                         sudo dpkg-reconfigure tzdata
+                                    select UTC
+
+       
+  
+  
   
 ---END -----------------
 
