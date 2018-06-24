@@ -190,35 +190,56 @@ expect -re "(\.*)(\r)";
 set datapath $expect_out(1,string)
 write_info $infoname "DATAPATH = $datapath\n";
 
-		# PDS SERIAL HUB URL AND OFFSET
-spawn -noecho getsetupinfo $setupfile "SERIAL HUB URL"
-expect -re "(\.*)(\r)";
-set hubip $expect_out(1,string)
-write_info $infoname  "SERIAL HUB URL: $hubip"
 		## TIME WITH NO GPS
 spawn -noecho getsetupinfo $setupfile "GPS DEAD TIME ALARM SECS"
 expect -re "(\.*)(\r)";
 set zdeadtime $expect_out(1,string);
 write_info $infoname  "GPS DEAD TIME ALARM SECS: $expect_out(1,string)"
+
 		# DEFINE THE PORTS 
-spawn -noecho getsetupinfo $setupfile "GPS HUB COM NUMBER"
+spawn -noecho getsetupinfo $setupfile "GPS PORT"
 expect -re "(\.*)(\r)";
 set gpsport $expect_out(1,string)
-write_info $infoname  "GPS HUB COM NUMBER: $gpsport"
-	# GPS CONNECTOION
-spawn -noecho getsetupinfo $setupfile "SERIAL GPS"
-expect -re "(\.*)(\r)";
-set gpscom $expect_out(1,string)
-write_info $infoname  "GPS 232COM PORT: $gpscom"
-send_user  "GPS 232COM PORT: $gpscom\n"
-	# simulate or normal op
+write_info $infoname  "GPS PORT: $gpsport"
+send_user "GPS PORT: $gpsport\n";
+	#====================
+	# GPS INPUT OPTION
+	#====================
 if { $gpsport == 0 } { 
-	send_user "SIMULATE GPS...\n";
+	# SIMULATE
+	send_user "SIMULATE GPS.\n";
+	write_info $infoname  "SIMULATE GPS.";
 	SpawnGpsSimulate;
+} elseif {$gpsport == 1} {
+	# GPS CONNECTOION
+	write_info $infoname  "GPS RS232";
+	spawn -noecho getsetupinfo $setupfile "SERIAL GPS"
+	expect -re "(\.*)(\r)";
+	set gpscom $expect_out(1,string)
+	write_info $infoname  "GPS 232COM: $gpscom"
+	send_user  "GPS 232COM: $gpscom\n"
+	SpawnGps $hubip $gpsport $gpscom
+} elseif {$gpsport == -1} {
+	# FIXED
+	spawn -noecho getsetupinfo $setupfile "GPS FIXED LATITUDE"
+	expect -re "(\.*)(\r)";
+	set fixedlat $expect_out(1,string)
+	spawn -noecho getsetupinfo $setupfile "GPS FIXED LONGITUDE"
+	expect -re "(\.*)(\r)";
+	set fixedlon $expect_out(1,string)
+	write_info $infoname  "GPS FIXED LAT $fixedlat, LON $fixedlon";
+	send_user "GPS FIXED LAT $fixedlat, LON $fixedlon\n";
 } else {
-	send_user "STANDARD GPS...\n";
+	# HUB SERIAL SERVER
+	spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"
+	expect -re "(\.*)(\r)";
+	set hubip $expect_out(1,string)
+	write_info $infoname  "SERIAL HUB IP: $hubip"
+	send_user "SERIAL HUB IP: $hubip, GPS PORT: $gpsport"
 	SpawnGps $hubip $gpsport $gpscom
 }
+
+	
 		# OPEN TELNET CONNECTIO
 write_info $infoname "GPS = $GPS, PID = $GPSPID\n";
 
