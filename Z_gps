@@ -229,6 +229,7 @@ if { $gpsport == 0 } {
 	set fixedlon $expect_out(1,string)
 	write_info $infoname  "GPS FIXED LAT $fixedlat, LON $fixedlon";
 	send_user "GPS FIXED LAT $fixedlat, LON $fixedlon\n";
+	send_user "Exit Z_gps\n"; exit 0;
 } else {
 	# HUB SERIAL SERVER
 	spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"
@@ -238,10 +239,6 @@ if { $gpsport == 0 } {
 	send_user "SERIAL HUB IP: $hubip, GPS PORT: $gpsport"
 	SpawnGps $hubip $gpsport $gpscom
 }
-
-	
-		# OPEN TELNET CONNECTIO
-write_info $infoname "GPS = $GPS, PID = $GPSPID\n";
 
 		# GPSAV PROGRAM
 SpawnAvgGps $setupfile

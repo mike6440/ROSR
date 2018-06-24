@@ -12,7 +12,7 @@ SHELL=/bin/bash
 #26,56 * * * * $DAQSWFOLDER/sbd_transmit >> $DAQDATAFOLDER/sbdlog
 
 #    Check and reboot at midnight
-@midnight $DAQSWFOLDER/UpdateDaq >> $DAQDATAFOLDER/daqlog
+# @midnight $DAQSWFOLDER/UpdateDaq >> $DAQDATAFOLDER/daqlog
 
 #	SCS OUTPUT
 #6,16,26,36,46,56 * * * * $DAQSWFOLDER/sbd2scs_tcp >> /tmp/scslog

@@ -193,7 +193,7 @@ proc spawn_kermit232 {hubip} {
 
 #==================== END PROCEDURES =============================================
 
-exec echo "START ROSR3 [timestamp -gmt -format "%Y%m%d,%H%M%S"]" > /tmp/sbd
+exec echo "START ROSR [timestamp -gmt -format "%Y%m%d,%H%M%S"]" > /tmp/sbd
 
 		#============
 		# DATAPATH
@@ -249,27 +249,28 @@ if { $e_cal == 0 } {
 	send_user "CALIBRATION MODE.\n"
 }
 	# PDS SERIAL HUB URL AND OFFSET
-spawn -noecho getsetupinfo $setupfile "SERIAL HUB URL"
+spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"
 expect -re "(\.*)(\r)";
 set hubip $expect_out(1,string)
-write_info $infoname  "SERIAL HUB URL: $hubip"
+write_info $infoname  "SERIAL HUB IP: $hubip"
+
 	## ROSR PORT
-spawn -noecho getsetupinfo $setupfile "ROSR HUB COM NUMBER"
+spawn -noecho getsetupinfo $setupfile "ROSR PORT"
 expect -re "(\.*)(\r)";
 set rosrport $expect_out(1,string)
-write_info $infoname  "ROSR HUB COM NUMBER: $rosrport"
+write_info $infoname  "ROSR PORT: $rosrport"
 	# SIMULATION ?
-spawn -noecho getsetupinfo $setupfile "SIMULATEFLAG"
-expect -re "(\.*)(\r)";
-set simulateflag $expect_out(1,string)
-if { $simulateflag == 1 } { 
+# spawn -noecho getsetupinfo $setupfile "SIMULATEFLAG"
+# expect -re "(\.*)(\r)";
+# set simulateflag $expect_out(1,string)
+
+if { $rosrport == 0 } { 
 	send_user "SIMULATE ROSR...\n";
 	SpawnRosrSimulate;
 } else {
 	send_user "OPEN SERIAL CONNECTION...\n";
 	SpawnRosr $hubip $rosrport
 }
-
 		#=================
 		# OPEN SET FILE NAMES AND NOTE TIME
 		#=================
