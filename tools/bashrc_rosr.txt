@@ -133,17 +133,17 @@ echo "prompt k>>" > ~/.kermrc
     # MONITOR PROGRESS
 alias rosrsbd="tail -f /tmp/sbd 2>/dev/null"
 alias Sbd="cat /tmp/sbd"
-alias sbdlog="less ../data/sbdlog"
+alias sbdlog="less +G ../data/sbdlog"
 
     # alias
-alias daqlog="less $DAQDATAFOLDER/daqlog"
+alias daqlog="less +G $DAQDATAFOLDER/daqlog"
 alias Ping="ping -c3 "
 alias Archive="ArchiveRosr";
 alias Wipe="ClearRosrData";
 
 cd $DAQSWFOLDER
 
-alias bootlog="tail ~/tmp/bootlog"
+alias bootlog="less +G ~/tmp/bootlog"
 alias llb="ls -l ~/tmp"
 # restart set AutoStartFlag in /etc/rc.local (ubuntu > 16.04)
 if [ -e ${HOME}/tmp/AutoStartFlag ] 
