@@ -2,8 +2,8 @@
 #Z_rosr_v6
 
 set PROGRAMNAME Z_rosr
-set VERSION 9.2
-set EDITDATE 180608;
+set VERSION 9.3
+set EDITDATE 180625;
 # 
 # V1 FROM Z_ROSR V20
 #v4 use getgpsraw program 

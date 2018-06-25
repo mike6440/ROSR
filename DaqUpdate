@@ -19,6 +19,10 @@ for($is=0; $is<=$#f; $is++){
 	my $f=$f[$is];
 		# FILE MOD TIME
 	chomp ($str = `LastDataFolder $f`);
+	if(! -f $str){
+		print"0";
+		exit 1;
+	}
 	my $mtime=(stat $str)[9]-$os;
 	my $age = now() - $mtime;
 	#printf"%10s   %10d   %4d   %4d   ",$f,$mtime,$age,$d[$is];

@@ -137,7 +137,7 @@ proc spawn_kermit232 {hubip} {
 
 
 	# PDS SERIAL HUB URL AND OFFSET
-spawn -noecho getsetupinfo $setupfile "SERIAL HUB URL"
+spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"
 expect -re "(\.*)(\r)";
 set hubip $expect_out(1,string)
 	# ROSR PORT
