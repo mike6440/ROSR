@@ -1,5 +1,5 @@
 THIS FILE: su5c.txt
-Editdate: 180618
+Editdate: 180625
 COMMENTS:
  rosr5 calibration
 END
@@ -16,18 +16,15 @@ SCAN VIEW ANGLES: 265 325 45 135
 RT OUT PATH: data
 NO DATA WAIT TIME: 3600
 	#COMMS with miniPC DA1000
-SERIAL HUB URL: /dev/ttyS0
+	# Hub 10001, simulate 0, rs232 1
+ROSR PORT: 1
+SERIAL HUB IP: /dev/ttyS0
+	if icp-das server e.g. 192.168.255.1 
+	!! Hub--10003, rs232 1, Fixed -1, simulate=0
+GPS PORT: 0
 SERIAL GPS: /dev/ttyS1
-	SERIAL HUB URL: 192.168.255.1
 	# iboot ip, 0=>not connected
 IBOOT IP: 0
-	PC IP: 192.168.255.10
-	PC IP1: 192.168.255.11
-	PC IP2: 192.168.255.12
-	# Hub 10001, simulate 0, rs232 1
-ROSR HUB COM NUMBER: 1
-	!! Hub--10003, rs232 1, Fixed -1, simulate=0
-GPS HUB COM NUMBER: 1
 	# MODEM -- 10004, Not connected=-1, simulate=0
 SBD HUB COM NUMBER: -1
 	# KAIMEI SOCKET SERVER 10.198.5.1 4025
@@ -77,8 +74,8 @@ MISSING VALUE: -999
 GPS AVERAGING TIME: 120
 GPS DEAD TIME ALARM SECS: 60
 	!! if GPS HUB COM NUMBER = -1
-GPS FIXED LATITUDE: 35
-GPS FIXED LONGITUDE: -122
+GPS FIXED LATITUDE: 35.01
+GPS FIXED LONGITUDE: -122.02
 		Magnetic variation, + = East of true
 GPS FIXED VARIATION: 18.1
 VERBOSE MODE: 0
