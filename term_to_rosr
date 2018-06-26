@@ -10,10 +10,10 @@ set setupfile "$env(DAQSWFOLDER)/setup/su.txt"
 #==============
 ## READ SETUP FILE FOR IP ADDRESS
 #==============
-spawn -noecho getsetupinfo $setupfile "SERIAL HUB URL"
+spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"
 expect -re "(\.*)(\r)";
 set hubip $expect_out(1,string)
-send_user "SERIAL HUB URL: $hubip\n"
+send_user "SERIAL HUB IP: $hubip\n"
 
 ## SERIAL SERVER VIA ETHERNET
 if { [string first "dev" $hubip] == -1 } {
@@ -21,10 +21,10 @@ if { [string first "dev" $hubip] == -1 } {
 	#==============
 	## READ SETUP FILE FOR PORT NUMBER
 	#==============
-	spawn -noecho getsetupinfo $setupfile "ROSR HUB COM NUMBER"
+	spawn -noecho getsetupinfo $setupfile "ROSR PORT"
 	expect -re "(\.*)(\r)";
 	set portnumber $expect_out(1,string)
-	send_user "ROSR PORT NUMBER: $portnumber\n"
+	send_user "ROSR PORT: $portnumber\n"
 
 
 	# START PROCESS -- KERMIT FOR MODEM

@@ -28,7 +28,7 @@ fi
 export SETUPFILE=$DAQSWFOLDER"/setup/su.txt"
 
 # TEST CALLS
-alias I='cd $DAQSWFOLDER; echo "NOTE: ^\ q to exit";    ./kerm232'
+alias I='cd $DAQSWFOLDER; echo "NOTE: ^\ q to exit"; ./term_to_rosr'
 alias N='cd $DAQSWFOLDER; ./term_to_sbd  $SETUPFILE'
 alias P='cd $DAQSWFOLDER; ./term_to_gps  $SETUPFILE'
 
@@ -140,6 +140,7 @@ alias daqlog="less +G $DAQDATAFOLDER/daqlog"
 alias Ping="ping -c3 "
 alias Archive="ArchiveRosr";
 alias Wipe="ClearRosrData";
+alias ll="ls -lt";
 
 cd $DAQSWFOLDER
 

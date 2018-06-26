@@ -21,7 +21,7 @@ my $EDITDATE = '180604';
 # FORMAT 3
 #2018,06,08,17,59,48,0,0.000000,0.000000,0.0,0,0.0,$WI053,34,00.195534, 44.97, 154489,25.69,2.714,2.715,0.393,2.471,1.864,1.863,4.096,4.096,4.096,3.549,-0.000,2.789,4.942,20.12,20.13,37.89,37.93,-1.0,-1.4,17.87,18.68,200.00,200.00,14.8,-0.0,  0*02
 #2018,06,08,17,59,51,0,0.000000,0.000000,0.0,0,0.0,$WI053,34,00.195537, 44.97, 154675,25.69,2.714,2.715,0.393,2.471,1.864,1.863,4.096,4.096,4.096,3.549,-0.000,2.789,4.942,20.12,20.13,37.89,37.93,-1.0,-1.4,17.89,18.68,200.00,200.00,14.8,-0.0,  0*0E
-use lib $ENV{DAQLIB};
+use lib $ENV{MYLIB};
 use perltools::MRtime;
 use perltools::MRutilities;
 use perltools::MRsensors;
@@ -78,13 +78,13 @@ if($e_cal == 0){
 # TELNET SERVER
 #======================
 $telnetserverip = FindInfo($setupfile,'TELNET SERVER IP',':');
-#print"TELNET SERVER IP = $telnetserverip\n";
+print"TELNET SERVER IP = $telnetserverip\n";
 if($telnetserverip==0){print"No telnet socket output\n"}
 else{
 	$telnetserverport = FindInfo($setupfile,'TELNET SERVER PORT',':');
-	#print"TELNET SERVER PORT = $telnetserverport\n";
+	print"TELNET SERVER PORT = $telnetserverport\n";
 	$socketprogram = FindInfo($setupfile,'TELNET PROGRAM',':');  # v6 udp or sock
-	#print"TELNET PROGRAM = $socketprogram\n";                    # v6
+	print"TELNET PROGRAM = $socketprogram\n";                    # v6
 }
 
 $str="\"PROGRAM: $PROGRAMNAME V$VERSION, Edit $EDITDATE,  RUN  ".dtstr(now(),'short')."\""; 
@@ -187,7 +187,6 @@ print"OUTPUT HEADER FILE: $fnhdr\n";
 open HDR,">$fnhdr" or die"OPEN HEADERFILE FAILS";
 MakeHeaderFile();
 close HDR;
-
 #===========================
 # AVG OUTPUT DATA FILE
 #===========================
