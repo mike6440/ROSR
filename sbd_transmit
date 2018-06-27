@@ -172,14 +172,14 @@ proc sbdi {str sbdid ntries} {
 #==================== END PROCEDURES =============================================
 
 
-		# PDS SERIAL HUB URL
-spawn -noecho getsetupinfo $setupfile "SERIAL HUB URL"
+		# PDS SERIAL HUB
+spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"
 expect -re "(\.*)(\r)";
 set hub_url $expect_out(1,string)
 
 
 		## SBDPORT
-spawn -noecho getsetupinfo $setupfile "SBD HUB COM NUMBER"
+spawn -noecho getsetupinfo $setupfile "SBD PORT"
 expect -re "(\.*)(\r)";
 set sbdport $expect_out(1,string)
 

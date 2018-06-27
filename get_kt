@@ -92,12 +92,6 @@ if [catch {open $setupfile} sufile] {
 	send_user "EXISTS\n"
 }
 
-		# HUB IP
-# spawn -noecho ./getsetupinfo $setupfile "SERIAL HUB URL"
-# expect -re "(\.*)(\r)";
-# set hub_url $expect_out(1,string);
-# send_user "KT HUB IP: $hub_url\n";
-
 		# RS232 LINE
 spawn -noecho ./getsetupinfo $setupfile "SERIAL LINE"
 expect -re "(\.*)(\r)";

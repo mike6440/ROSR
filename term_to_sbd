@@ -29,17 +29,17 @@ if { $argc == 0} {
 #==============
 ## READ SETUP FILE FOR IP ADDRESS
 #==============
-spawn -noecho getsetupinfo $setupfile "SERIAL HUB URL"
+spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"
 expect -re "(\.*)(\r)";
 set hubip $expect_out(1,string)
-send_user "SERIAL HUB URL: $hubip\n"
+send_user "SERIAL HUB IP: $hubip\n"
 #==============
 ## READ SETUP FILE FOR PORT NUMBER
 #==============
-spawn -noecho getsetupinfo $setupfile "SBD HUB COM NUMBER"
+spawn -noecho getsetupinfo $setupfile "SBD PORT"
 expect -re "(\.*)(\r)";
 set portnumber $expect_out(1,string)
-send_user "RAD PORT NUMBER: $portnumber\n"
+send_user "RAD PORT: $portnumber\n"
 
 # 111221-remove ping as unnecessary.
 
