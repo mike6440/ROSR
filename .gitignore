@@ -2,8 +2,6 @@
 tmp
 setup/su.txt
 setupifconfig
-udpserver
-udpclient
 *-bu
 other
 other/*

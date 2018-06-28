@@ -15,9 +15,11 @@ use perltools::MRtime;
 use perltools::MRutilities;
 use IO::Socket::INET;
 
-$setupfile="setup/su.txt";
+my $setupfile="setup/su.txt";
+my $sn=FindInfo($setupfile,"ROSR SERIAL NUMBER");
 
 # ip# and port from su.txt or command line.
+my($serverip,$serverport);
 if($#ARGV == -1 || $#ARGV == 0)
 {
 	$serverip=FindInfo($setupfile,'TELNET SERVER IP',':');
@@ -33,17 +35,6 @@ else {}
 
 # auto-flush on socket
 $| = 1;
-
-#####################
-# $socket = new IO::Socket::INET (
-# PeerAddr   => '127.0.0.1:5000',
-# Proto        => 'udp'
-# ) or die "ERROR in Socket Creation : $!\n”;
-# #send operation
-# $data = “data from client”;
-# $socket->send($data);
-#######################
-
 
 # create a connecting socket
 my $socket = new IO::Socket::INET (
@@ -61,12 +52,13 @@ if($#ARGV == 0 || $#ARGV == 2){
 } else {
 	# data to send to a server
 	$fn=`LastDataRecord rosr_avg`;
+	
 	chomp($fn);
 	if( $fn eq 0 || substr($fn,6) =~ /[A-Za-z]/ ){
-		$str=sprintf"\$ROSST,%s,M,,,,,M,\*",dtstr(now(),'csv');
+		$str=sprintf"\$ROSST,$sn,%s,M,,,,,M,\*",dtstr(now(),'csv');
 	} else {
 		@w=split /[, ]+/, $fn;
-		$str=sprintf "\$ROSST,$w[1]$w[2]$w[3],$w[4]$w[5]$w[6],";
+		$str=sprintf "\$ROSST,$sn,$w[1]$w[2]$w[3],$w[4]$w[5]$w[6],";
 		#test gps
 		if($w[7]=~/[A-Za-z]/ || $w[7]<-90 || $w[8]<-180 || $w[7]>90 || $w[8]>360 ){
 			$str=$str.'I,,,,,';
@@ -82,7 +74,7 @@ if($#ARGV == 0 || $#ARGV == 2){
 	}
 }
 # make the packet
-#$str='$GPRMC,070951,A,3356.2135,N,13055.5039,E,000.1,051.6,160915,007.1,W*';# == 64';
+#$str='$GPRMC,sn,070951,A,3356.2135,N,13055.5039,E,000.1,051.6,160915,007.1,W*';# == 64';
 $str=$str.NmeaChecksum($str)."\r\n";
 
 # send packet
