@@ -4,24 +4,32 @@
 # sends $ROSST,%s,M,,,,,M,*5A if there is no data. 
 #see https://blog-en.openalfa.com/how-to-send-and-receive-upd-datagrams-in-perl
 
+# Input: 
+#  $#ARGV=-1    udptxx (no args) :: uses su.txt for ip and port; computes ROSST string
+#   $#ARGV=0    udptxx "string" :: uses su.txt for ip and port; sends "string"
+#   $#ARGV=1    udptxx ip port  :: computes ROSST string and send it to ip/port.
+#   $#ARGV=2    udptxx ip port "string" :: sends "string" to ip/port.
+
 use lib $ENV{DAQLIB};
 use perltools::MRtime;
 use perltools::MRutilities;
-# use perltools::MRsensors;
-# use perltools::MRstatistics;
-# use perltools::Isar;
-# use POSIX;
 use IO::Socket::INET;
 
+$setupfile="setup/su.txt";
+
 # ip# and port from su.txt or command line.
-if($#ARGV < 0){
-	$serverip=FindInfo(`cat tmp`,'TELNET SERVER IP',':');
-	$serverport=FindInfo(`cat tmp`,'TELNET SERVER PORT',':');
-} else {
+if($#ARGV == -1 || $#ARGV == 0)
+{
+	$serverip=FindInfo($setupfile,'TELNET SERVER IP',':');
+	$serverport=FindInfo($setupfile,'TELNET SERVER PORT',':');
+} 
+elsif($#ARGV == 1 || $#ARGV == 2) 
+{
 	$serverip=shift();
 	$serverport=shift();
 }
-#print"Socket -- $serverip $serverport\n";
+else {}
+# print"[!!]Socket -- $serverip $serverport\n";
 
 # auto-flush on socket
 $| = 1;
@@ -45,47 +53,37 @@ my $socket = new IO::Socket::INET (
 );
 die "cannot connect to the server $!\n" unless $socket;
 
-
+# DEFINE $str
 my ($fn, $str, @w);
-# data to send to a server
-$fn=`LastDataFolder rosr_avg`;
-#print"fn=$fn\n";
-if( -f $fn ){
-	#print"$fn exists.\n";
-	$str=`tail -1 $fn`;
+if($#ARGV == 0 || $#ARGV == 2){
+	$str=shift();
 	chomp($str);
-    if($str =~ /[a-zA-Z]/)
-    {
-        print"Bad record\n";
-        $str=sprintf"\$ROSST,%s,M,,,,,M,*",dtstr(now(),'csv'); # bad record
-    }
-    else
-    {
-	    @w=split /[, ]+/, $str;
-	    $str=sprintf "\$ROSST,$w[1]$w[2]$w[3],$w[4]$w[5]$w[6],";
-	    #test gps
-	    if($w[7]<-90 || $w[8]<-180 || $w[7]>90 || $w[8]>360 ){
-		    $str=$str.'I,,,,,';
-	    } else {
-		    $str=$str."V,$w[7],$w[8],$w[9],$w[10],";
-	    }
-	    # test ssst
-	    if($w[11]<0 || $w[11]>50){
-		    $str=$str.'I,*';
-	    } else {
-		    $str=$str."V,$w[11]*";
-	    }
-	    #$str=sprintf "\$ROSST,$w[1]$w[2]$w[3],$w[4]$w[5]$w[6],V,$w[7],$w[8],$w[9],$w[10],V,$w[11]*";
-    }
-}
-else{
-	$str=sprintf"\$ROSST,%s,M,,,,,M,*",dtstr(now(),'csv');  # bad record
+} else {
+	# data to send to a server
+	$fn=`LastDataRecord rosr_avg`;
+	chomp($fn);
+	if( $fn eq 0 || substr($fn,6) =~ /[A-Za-z]/ ){
+		$str=sprintf"\$ROSST,%s,M,,,,,M,\*",dtstr(now(),'csv');
+	} else {
+		@w=split /[, ]+/, $fn;
+		$str=sprintf "\$ROSST,$w[1]$w[2]$w[3],$w[4]$w[5]$w[6],";
+		#test gps
+		if($w[7]=~/[A-Za-z]/ || $w[7]<-90 || $w[8]<-180 || $w[7]>90 || $w[8]>360 ){
+			$str=$str.'I,,,,,';
+		} else {
+			$str=$str."V,$w[7],$w[8],$w[9],$w[10],";
+		}
+		# test ssst
+		if($w[11]=~/[A-Za-z]/ || $w[11]<-20 || $w[11]>60){
+			$str=$str.'I,*';
+		} else {
+			$str=$str."V,$w[11]*";
+		}
+	}
 }
 # make the packet
 #$str='$GPRMC,070951,A,3356.2135,N,13055.5039,E,000.1,051.6,160915,007.1,W*';# == 64';
-my $chk=NmeaChecksum($str);
-$str=$str.$chk."\r\n";
-print"$str";
+$str=$str.NmeaChecksum($str)."\r\n";
 
 # send packet
 #my $size = $socket->send($str);
@@ -101,6 +99,6 @@ shutdown($socket, 1);
 
 # close the socket
 $socket->close();
-
+print"$serverip $serverport >> $str";
 exit 0;
  

@@ -1,0 +1,55 @@
+#!/usr/bin/perl -X
+if($#ARGV<0){
+	print '
+PROGRAM udprx
+Call: perl udprx PORT [FILENAME]
+where
+  perl call the perl program. (\'./\' works also.)
+  PORT is the desired port, e.g. 5555
+  FILENAME (optional) defines a file where collected data are stored.
+
+Example:
+  perl udprx 5555 /tmp/prpdata.txt
+or
+  perl udprx 5555 		-> to display data only.
+
+   THIS PROGRAM WAITS FOR DATA FROM UDP CLIENT.
+';
+	exit 1;
+};
+
+use lib $ENV{DAQLIB};
+use perltools::MRtime;
+use perltools::MRutilities;
+use IO::Socket;
+
+my $serverport=$ARGV[0];
+
+# SAVE TO FILE
+my $recordflag=0;
+if ($#ARGV >= 1){
+	my $datfile = $ARGV[1];
+	$recordflag=1;
+	print"record data to $datfile\n";
+}
+
+##########################
+#  we call IO::Socket::INET->new() to create the UDP Socket and bound 
+# to specific port number mentioned in LocalPort and there is no need to provide 
+#########################
+my $sock = IO::Socket::INET->new (
+	LocalPort => $serverport,
+	Proto => 'udp',
+) or die "[!!] Could not create socket: $!\n";
+print"Waiting on port $serverport for UDP message: \n";
+
+my ($received_data);
+my ($peer_address,$peer_port);
+while ($sock->recv($received_data, 1024)) {
+    my($port, $ipaddr) = sockaddr_in($sock->peername);
+    $peer_address = $sock->peerhost();
+    print "$peer_address $serverport => $received_data";
+} 
+die "recv: $!";
+
+close($sock);
