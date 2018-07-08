@@ -14,47 +14,30 @@ FIXED ROLL: 0.1
 		## rosr01 : kt1585_sn11486.txt
 KT15 SERIAL NUMBER: 11486
 KT15 FILTER FILE: kt15/kt1585_sn11486.txt
-	========================
-		HUB ADDRESS AND PORTS
-		PDS default: 192.168.255.1
-	========================
-SERIAL LINE: /dev/tty.PL2303-001013FA
-SERIAL SPEED: 9600
-    # KAIMEI NETWORK
-SERIAL HUB URL: 10.198.3.109
+=============
+NETWORK
+=============
 IBOOT IP: 10.198.3.110
-PC IP: 10.198.3.111
-TEST IP: 10.198.3.103
-    # DEFAULT FROM FACTORY
-	SERIAL HUB URL: 192.168.255.1
-	IBOOT IP: 192.168.255.2
-	PC IP: 192.168.255.10
-	TEST IP: 192.168.255.12
-    # HUB--SERIAL SERVER--PORTS
-	# ROSR -- 10001, simulate=0
-ROSR HUB COM NUMBER: 10001
-	# GPS -- 10003, Fixed=-1, simulate=0
-GPS HUB COM NUMBER: -1
+	# ICP-DAS HUB
+SERIAL HUB IP: 10.198.3.109
+	# Hub 10001, simulate 0, rs232 1
+ROSR PORT: 10001
+	# GPS Hub-10003, rs232 1, Fixed -1, simulate=0
+GPS PORT: -1
+	# iff port = 1 specify serial port
+SERIAL GPS: not used
+	# iboot ip, 0=>not connected
+IBOOT IP: 0
 	# MODEM -- 10004, Not connected=-1, simulate=0
-SBD HUB COM NUMBER: -1
+SBD PORT: -1
 	# SCS OUTPUT PORT -- TX a string out this port
-SCS HUB TXD PORT: 10004
+SCS PORT: 10004
 	# SCS INPUT PORT -- receive a string here using TCPIP
-SCS HUB RXD PORT: 10005
-	==========================
-	# TELNET AND UDP SOCKET 
-	==========================
-		# 0 if not in use
-	TELNET SERVER IP: 0
-	# KAIMEI SOCKET 
-TELNET SERVER IP: 10.198.5.1
-TELNET SERVER PORT: 4025
-    	# LOCAL TEST
-	TELNET SERVER IP: localhost
-	TELNET SERVER PORT: 33333
-		# RV THOMAS G THOMPSON
-	TELNET SERVER IP: 10.43.12.12
-	TELNET SERVER PORT: 33333 
+SCS RXD PORT: 10005
+	# SOCKET SERVER -- KAIMEI 10.198.5.1 4025
+TELNET PROGRAM: udptx
+TELNET SERVER IP: 10.1.10.86
+TELNET SERVER PORT: 4444
 	========================
 	# CALIBRATION
 	========================

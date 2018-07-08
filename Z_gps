@@ -211,13 +211,14 @@ if { $gpsport == 0 } {
 	write_info $infoname  "SIMULATE GPS.";
 	SpawnGpsSimulate;
 } elseif {$gpsport == 1} {
-	# GPS CONNECTOION
+	# GPS CONNECTION
 	write_info $infoname  "GPS RS232";
 	spawn -noecho getsetupinfo $setupfile "SERIAL GPS"
 	expect -re "(\.*)(\r)";
 	set gpscom $expect_out(1,string)
 	write_info $infoname  "GPS 232COM: $gpscom"
 	send_user  "GPS 232COM: $gpscom\n"
+	set hubip "rs232 device";
 	SpawnGps $hubip $gpsport $gpscom
 } elseif {$gpsport == -1} {
 	# FIXED

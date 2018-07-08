@@ -1,5 +1,5 @@
 THIS FILE: su5c.txt
-Editdate: 180625
+Editdate: 180708
 COMMENTS:
  rosr5 calibration
 END
@@ -15,23 +15,29 @@ SCAN VIEW ANGLES: 265 325 45 135
 		DATA FILES ---------------------
 RT OUT PATH: data
 NO DATA WAIT TIME: 3600
-	#COMMS with miniPC DA1000
-	# Hub 10001, simulate 0, rs232 1
-ROSR PORT: 1
-SERIAL HUB IP: /dev/ttyS0
-	if icp-das server e.g. 192.168.255.1 
-	!! Hub--10003, rs232 1, Fixed -1, simulate=0
-GPS PORT: 0
-SERIAL GPS: /dev/ttyS1
+=============
+NETWORK
+=============
 	# iboot ip, 0=>not connected
 IBOOT IP: 0
+	# icp-das server  e.g. 192.168.255.1 or /dev/ttyusb0
+SERIAL HUB IP: /dev/ttyS0
+	# rosr hub 10001, simulate 0, rs232 1
+ROSR PORT: 1
+	# gps hub-10003, rs232 1, Fixed -1, simulate=0
+GPS PORT: -1
+	# iff gps port = 1 specify serial port
+SERIAL GPS: /dev/ttyS1
 	# MODEM -- 10004, Not connected=-1, simulate=0
-SBD HUB COM NUMBER: -1
-	# KAIMEI SOCKET SERVER 10.198.5.1 4025
-TELNET PROGRAM: socktxx
-TELNET SERVER IP: 10.1.10.169
-TELNET SERVER PORT: 5555
-	# CALIBRATION
+SBD PORT: -1
+	# SOCKET SERVER -- KAIMEI 10.198.5.1 4025
+	# udptx or socktxx
+TELNET PROGRAM: udptx
+TELNET SERVER IP: 10.1.10.86
+TELNET SERVER PORT: 4444
+=============
+CALIBRATION
+=============
 		#CAL EMIS: 0 = field use, compute e from angle,  ~=1 = calibration mode
 CALIBRATION EMISSIVITY: 1
 CAL SSST SLOPE: 1

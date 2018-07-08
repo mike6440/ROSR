@@ -1,5 +1,5 @@
 THIS FILE: su_mossbay_rosr2.txt
-Editdate: 160520
+Editdate: 20180708T162730Z
 ROSR SERIAL NUMBER: 2
 
 	rosr2cal_151117:  0.8789 0.1656
@@ -14,32 +14,29 @@ SCAN VIEW ANGLES: 265 325 45 135
 RT OUT PATH: data
 NO DATA WAIT TIME: 3600
 
-SERIAL HUB URL: 192.168.255.1
+=============
+NETWORK
+=============
+	# iboot ip, 0=>not connected
 IBOOT IP: 192.168.255.2
-PC IP: 192.168.255.10
-	#TEST IP: 192.168.255.12
-
-		ROSR -- 10001, simulate=0
-ROSR HUB COM NUMBER: 10001
-		GPS -- 10003, Fixed=-1, simulate=0
-GPS HUB COM NUMBER: 10003
-		MODEM -- 10004, Not connected=-1, simulate=0
-SBD HUB COM NUMBER: -1
-
-     KAIMEI SOCKET SERVER 10.198.5.1 4025
-TELNET SERVER IP: 0
-	TELNET SERVER IP: 192.168.255.10
-TELNET SERVER PORT: 
-
-	========================
-		HUB ADDRESS AND PORTS
-		PDS default: 192.168.255.1 (sometimes ...3)
-	========================
-SERIAL LINE: /dev/tty.PL2303-001013FA
-SERIAL SPEED: 9600
-
-
-	# CALIBRATION
+	# icp-das server  e.g. 192.168.255.1 or /dev/ttyusb0
+SERIAL HUB IP: 192.168.255.1
+	# rosr hub 10001, simulate 0, rs232 1
+ROSR PORT: 10001
+	# gps hub-10003, rs232 1, Fixed -1, simulate=0
+GPS PORT: 10003
+	# iff gps port = 1 specify serial port
+SERIAL GPS: not used
+	# MODEM -- 10004, Not connected=-1, simulate=0
+SBD PORT: -1
+	# SOCKET SERVER -- KAIMEI 10.198.5.1 4025
+	# udptx or socktxx
+TELNET PROGRAM: udptx
+TELNET SERVER IP: 10.1.10.86
+TELNET SERVER PORT: 4444
+=============
+CALIBRATION
+=============
 		#CAL EMIS: 0 = field use, compute e from angle,  ~=1 = calibration mode
 CALIBRATION EMISSIVITY: 0
 CAL SSST SLOPE: 1
