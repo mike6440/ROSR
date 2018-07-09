@@ -9,6 +9,14 @@ SIMULATEFLAG: 0
 FIXED TILT FLAG: 0
 FIXED PITCH: 0.1
 FIXED ROLL: 0.1
+ROSR SERIAL NUMBER: 1
+		Verbose mode prints out test messages and data.  VERBOSE = 1, NOT VERBOSE = 0
+		avgrosr.pl makes a file called data/tmp.txt.
+VERBOSE MODE: 0
+		## Specifics on the Instrument
+		## rosr01 : kt1585_sn11486.txt
+KT15 SERIAL NUMBER: 11486
+KT15 FILTER FILE: kt15/kt1585_sn11486.txt
 	========================
 		HUB ADDRESS AND PORTS
 		PDS default: 192.168.255.1
@@ -30,12 +38,9 @@ SBD PORT: -1
 SCS HUB TXD PORT: 10004
 	# SCS INPUT PORT -- receive a string here using TCPIP
 SCS HUB RXD PORT: 10005
-        ==========================
-        # TELNET AND UDP SOCKET
-        ==========================
-                # 0 if not in use
-        TELNET SERVER IP: 0
-    # KAIMEI SOCKet
+  # 0 if not in use
+TELNET SERVER IP: 0
+  # KAIMEI SOCKet
 TELNET PROGRAM: socktxx
 TELNET SERVER IP: 10.198.5.1
 TELNET SERVER PORT: 4025
@@ -115,26 +120,14 @@ END
 ##GPS MODEL NUMBER: GPS17X
 ##GPS MIN SAMPLES FOR AVG: 3
 GPS AVERAGING TIME: 120
-	========================
-		FIXED POSITION -- NO GPS
-		(hub port=-1)
-	========================
-	# EUCLID AVE
 GPS FIXED LATITUDE: 47.60329
 GPS FIXED LONGITUDE: -122.28797
 		Magnetic variation, + = East of true
 GPS FIXED VARIATION: 18.1
-	========================
-		ROSR
-	========================
-ROSR SERIAL NUMBER: 1
-		Verbose mode prints out test messages and data.  VERBOSE = 1, NOT VERBOSE = 0
-		avgrosr.pl makes a file called data/tmp.txt.
-VERBOSE MODE: 0
-		## Specifics on the Instrument
-		## rosr01 : kt1585_sn11486.txt
-KT15 SERIAL NUMBER: 11486
-KT15 FILTER FILE: kt15/kt1585_sn11486.txt
+GPS DEAD TIME ALARM SECS:60	
+  ========================
+  ROSR
+  ========================
 ROSR AVERAGING TIME (sec): 600
 SEA EMISSIVITY (UNCORRECTED): 0.9870975
 APERATURE EMISSIVITY : 0.95

@@ -268,7 +268,7 @@ if { $rosrport == 0 } {
 	send_user "SIMULATE ROSR...\n";
 	SpawnRosrSimulate;
 } else {
-	send_user "OPEN SERIAL CONNECTION...\n";
+	send_user "OPEN ROSR SERIAL CONNECTION...\n";
 	SpawnRosr $hubip $rosrport
 }
 		#=================

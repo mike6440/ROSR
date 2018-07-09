@@ -106,15 +106,12 @@ END
 ##GPS MODEL NUMBER: GPS17X
 ##GPS MIN SAMPLES FOR AVG: 3
 GPS AVERAGING TIME: 120
-	========================
-		FIXED POSITION -- NO GPS
-		(hub port=-1)
-	========================
 	# RMRCO +47.60332, -122.28807
 GPS FIXED LATITUDE: 47.60332
 GPS FIXED LONGITUDE: -122.28807
 		Magnetic variation, + = East of true
 GPS FIXED VARIATION: 12
+GPS DEAD TIME ALARM SECS: 60
 	========================
 		ROSR
 	========================

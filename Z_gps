@@ -173,8 +173,6 @@ set infoname "$env(DAQDATAFOLDER)/info_gps.txt"
 send_user "infoname = $infoname\n";
 
 write_info $infoname "===== $PROGRAMNAME, V $VERSION, $EDITDATE =============="
-
-
 		# SETUP FILE DEFINED
 set setupfile  [lindex $argv 0]
 write_info $infoname "SETUPFILE: $setupfile   "
