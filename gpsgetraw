@@ -36,37 +36,37 @@ my ($str,$ir,$is,$str1,$setupfile);
 my @w;
 my $missing=0;
 
-	# SETUPFILE
+  # SETUPFILE
 $setupfile = `cat tmp`;
 #$setupfile = shift();
-	# FIXED OR ACTUAL
+  # FIXED OR ACTUAL
 $gpsstatus=FindInfo($setupfile,'GPS PORT',':');
-	# FIXED GPS POSITION
-#printf"gpsstatus=%d\n",$gpsstatus;
+  # FIXED GPS POSITION
+   #printf"gpsstatus=%d\n",$gpsstatus;
 if($gpsstatus == -1){
-	printf"%s,%s,0,0,%s",
-	  FindInfo($setupfile,"GPS FIXED LATITUDE",':'),
-	  FindInfo($setupfile,"GPS FIXED LONGITUDE",':'),
-	  FindInfo($setupfile,"GPS FIXED VARIATION",':');
+  printf"%s,%s,0,0,%s",
+    FindInfo($setupfile,"GPS FIXED LATITUDE",':'),
+    FindInfo($setupfile,"GPS FIXED LONGITUDE",':'),
+    FindInfo($setupfile,"GPS FIXED VARIATION",':');
 }
-	# NORMAL OPERATION = simulate, rs232, or serial server
+  # NORMAL OPERATION = simulate, rs232, or serial server
 else {
-	$str=`LastDataRecord gps_raw`;
-	#$str='14 2017 07 13 18 21 49 $GPRMC,182149,V,4738.9764,N,12218.7869,W,,,130717,016.4,E*78';
-	#$str='14 2017 07 13 18 21 49 $GPRMC,040302.663,A,3939.7,N,10506.6,W,0.27,358.86,200804,018.1,E*7C';
-	chomp($str);
-	if($str =~ /\$GPRMC/){
-		$ir = index($str,"GPRMC");
-		if($ir>10){
-			my $i1 = index($str,"\$");
-			my $i2 = index($str,"\*");
-			$str1=substr($str,$i1,$i2-$i1+3);
-			#print"str1=$str1\n";
-			@x=gprmc($str1,$missing);
-			#$ii=0;foreach(@x){print"$ii, $_\n";$ii++}
-			printf"%d,%.6f,%.6f,%.1f,%.0f,%.1f",$x[0],$x[1],$x[2],$x[3],$x[4],$x[5];
-		}	
-		else {print"$missing, $missing, $missing, $missing, $missing, $missing"}
-	} else {print"$missing, $missing, $missing, $missing, $missing, $missing";}
+  $str=`LastDataRecord gps_raw`;
+  #$str='14 2017 07 13 18 21 49 $GPRMC,182149,V,4738.9764,N,12218.7869,W,,,130717,016.4,E*78';
+  #$str='14 2017 07 13 18 21 49 $GPRMC,040302.663,A,3939.7,N,10506.6,W,0.27,358.86,200804,018.1,E*7C';
+  chomp($str);
+  if($str =~ /\$GPRMC/){
+    $ir = index($str,"GPRMC");
+    if($ir>10){
+      my $i1 = index($str,"\$");
+      my $i2 = index($str,"\*");
+      $str1=substr($str,$i1,$i2-$i1+3);
+      #print"str1=$str1\n";
+      @x=gprmc($str1,$missing);
+      #$ii=0;foreach(@x){print"$ii, $_\n";$ii++}
+      printf"%d,%.6f,%.6f,%.1f,%.0f,%.1f",$x[0],$x[1],$x[2],$x[3],$x[4],$x[5];
+    } 
+    else {print"$missing, $missing, $missing, $missing, $missing, $missing"}
+  } else {print"$missing, $missing, $missing, $missing, $missing, $missing";}
 }
 exit;
