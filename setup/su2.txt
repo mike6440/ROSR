@@ -1,7 +1,10 @@
 THIS FILE: su2.txt
 Editdate: 20180813T133510Z
 ROSR SERIAL NUMBER: 2
-
+	!!
+SIMULATEFLAG: 0
+    !! see fixed pitch and fixed roll if == 1
+FIXED TILT FLAG: 0
 	rosr2cal_151117:  0.8789 0.1656
 SSST SLOPE : 0.8789
 SSST OFFSET: 0.1656
@@ -115,6 +118,9 @@ SEA EMISSIVITY: 0.9870975
 APERATURE EMISSIVITY : 0.95
 MIN SAMPLES FOR AVG: 2
 	#SELF-HEAT FLAG: 1
+	!! see FIXED TILT FLAG
+FIXED PITCH: 0
+FIXED ROLL: 0
 	========================
 		END SETUP FILE
 	========================
