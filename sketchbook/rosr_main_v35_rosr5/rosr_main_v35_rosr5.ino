@@ -46,9 +46,9 @@ Adafruit_ADS1115 ads2(0x4A);    // ad2, u14, construct an ads1115 at address 0x4
 // !! CUSTOMIZE FOR ROSR NUMBER
 // 2a means with swapped bb's
 //==========================
-#include "header5.h"  // !! programname, version, eeprom_id
-#include "t-rad_table5.h"	// !! rad<->temp parameters
-#include "Tcal_rosr5.h"  //!! BB thermistor coefs 
+#include "header2.h"  // !! programname, version, eeprom_id
+#include "t-rad_table2.h"	// !! rad<->temp parameters
+#include "Tcal_rosr2.h"  //!! BB thermistor coefs 
 
 #define YES 1
 #define NO 0
@@ -2480,8 +2480,8 @@ void PrintProgramID(void)
 
 
 // !! s/r float ReadEncoder (float ref)
-//#include "readencoder1.h" //rosr1 and rosr2
-#include "readencoder2.h" //rosr3, 4 and above
+#include "readencoder1.h" //rosr1 and rosr2
+//#include "readencoder2.h" //rosr3, 4 and above
 
 //============================================================================
 void        ReadKT15(double *irrad, double *irtemp)
