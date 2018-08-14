@@ -1,5 +1,6 @@
 Edit 180202 -- TGT IP#s
 THIS FILE: su4.txt
+DAQ PASSWORD: r0srr0sr
 	DATA FILES ------
 RT OUT PATH: data
 ROSR SERIAL NUMBER: 4

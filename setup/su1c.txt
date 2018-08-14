@@ -1,6 +1,7 @@
 THIS FILE: su1c.txt
 Editdate: 180205
 #CALIBRATION FILE
+DAQ PASSWORD: r0srr0sr
 		DATA FILES ---------------------
 RT OUT PATH: data
 NO DATA WAIT TIME: 3600

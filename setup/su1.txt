@@ -1,5 +1,6 @@
 THIS FILE: 
 Editdate: 180213
+DAQ PASSWORD: r0srr0sr
 		DATA FILES ---------------------
 RT OUT PATH: data
 NO DATA WAIT TIME: 3600

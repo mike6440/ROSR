@@ -1,5 +1,6 @@
 THIS FILE: su3c.txt
 Editdate: 180625
+DAQ PASSWORD: r0srr0sr
 COMMENTS:
  rosr3 calibration
 END

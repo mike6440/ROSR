@@ -1,5 +1,6 @@
 THIS FILE: su3.txt
 Editdate: 180318
+DAQ PASSWORD: r0srr0sr
 COMMENTS:
  Setup rosr3 after checking on BB repeatability
 END

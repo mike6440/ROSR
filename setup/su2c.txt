@@ -1,5 +1,6 @@
 THIS FILE: su2c.txt
 Editdate: 170725
+DAQ PASSWORD: r0srr0sr
 SSST SLOPE : 1.0106
 SSST OFFSET: -0.0426
 	# (bb1, bb2, sky, sea)
