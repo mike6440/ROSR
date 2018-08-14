@@ -50,9 +50,6 @@ CALIBRATION VIEW POSITION : 3
 	=======================
 	OPERATIONAL PARAMETERS
 	=======================
-	!! see FIXED TILT FLAG
-FIXED PITCH: 0
-FIXED ROLL: 0
 NO DATA WAIT TIME: 3600
 BLACK BODY EMISSIVITY : 1.0
 		## set Vref to 0 and the values from the 2*adc12-7 will be used.
@@ -104,6 +101,9 @@ ROSR AVERAGING TIME (sec): 600
 SEA EMISSIVITY (UNCORRECTED): 0.9870975
 APERATURE EMISSIVITY : 0.95
 MIN SAMPLES FOR AVG: 2
+	!! see FIXED TILT FLAG
+FIXED PITCH: 0
+FIXED ROLL: 0
 	========================
 		END SETUP FILE
 	========================

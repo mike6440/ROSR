@@ -1,8 +1,13 @@
 THIS FILE: su2c.txt
-Editdate: 170725
+Editdate: 20180814T190317Z
 DAQ PASSWORD: r0srr0sr
-SSST SLOPE : 1.0106
-SSST OFFSET: -0.0426
+ROSR SERIAL NUMBER: 2
+	!!
+SIMULATEFLAG: 0
+    !! see fixed pitch and fixed roll if == 1
+FIXED TILT FLAG: 0
+SSST SLOPE : 1
+SSST OFFSET: 0
 	# (bb1, bb2, sky, sea)
 SCAN VIEW ANGLES: 265 325 45 135
 KT15 SERIAL NUMBER: 11733
@@ -10,7 +15,6 @@ KT15 FILTER FILE: kt15/kt1585_sn11733.txt
 
 		DATA FILES ---------------------
 RT OUT PATH: data
-ROSR SERIAL NUMBER: 2
 =============
 NETWORK
 =============
@@ -38,11 +42,11 @@ CALIBRATION
 CALIBRATION EMISSIVITY: 1
 CAL SSST SLOPE: 1
 CAL SSST OFFSET: 0
+	# CAL VIEW ANGLES (SAME AS ROSR EEPROM) -- (0,1,2,3)=(bb1, bb2, sky, sea)
 CAL SCAN VIEW ANGLES: 265 325 45 90
 	# INDEX -- (0,1,...) index.  Use for calibration case
 CALIBRATION VIEW POSITION : 3
-	# CAL VIEW ANGLES (SAME AS ROSR EEPROM) -- (0,1,2,3)=(bb1, bb2, sky, sea)
-CAL VIEW ANGLES: 265 325 45 90
+	CAL VIEW ANGLES: 265 325 45 90
 =======================
 	OPERATIONAL PARAMETERS
 =======================
@@ -77,6 +81,20 @@ COMMENTS:
 END
 
 	========================
+		GPS SETUP
+		NOTE: Use the Garmin-supplied Windows program to set the 17x for
+		9600 baud, 1-sec output, GPRMC only string.
+	========================
+##GPS MODEL NUMBER: GPS17X
+##GPS MIN SAMPLES FOR AVG: 3
+GPS AVERAGING TIME: 120
+	# MOSS BAY
+GPS FIXED LATITUDE: 35.00000
+GPS FIXED LONGITUDE: -122.00000
+		Magnetic variation, + = East of true
+GPS FIXED VARIATION: 18.1
+GPS DEAD TIME ALARM SECS: 60
+	========================
 		ROSR
 	========================
 		Verbose mode prints out test messages and data.  VERBOSE = 1, NOT VERBOSE = 0
@@ -89,6 +107,8 @@ APERATURE EMISSIVITY : 0.95
 ##MAXIMUM NUMBER OF AVERAGES (Set to 1e20 for final run) : 1e20
 MIN SAMPLES FOR AVG: 2
 SELF-HEAT FLAG: 1
+FIXED PITCH: 0
+FIXED ROLL: 0
 	========================
 		END SETUP FILE
 	========================
