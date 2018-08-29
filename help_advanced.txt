@@ -1,22 +1,67 @@
-gtdaq       --  go to the ROSR/sw folder
-
+The sw folder contains all rosr software. It is located at
+   /home/oper/swmain/apps/ROSR/sw
+"gtdaq" (go to daq) goes to the  sw folder.
 
 --- SCREEN ---
-isscreen    --  Checks to see if the DAQ screen is on.
-gtscreen    --  Opens the DAQ screen (careful!), "^a d" to end.
-^a d        --  disconnect from screen
-^a 1        --  go to screen 1. Also 2,3,...
+The "start" command begins a background data collection using the screen 
+software. All data collection is out of view but can be seen by using screen
+commands. These are customized commands for viewing.  
+  "iss" or "isscreen" -- Checks to see if the DAQ screen is on.
+  "gtscreen" -- opens the DAQ screen (careful!), "^a d" to end screen session.
+  "^a 1" -- go to screen 1. ROSR data acquition.
+  "^a 2" -- go to screen 2. GPS data acquition.
+  "^a d" -- end the screen session; disconnect from screen.
+  
 
+#-----------------------------
+#--ROSR OUTPUT PACKETS 
+#-----------------------------
+#-RAW-----------          (rosrraw)  2 sec output from ROSR
+  $WIssf,vv,etime,drum,RAD,REF,adc0,adc1,adc2,adc3,adc4,adc5,adc6,adc7,
+  adc8,adc9,adc10,adc11,vref,t11,t12,t21,t22,pit,rol,Tanalog,Tktcase,Twindow,
+  Tpwr,Vin,vrain,sec*chk<cr><lf>
+  where ss=serialnumber, f = format number, vv=sw version number
+  example:
+  $WI033,33,00.002314,135.00, 159367,24.47,2.727,2.731,0.143,2.467,1.838,1.833,2.040,2.708
+  ,0.815,0.564,-0.001,2.679,4.933,19.74,19.76,38.45,38.49,-0.0,-0.8,-57.10,20.76,20.18,
+  33.88, 2.8,-0.0,  0*78
 
---- CREATE DATA ARCHIVE ---
-  1.  ../../      --  move up to the apps folder.  (~/swmain/apps/$ )
-  2. cp -R ROSR /home/rmr/rosr_yyyyMMdd  
-  3. tar -zcf /home/rmr/rosr_yyyyMMdd.tar.gz ROSR
-  4. Save to thumb drive or scp to archive.
+#-Av-----------            (rosrav) 280 sec output from ROSR
+  $WIRAV,etime,vav0,vav1,vav2,vav3,k0,ksd0,k1,ksd1,k2,ksd2,k3,ksd3,t11,tsd11,t12,tsd12,
+     t21,tsd21,t22,tsd22,T1,T2,pav,psd,rav,rsd,ang,emis*chk
+  where
+   vavi, i=0..3 = view angle (bb1,bb2,sky,sea)
+   ki, i=0..3 = kt15 rad (bb1,bb2,sky,sea)
+   ksdi, i=0..3 = kt15 stdev (bb1,bb2,sky,sea)
+   t11,tsd11 = mean BB1,thermister1 and stdev.
+   ditto for t12, t21, and t22
+  
+#-Sst-----------             (rosrst)   280 sec output from ROSR
+  $WIRST,etime,vav0,vav1,vav2,vav3,k0,k1,k2,k3,T1,T2,ang,emis,ssst*chk
+  where
+   vavi, i=0..3 = avg view angle (bb1,bb2,sky,sea)
+   ki, i=0..3 = kt15 avg rad (bb1,bb2,sky,sea)
 
+#-Avg-----------              (rosravg)  10 min output from DAQ 
+  ix UTC lat lon sog cog ssst ssstu T1 T2 k1 k2 ksea ksky emis pit sdpit rol sdrol rain
 
---- WIPE ALL DATA -- !!! DANGER !!! ---
-  1. gtdaq
-  2. rm -r ../data/*   CAREFUL!!
+#-SBD-----------               (rosrsbd)  10 min output from DAQ 
+  $WISBD yyyyMMdd hhmmss lat lon sog cog ssst pi sdpi ro sdro emis
+      k1 k2 ksky ksea T1 T2 vrain
+
+#-TELNET/UDP-----------          OUTPUT TO SHIP   10 min output from DAQ 
+  $ROSST,yyyyMMdd,hhmmss,V1,lat,lon,sogmps,cogT,V2,ssst*chk
+   where
+   yyyyMMdd,hhmmss = UTC
+   V1 = GPS quality: M=missing, I=Invalid, V=valid
+   lat,lon = avg 10 min position,
+   sogmps,cogT = speed (m/s), true course
+   V2 = SSST quality: M=missing, I=Invalid, V=valid
+   SSST= skin temp (degC)
+  example: 
+    $ROSST,20180203,155000,V,29.99997,-145.42247,7.4,268,V,23.520*71
+
+  
+
 
 
