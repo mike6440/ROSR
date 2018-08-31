@@ -35,7 +35,7 @@ proc SpawnGps { hubip gpsport gpscomport} {
 		set str [spawn_kermit $hubip $gpsport]
 		set GPS [lindex $str 0];    
 		set GPSPID [lindex $str 1];
-		send_user "SPAWN GPS KERMIT, IP=$hubip, port=$gpsport, spawn_id=$GPS, pid=$GPSPID\n"
+		send_user "SPAWN GPS KERMIT: IP=$hubip, port=$gpsport, spawn_id=$GPS, pid=$GPSPID\n"
 	} else {
 		set str [spawn_kermit232 $gpscomport]
 		set GPS [lindex $str 0];
@@ -55,6 +55,7 @@ proc spawn_kermit {hubip portnumber} {
 			# START PROCESS -- KERMIT
 	set GPSPID [spawn kermit]
 	set GPS $spawn_id;
+	send_user "test GPS=$GPS, GPSPID=$GPSPID\n";
 	set timeout 4	
 	expect {
 		timeout {send_user "KERMIT FAILS TO OPEN\n"; exit 1}
@@ -175,7 +176,8 @@ if { $gpsport == 0 } {
 	spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"
 	expect -re "(\.*)(\r)";
 	set hubip $expect_out(1,string)
-	send_user "SERIAL HUB IP: $hubip, GPS PORT: $gpsport"
+	set gpscom 0
+	send_user "SERIAL HUB IP: $hubip, GPS PORT: $gpsport\n"
 	SpawnGps $hubip $gpsport $gpscom
 }
 
