@@ -1,5 +1,5 @@
 # BASH SETUP
-# edit 20180608T150505Z
+# edit 20180901T212832Z
 #
 
 export EDITOR="vim"
@@ -77,7 +77,7 @@ rosrst () {
     cd $DAQSWFOLDER;
     xx=`LastDataFolder rosr_sst`
     head -1 $xx
-    tail $xx
+    tail -f $xx
 }
 alias Sst="rosrst";
 
