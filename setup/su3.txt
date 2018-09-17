@@ -1,10 +1,12 @@
 THIS FILE: su3.txt
-Editdate: 180318
+Editdate: 180916
 DAQ PASSWORD: r0srr0sr
 COMMENTS:
- Setup rosr3 after checking on BB repeatability
+ After rosr3 maintennce. New gold mirror.
+ Tilt sensor is reversed
 END
 ROSR SERIAL NUMBER: 3
+  calibration
 SSST SLOPE : 1.0017
 SSST OFFSET: .118
     # see fixed pitch and fixed roll if == 1
@@ -15,17 +17,18 @@ SCAN VIEW ANGLES: 265 325 45 135
 		DATA FILES ---------------------
 RT OUT PATH: data
 NO DATA WAIT TIME: 3600
-=============
-NETWORK
-=============
-	# iboot ip, 0=>not connected
-IBOOT IP: 192.168.255.2
+MISSING VALUE: -999
+	=============
+	NETWORK
+	=============
+	# iboot ip, 0=>not connected, else 192.168.255.2
+IBOOT IP: 0
 	# icp-das server  e.g. 192.168.255.1 or /dev/ttyusb0
 SERIAL HUB IP: 192.168.255.1
 	# rosr hub 10001, simulate 0, rs232 1
 ROSR PORT: 10001
 	# gps hub-10003, rs232 1, Fixed -1, simulate=0
-GPS PORT: 10003
+GPS PORT: -1
 	# iff gps port = 1 specify serial port, e.g. /dev/ttyS1
 SERIAL GPS: not used
 	# MODEM -- 10004, Not connected=-1, simulate=0
@@ -35,9 +38,17 @@ SBD PORT: -1
 TELNET PROGRAM: udptx
 TELNET SERVER IP: 10.1.10.86
 TELNET SERVER PORT: 4444
-=============
-CALIBRATION
-=============
+	=============
+	MISC
+	=============
+VERBOSE MODE: 0
+ROSR AVERAGING TIME (sec): 600
+SEA EMISSIVITY: 0.9870975
+APERATURE EMISSIVITY : 0.95
+MIN SAMPLES FOR AVG: 2
+	=============
+	CALIBRATION
+	=============
 		#CAL EMIS: 0 = field use, compute e from angle,  ~=1 = calibration mode
 CALIBRATION EMISSIVITY: 0
 CAL SSST SLOPE: 1
@@ -69,24 +80,24 @@ SHIP NAME: RV NA
 CRUISE NAME: --
 	port or starboard
 PLATFORM SIDE: PORT
+	========================
+		TILT
+	========================
 FIXED PITCH: 0
 FIXED ROLL: 0
-MINIMUM EXPECTED LATITUDE: 5
-MAXIMUM EXPECTED LATITUDE: 90
-MINIMUM EXPECTED LONGITUDE: -180
-MAXIMUM EXPECTED LONGITUDE: 360
-MISSING VALUE: -999
+	========================
+		GPS
+	========================
 GPS DEAD TIME ALARM SECS: 60 
 GPS AVERAGING TIME: 120
 GPS FIXED LATITUDE: 35
 GPS FIXED LONGITUDE: -122
 		Magnetic variation, + = East of true
 GPS FIXED VARIATION: 18.1
-VERBOSE MODE: 0
-ROSR AVERAGING TIME (sec): 600
-SEA EMISSIVITY: 0.9870975
-APERATURE EMISSIVITY : 0.95
-MIN SAMPLES FOR AVG: 2
+MINIMUM EXPECTED LATITUDE: 5
+MAXIMUM EXPECTED LATITUDE: 90
+MINIMUM EXPECTED LONGITUDE: -180
+MAXIMUM EXPECTED LONGITUDE: 360
 	========================
 		END SETUP FILE
 	========================
