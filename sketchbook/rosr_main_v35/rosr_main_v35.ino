@@ -28,6 +28,9 @@
 //v35 180610 --
 //		TEST mode is sustained permanently if 'fc' is operated in the menu
 //		180917 setup for rosr3
+//v36 to do
+//		1. T22 error
+
 
 //NOTE ====== INCLUDES
 #include <string.h>
