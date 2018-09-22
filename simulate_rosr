@@ -3,13 +3,12 @@
 use lib $ENV{DAQLIB};
 use perltools::MRtime;
 
+$finx="$ENV{HomePath}/rosrsim.txt";
 $fin="simulate/rosr.txt";
-
-my $irec = 0;
-my $i1;
-
+if(-f $finx){
+	$fin=$finx;
+}
 while (1) {
-	$irec = 0;
 	open(F,"<$fin") or die("fin error\n");
 
 	# Loop through all the data records.
@@ -19,7 +18,6 @@ while (1) {
 		# STRIP OFF THE BEGINNING TIME USING SED
 		print"$str\r\n";
 		sleep(2);
-		$irec++;
 	}
 	print"Starting over\n";
 	close F;
