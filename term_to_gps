@@ -18,6 +18,15 @@ set password $expect_out(1,string)
 
 global GPS GPSPID
 #========================================================
+#		FIXED GPS #v10
+#========================================================
+proc SpawnGpsFixed { } {
+	global GPS GPSPID
+		# Spawn simulate_gps
+	set GPSPID [spawn perl fixed_gps]
+	set GPS $spawn_id
+}
+#========================================================
 #		PROCEDURE TO SIMULATE GPS #v9
 #========================================================
 proc SpawnGpsSimulate { } {
@@ -163,14 +172,8 @@ if { $gpsport == 0 } {
 	SpawnGps $hubip $gpsport $gpscom
 } elseif {$gpsport == -1} {
 	# FIXED
-	spawn -noecho getsetupinfo $setupfile "GPS FIXED LATITUDE"
-	expect -re "(\.*)(\r)";
-	set fixedlat $expect_out(1,string)
-	spawn -noecho getsetupinfo $setupfile "GPS FIXED LONGITUDE"
-	expect -re "(\.*)(\r)";
-	set fixedlon $expect_out(1,string)
-	send_user "GPS FIXED LAT $fixedlat, LON $fixedlon\n";
-	send_user "Exit Z_gps\n"; exit 0;
+	send_user "FIXED GPS.\n";
+	SpawnGpsFixed;
 } else {
 	# HUB SERIAL SERVER
 	spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"

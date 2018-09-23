@@ -1,8 +1,10 @@
 #!/usr/bin/expect --
 
 set PROGRAMNAME Z_gps
-set VERSION 09
-set EDITDATE 180202; #150414;	#150410;	#150214		;#141024  ;#130706
+set VERSION 10
+set EDITDATE 180923;         #180202; #150414;	#150410;	#150214		;#141024  ;#130706
+# v10 -- add SpawnGpsFixed
+
 
 set loguser 0;#   test 0-quiet, 1=verbose
 log_user $loguser;
@@ -10,6 +12,16 @@ log_user $loguser;
 global GPS GPSPID GPSAV GPSAVPID
 global infoname
 
+#========================================================
+#		FIXED GPS #v10
+#========================================================
+proc SpawnGpsFixed { } {
+	global GPS GPSPID infoname
+		# Spawn simulate_gps
+	set GPSPID [spawn perl fixed_gps]
+	set GPS $spawn_id
+	write_info $infoname "SPAWN GPS FIXED, spawn_id = $GPS, pid = $GPSPID"
+}
 #========================================================
 #		PROCEDURE TO SIMULATE GPS #v9
 #========================================================
@@ -26,12 +38,14 @@ proc SpawnGpsSimulate { } {
 proc SpawnGps { hubip gpsport gpscomport} {
 	global GPS GPSPID infoname
 	if { [string first "dev" $hubip] == -1 } {
+			# NETWORK SERVER
 		set str [spawn_kermit $hubip $gpsport]
 		set GPS [lindex $str 0];    
 		set GPSPID [lindex $str 1];
 		send_user "SPAWN GPS KERMIT, IP=$hubip, port=$gpsport, spawn_id=$GPS, pid=$GPSPID\n"
 		write_info $infoname "SPAWN GPS KERMIT, IP=$hubip, port=$gpsport, spawn_id=$GPS, pid=$GPSPID"
 	} else {
+			# RS232
 		set str [spawn_kermit232 $gpscomport]
 		set GPS [lindex $str 0];
 		set GPSPID [lindex $str 1];
@@ -174,7 +188,7 @@ send_user "infoname = $infoname\n";
 
 write_info $infoname "===== $PROGRAMNAME, V $VERSION, $EDITDATE =============="
 		# SETUP FILE DEFINED
-set setupfile  [lindex $argv 0]
+set setupfile [lindex $argv 0]
 write_info $infoname "SETUPFILE: $setupfile   "
 ## SEE IF THE SETUP FILE EXISTS
 if [catch {open $setupfile} sufile] {
@@ -220,17 +234,11 @@ if { $gpsport == 0 } {
 	SpawnGps $hubip $gpsport $gpscom
 } elseif {$gpsport == -1} {
 	# FIXED
-	spawn -noecho getsetupinfo $setupfile "GPS FIXED LATITUDE"
-	expect -re "(\.*)(\r)";
-	set fixedlat $expect_out(1,string)
-	spawn -noecho getsetupinfo $setupfile "GPS FIXED LONGITUDE"
-	expect -re "(\.*)(\r)";
-	set fixedlon $expect_out(1,string)
-	write_info $infoname  "GPS FIXED LAT $fixedlat, LON $fixedlon";
-	send_user "GPS FIXED LAT $fixedlat, LON $fixedlon\n";
-	send_user "Exit Z_gps\n"; exit 0;
+	send_user "FIXED GPS.\n";
+	write_info $infoname  "FIXED GPS.";
+	SpawnGpsFixed;
 } else {
-	# HUB SERIAL SERVER
+	# HUB SERVER
 	spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"
 	expect -re "(\.*)(\r)";
 	set hubip $expect_out(1,string)
@@ -300,9 +308,9 @@ while 1 {
 			set F [open $rawname a 0600]
 			set rawstr [timestamp -gmt -format "$Nrecs %Y %m %d %H %M %S " -seconds $timegps]$rawstr
 			puts $F $rawstr
-            #send_user "$rawstr\n";
 			close $F
-					# SEND RAW TO AVG AND RCV RESPONSE
+			
+			# SEND RAW TO AVG AND RCV RESPONSE
 			set timeout 1
 			set spawn_id $GPSAV
 			expect {

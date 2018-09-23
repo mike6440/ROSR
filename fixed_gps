@@ -1,0 +1,50 @@
+#! /usr/bin/perl
+# $GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A
+# 
+# Where:
+#      RMC          Recommended Minimum sentence C
+#      123519       Fix taken at 12:35:19 UTC
+#      A            Status A=active or V=Void.
+#      4807.038,N   Latitude 48 deg 07.038' N
+#      01131.000,E  Longitude 11 deg 31.000' E
+#      022.4        Speed over the ground in knots
+#      084.4        Track angle in degrees True
+#      230394       Date - 23rd of March 1994
+#      003.1,W      Magnetic Variation
+#      *6A          The checksum data, always begins with *
+# Note that, as of the 2.3 release of NMEA, there is a new field in the RMC sentence at the end just prior to the checksum. For more information on this field see here.
+# 
+
+use lib $ENV{MYLIB};
+use perltools::MRutilities;
+use perltools::MRtime;
+
+my $update = 1;  # seconds between records
+
+  # SETUPFILE
+my $setupfile = "setup/su.txt";
+my $flat=FindInfo($setupfile,"GPS FIXED LATITUDE",':');
+my $flon=FindInfo($setupfile,"GPS FIXED LONGITUDE",':');
+my $fvar=FindInfo($setupfile,"GPS FIXED VARIATION",':');
+
+my $hemlat='N'; if($flat<0){$hem='S'; $flat=-$flat}
+my $strlat=sprintf("%03f",int($flat)*100 + 60*($flat-int($flat)));
+my $hemlon='E'; if($flon<0){$hemlon='W'; $flon=-$flon}
+my $strlon=sprintf("%03f",int($flon)*100 + 60*($flon-int($flon)));
+my $hemvar='E'; if($fvar<0){$hemvar='W'; $fvar=-$fvar} 
+
+my ($then, $now);
+$then = $now = now();
+#$GPRMC,000015,A,3000.3609,N,14455.5704,W,014.4,262.4,070111,012.8,E*66
+while (1) {
+	my $strtime=dtstr(now(),'short');
+	my @a=split(/[, ]/,$strtime);
+	my $str = sprintf"\$GPRMC,%s,A,%s,%s,%s,%s,0.0,0.0,%s%s%s,%s,%s*",
+	  $a[1],$strlat,$hemlat,$strlon,$hemlon,substr($a[0],6,2),substr($a[0],4,2),substr($a[0],2,2),
+	  abs($fvar),$hemvar;
+	my $cc = NmeaChecksum($str);
+	$str=$str.$cc;
+	print"$str\n";
+	## PAUSE A FEW SECONDS
+	sleep($update);
+}

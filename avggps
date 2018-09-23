@@ -1,7 +1,7 @@
 #!/usr/bin/perl -X
 my $PROGRAMNAME = 'avggps.pl';
-my $VERSION = '09';  
-my $EDITDATE = '141021';
+my $VERSION = '10';  
+my $EDITDATE = '180923';
 #v01 -- taken from avgrad
 #v02 -- file output with spaces and labeled for R
 #v03 -- new output file names with jday
@@ -9,6 +9,7 @@ my $EDITDATE = '141021';
 #v05 -- new file names
 #...
 #v08 -- improved setup file call
+#v10 -- Add fixed gps. setupfile = setup/su.txt
 
 ## CALL --- avggps setupfile
 
@@ -19,8 +20,6 @@ else {
 	print"DOES NOT EXIST. STOP.\n";
 	exit 1;
 }
-
-
 
 #====================
 # PRE-DECLARE SUBROUTINES
@@ -182,7 +181,7 @@ sub ReadNextRecord
 	print"GPS--\r\n";
 	chomp($str=<STDIN>);
 	
-	#print"str = $str\n";
+	#print"str = $str\n"; die;
 	## COMMANDS
 	if ( $str =~ /quit/i ) {print"QUIT GPS avg program\n"; exit 0 }
 	
@@ -194,8 +193,9 @@ sub ReadNextRecord
 	if($str =~ /\$GPRMC/ )	{					# identifies a data string
 		$str =~ s/^*\$/\$/;						# remove leading stuff
 		# DECODE THE STRING AND RETURN VARIABLES
+		print"test 196\n";
  		($dtgps, $lat, $lon, $sog, $cog, $var) = gprmc($str,-999);
- 		#print "dtgps, lat, lon, sog, cog, var = $dtgps, $lat, $lon, $sog, $cog, $var\n";
+ 		#print "dtgps, lat, lon, sog, cog, var = $dtgps, $lat, $lon, $sog, $cog, $var\n"; die;
 		my($xc,$yc) = VecP2V(1,$lat, $missing);
 		my($xp,$yp) = VecP2V(1,$lon, $missing);
 		my($xr,$yr) = VecP2V(1,$cog, $missing);
