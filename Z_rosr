@@ -2,8 +2,8 @@
 #Z_rosr_v6
 
 set PROGRAMNAME Z_rosr
-set VERSION 9.3
-set EDITDATE 180625;
+set VERSION 9.4
+set EDITDATE 180926;
 # 
 # V1 FROM Z_ROSR V20
 #v4 use getgpsraw program 
@@ -14,6 +14,7 @@ set EDITDATE 180625;
 #v9 include serial server or rs232
 #v9.1 -- trying to get it to work
 #v9.2 -- debug. Fix wirav and wirst files
+#v9.4 -- debug mystery crash at new day
 
 puts "
 RUN PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE"
@@ -302,11 +303,11 @@ while 1 {
 	if {$day1 != $day0} {
 		set day0 $day1
 		set fname [timestamp -format "%y%m%d" -seconds $dt]
+		write_info $infoname "NEW DAY $fname---"
 		set rwname "$datapath/rosr_raw_$fname.txt";
 		set avname "$datapath/rosr_av_$fname.txt";
 		set sstname "$datapath/rosr_sst_$fname.txt";
-		send_user "NEW DAY $fname\n"
-		write_info $infoname "NEW DAY $fname---"
+		# v9.4 send_user "NEW DAY $fname\n"
 		write_info $infoname "rwname = $rwname"
 		write_info $infoname "avname = $avname"
 		write_info $infoname "sstname = $sstname"
@@ -378,22 +379,6 @@ while 1 {
 		#=============
 		-i $user_spawn_id  
 		"q" { exit 0 }
-# 		"hr" {
-# 			#$WIROS,279.98, 155854,17.75,2.836,2.840,0.390,2.470,2.838,2.837,1.731,2.768,
-# 			#4.096,3.569,-0.000,2.652,4.939,17.71,17.74,17.77,17.77,-1.3,-1.8,
-# 			#17.1,21.4,19.1,41.0,14.3,-0.0,  0*4B
-# 			send_user "\$WIROS, drum, rad, kttemp, vb11, vb12, vkt15, vref/2, vb21, vb22, vtmir, vtwin, \n";
-# 			send_user "vtkt15, vin/4, vrain, vtkt, vref, t11, t12, t21, t22, pitch, roll, \n";
-# 			send_user "tkt, tktcase, twindow, tmirror, vin, vrain, secs, * checksum\n"; 
-# 		}
-# 		"ha" {
-# 			send_user "\$WIRAV, vav0, vav1, vav2, vav3, k0, k1, k2, k3, ksd0, ksd1, ksd2, ksd3,\n";
-# 			send_user "t11, t12, t21, t22, tsd11, tsd12, tsd21, tsd22, T1, T2,\n";
-# 			send_user "pav, psd, rav, rsd, ang, emis\*chk\n";
-# 		}
-# 		"hs" {
-# 			send_user "\$WIRST, vav0, vav1, vav2, vav3, k0, k1, k2, k3, T1, T2, ang, emis, ssst*chk\n";
-# 		}
 	}
 }
 

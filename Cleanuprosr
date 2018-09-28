@@ -6,7 +6,8 @@ chomp($usr);
 	#=================
 	# REMOVE ZOMBIES
 	#=================
-@removelist=("avgrosr","avggps","kermit","expect","perl","simulate_gps");
+@removelist=("avgrosr","avggps","kermit","expect","perl","simulate_gps",
+  "getsetupinfo");
 #$ii=0; foreach(@removelist){print"test0 $ii, $_\n"; $ii++}
 foreach $xx (@removelist){
 	$cmd="ps -u $usr -o pid,command | grep \"$xx\"";
