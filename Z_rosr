@@ -19,7 +19,7 @@ set EDITDATE 180926;
 puts "
 RUN PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE"
 
-set loguser 0;		#   test 0-quiet, 1=verbose
+set loguser 1;		#   test 0-quiet, 1=verbose
 log_user $loguser;
 
 		# SETUP FILE DEFINED
@@ -342,8 +342,15 @@ while 1 {
 				set s2 [string first "\*" $rawstr $s1]
 				set str [string range $rawstr $s1 [expr $s2+2]]
 				# GPS
-				set gpstr [exec gpsgetraw]
-				
+				#write_info $infoname "zz test 1";
+				#set gpstr [exec gpsgetraw]
+				set status [catch {exec gpsgetraw} gpstr ] ;
+				if {$status > 0} {
+					# handle an error condition ...
+					set gpstr "0,0,0,0,0,0";
+					write_info $infoname "catch error, gpstr = $gpstr\n";
+				}
+				#write_info $infoname "zz test 2, $gpstr\n";
 				set str [timestamp -gmt -format "%Y,%m,%d,%H,%M,%S,"]$gpstr,$rawstr 
 				set F [open $rwname a 0600]
 				puts $F $str  ;

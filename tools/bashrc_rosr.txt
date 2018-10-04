@@ -1,6 +1,6 @@
 # BASH SETUP
 # edit 20180901T212832Z
-#
+# NOTE: chmod 755 bashrc_rosr.txt ## make this executable 
 
 export EDITOR="vim"
 alias Top="top -u -s5"

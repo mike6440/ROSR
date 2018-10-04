@@ -29,7 +29,6 @@ if($str =~ /\$GPRMC/){
 		my $i1 = index($str,"\$");
 		my $i2 = index($str,"\*");
 		$str1=substr($str,$i1,$i2-$i1+3);
-		#print"test str1=$str1\n";
 		@x=gprmc($str1,$missing);
 		#$ii=0;foreach(@x){print"$ii, $_\n";$ii++}
 		printf"%d,%.6f,%.6f,%.1f,%.0f,%.1f",$x[0],$x[1],$x[2],$x[3],$x[4],$x[5];

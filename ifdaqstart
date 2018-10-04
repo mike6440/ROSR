@@ -1,10 +1,14 @@
 #!/bin/bash
 # This is called by bashrc hence at boottime
+# We want to have a process that runs only at startup, before bash. Create a file
+# named /etc/rc.local. You might need to create it.
+# You can just create the file /etc/rc.local and make it executable.
 
-if [ -e ~/tmp/daqstart ]
+
+if [ -e /home/oper/tmp/daqstart ]
 then
         # daq was running at reboot.
-    echo `date -u "+%y%m%d,%H%M%Sz"`--Backup data and re-start DAQ >> ~/tmp/bootlog
+    echo ifdaqstart `date -u "+%y%m%d,%H%M%Sz"`--Backup data and re-start DAQ >> ~/tmp/bootlog
     #echo `date -u "+%y%m%d,%H%M%Sz"`--Backup data and re-start DAQ
     
         # STOP
@@ -25,7 +29,7 @@ then
     screen -S ROSR -p 2 -X stuff "GG$(printf \\r)"
     #screen -l >> ~/tmp/bootlog
 else
-	echo `date -u "+%y%m%d,%H%M%Sz"`--REBOOT. No DAQ. >> ~/tmp/bootlog
+	echo ifdaqstart `date -u "+%y%m%d,%H%M%Sz"`--REBOOT. No DAQ. >> ~/tmp/bootlog
 fi
 
 

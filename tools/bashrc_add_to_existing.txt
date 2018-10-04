@@ -51,6 +51,7 @@ alias ls="ls -a --color=auto"
 alias ll="ls -la --color=auto"
 
 	# BASHRC_ROSR
+	## NOTE  chmod 755 bashrc_rosr.txt ## make the file executable
 if expr $DAQ = "ROSR" > /dev/null ; then
 test -f $DAQPATH/ROSR/sw/tools/bashrc_rosr.txt && . $_
 fi
