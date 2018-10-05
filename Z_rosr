@@ -3,7 +3,7 @@
 
 set PROGRAMNAME Z_rosr
 set VERSION 9.4
-set EDITDATE 180926;
+set EDITDATE 181004;
 # 
 # V1 FROM Z_ROSR V20
 #v4 use getgpsraw program 
@@ -14,7 +14,7 @@ set EDITDATE 180926;
 #v9 include serial server or rs232
 #v9.1 -- trying to get it to work
 #v9.2 -- debug. Fix wirav and wirst files
-#v9.4 -- debug mystery crash at new day
+#v9.4 -- debug mystery crash at new day -- see line 346
 
 puts "
 RUN PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE"
@@ -342,15 +342,14 @@ while 1 {
 				set s2 [string first "\*" $rawstr $s1]
 				set str [string range $rawstr $s1 [expr $s2+2]]
 				# GPS
-				#write_info $infoname "zz test 1";
-				#set gpstr [exec gpsgetraw]
+				#set gpstr [exec gpsgetraw] # this crashed at 00z.
+				# v9.4
 				set status [catch {exec gpsgetraw} gpstr ] ;
 				if {$status > 0} {
 					# handle an error condition ...
 					set gpstr "0,0,0,0,0,0";
 					write_info $infoname "catch error, gpstr = $gpstr\n";
 				}
-				#write_info $infoname "zz test 2, $gpstr\n";
 				set str [timestamp -gmt -format "%Y,%m,%d,%H,%M,%S,"]$gpstr,$rawstr 
 				set F [open $rwname a 0600]
 				puts $F $str  ;
