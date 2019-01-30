@@ -1,5 +1,4 @@
 #!/usr/bin/perl -X
-# edit 20180922T193214Z
 if($#ARGV<0){
 	print '
 PROGRAM udprx
@@ -25,16 +24,13 @@ use perltools::MRutilities;
 use IO::Socket;
 
 my $serverport=$ARGV[0];
-my ($datfile);
+
 # SAVE TO FILE
 my $recordflag=0;
 if ($#ARGV >= 1){
-	$datfile = $ARGV[1];
+	my $datfile = $ARGV[1];
 	$recordflag=1;
 	print"record data to $datfile\n";
-	open F, ">>$datfile" or die("OPEN $datfile FAILS\n");
-	printf F "Begin udprx %s\n",dtstr(now());
-	close F;
 }
 
 ##########################
@@ -53,11 +49,6 @@ while ($sock->recv($received_data, 1024)) {
     my($port, $ipaddr) = sockaddr_in($sock->peername);
     $peer_address = $sock->peerhost();
     print "$peer_address $serverport => $received_data";
-    if(-f $datfile){
-    	open F, ">>$datfile" or die("OPEN $datfile FAILS\n");
-    	print F "$received_data";
-    	close F;
-    }
 } 
 die "recv: $!";
 

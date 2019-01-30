@@ -27,7 +27,7 @@ DAQ = data acquisition; real time data collection and processing.
   1. "Stop"                             -> stop DAQ.
   2. "Archive"                          -> make a data archive in ~/rosrdata/  
   3. "Wipe y"                           -> erase (wipe) the data folder.
-  4. "RosrShutdown"                     -> Close shutter and go to standby.
+  4. "Shutdown"                     -> Close shutter and go to standby.
 #-TELNET SOCKET OR UDP -----
   1. Identify target computer IP and port.
   2. Modify setup/su.txt.

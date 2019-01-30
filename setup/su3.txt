@@ -1,14 +1,14 @@
 THIS FILE: su3.txt
-Editdate: 180916
+Editdate: 190129
 DAQ PASSWORD: r0srr0sr
 COMMENTS:
  After rosr3 maintennce. New gold mirror.
  Tilt sensor is reversed
 END
 ROSR SERIAL NUMBER: 3
-  calibration
-SSST SLOPE : 1.0017
-SSST OFFSET: .118
+  rosr3 cal 1901
+SSST SLOPE : 1.0092
+SSST OFFSET: .129
     # see fixed pitch and fixed roll if == 1
 FIXED TILT FLAG: 0
 KT15 SERIAL NUMBER: 11935
@@ -28,7 +28,7 @@ SERIAL HUB IP: 192.168.255.1
 	# rosr hub 10001, simulate 0, rs232 1
 ROSR PORT: 10001
 	# gps hub-10003, rs232 1, Fixed -1, simulate=0
-GPS PORT: -1
+GPS PORT: 10003
 	# iff gps port = 1 specify serial port, e.g. /dev/ttyS1
 SERIAL GPS: not used
 	# MODEM -- 10004, Not connected=-1, simulate=0
