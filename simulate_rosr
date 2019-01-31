@@ -3,11 +3,7 @@
 use lib $ENV{DAQLIB};
 use perltools::MRtime;
 
-$finx="$ENV{HomePath}/rosrsim.txt";
 $fin="simulate/rosr.txt";
-if(-f $finx){
-	$fin=$finx;
-}
 while (1) {
 	open(F,"<$fin") or die("fin error\n");
 
