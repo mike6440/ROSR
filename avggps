@@ -193,7 +193,6 @@ sub ReadNextRecord
 	if($str =~ /\$GPRMC/ )	{					# identifies a data string
 		$str =~ s/^*\$/\$/;						# remove leading stuff
 		# DECODE THE STRING AND RETURN VARIABLES
-		print"test 196\n";
  		($dtgps, $lat, $lon, $sog, $cog, $var) = gprmc($str,-999);
  		#print "dtgps, lat, lon, sog, cog, var = $dtgps, $lat, $lon, $sog, $cog, $var\n"; die;
 		my($xc,$yc) = VecP2V(1,$lat, $missing);
