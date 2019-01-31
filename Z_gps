@@ -243,8 +243,8 @@ if { $gpsport == 0 } {
 	expect -re "(\.*)(\r)";
 	set hubip $expect_out(1,string)
 	write_info $infoname  "SERIAL HUB IP: $hubip"
-	send_user "SERIAL HUB IP: $hubip, GPS PORT: $gpsport"
-	SpawnGps $hubip $gpsport $gpscom
+	send_user "SERIAL HUB IP: $hubip, GPS PORT: $gpsport\n"
+	SpawnGps $hubip $gpsport -1
 }
 
 		# GPSAV PROGRAM

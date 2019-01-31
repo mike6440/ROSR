@@ -65,8 +65,10 @@ commands. These are customized commands for viewing.
 #-------------------------------------
 # Ubuntu setup
 #-------------------------------------
-  Lid Close do not suspend, Ubuntu 18.04 and >
+  1. LID CLOSE do not suspend, Ubuntu 18.04 and >
     $ sudo gedit /etc/systemd/logind.conf
         edit--HandleLidSwitch=ignore (remove comment)
     $ systemctl restart systemd-logind.service
 
+  2. TELNET -- install telnet. try man telnet to see if it's there.
+    Ubuntu use apt-get,  Mac use homebrew
