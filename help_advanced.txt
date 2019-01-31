@@ -62,6 +62,11 @@ commands. These are customized commands for viewing.
     $ROSST,20180203,155000,V,29.99997,-145.42247,7.4,268,V,23.520*71
 
   
-
-
+#-------------------------------------
+# Ubuntu setup
+#-------------------------------------
+  Lid Close do not suspend, Ubuntu 18.04 and >
+    $ sudo gedit /etc/systemd/logind.conf
+        edit--HandleLidSwitch=ignore (remove comment)
+    $ systemctl restart systemd-logind.service
 
