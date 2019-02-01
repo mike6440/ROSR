@@ -72,3 +72,37 @@ commands. These are customized commands for viewing.
 
   2. TELNET -- install telnet. try man telnet to see if it's there.
     Ubuntu use apt-get,  Mac use homebrew
+    
+LINUX SET WIFI PORT -- configure wifi link
+https://www.linux.com/learn/how-configure-wireless-any-linux-desktop
+
+* which ifconfig
+* which iwlist
+* which iwconfig
+* which dhclient
+* which wpa_supplicant
+
+* ifconfig : Determine wireless id — wlp3s0
+* The above command will bring your wireless device up so it is ready to use. 
+  sudo ifconfig wlp3s0 up
+
+* Scan for any wireless access points :
+  iwlist wlp3s0 scan | grep ESSID identify ESSID
+    ESSID example “rmr-5” 
+* Set the wireless link 
+  sudo iwconfig wlp3s0 essid rmr-5 key s:r0srr0sr
+
+* Get an IP address for the connection 
+  dhclient wlan0
+   A Script
+	#! /bin/bash 
+	ifconfig wlp3s0 
+	iwconfig wlp3s0 essid rmr-5 key s:r0srr0sr
+	dhclient wlp3s0
+
+* NO PASSWD REQUIRED
+  sudo passwd -d oper
+
+
+
+move to /usr/local/bin so the command is global.
