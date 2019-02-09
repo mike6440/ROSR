@@ -1,11 +1,13 @@
 THIS FILE: su2.txt
-Editdate: 20180813T133510Z
+Editdate: 190208
+  rosr2-5_docktest
+  no gps. Set to simulate.
 DAQ PASSWORD: r0srr0sr
 ROSR SERIAL NUMBER: 2
 SIMULATEFLAG: 0
 FIXED TILT FLAG: 0
 	rosr2cal_180814:
-SSST SLOPE : 0.934
+SSST SLOPE: 0.934
 SSST OFFSET: -.075
 KT15 SERIAL NUMBER: 11733
 KT15 FILTER FILE: kt15/kt1585_sn11733.txt
@@ -24,7 +26,7 @@ SERIAL HUB IP: 192.168.255.1
 	# rosr hub 10001, simulate 0, rs232 1
 ROSR PORT: 10001
 	# gps hub-10003, rs232 1, Fixed -1, simulate=0
-GPS PORT: 10003
+GPS PORT: -1
 	# iff gps port = 1 specify serial port
 SERIAL GPS: not used
 	# MODEM -- 10004, Not connected=-1, simulate=0
@@ -44,7 +46,6 @@ CAL SSST OFFSET: 0
 CAL SCAN VIEW ANGLES: 265 325 45 90
 		# INDEX -- (0,1,...) index.  Use for calibration case
 CALIBRATION VIEW POSITION : 3
-
 	=======================
 		BLACK BODY
 	=======================
@@ -61,22 +62,20 @@ REF VOLTAGE FOR 12 BIT ADC: 4.0928
 		## ROSR-01: 9995 9984 9997 9997
 		## ROSR-04: 10000 10000 10000 10000
 APPERATURE THERMS REF RESISTANCES: 10000 10000 10000 10000
-
 ========================
 		EXPERIMENT INFO
 ========================
-EXPERIMENT NAME: Qing 
-GEOGRAPHIC LOCATION: Luwes
+EXPERIMENT NAME: rosr2-5dock
+GEOGRAPHIC LOCATION: UW dock
 		two characters for a ship code
-PLATFORM NAME: RV SHARP
-LOCATION ON PLATFORM: BRIDGE ROOF
-HEIGHT ABOVE SEA LEVEL m: 3
-SHIP TYPE: RV
-SHIP NAME: RV HUGH SHARP
-CRUISE NAME: CFOG
+PLATFORM NAME: UWDock
+LOCATION ON PLATFORM: dock
+HEIGHT ABOVE SEA LEVEL m: 2.8
+SHIP TYPE: na
+SHIP NAME: na
+CRUISE NAME: rosr2-5dock
 	port or starboard
-PLATFORM SIDE: PORT
-
+PLATFORM SIDE: na
 ========================
 		QUALITY ERROR CHECK
 ========================
@@ -91,7 +90,6 @@ MISSING VALUE: -999
 COMMENTS:
  ROSR2
 END
-
 	========================
 		GPS SETUP
 		NOTE: Use the Garmin-supplied Windows program to set the 17x for
@@ -100,9 +98,9 @@ END
 ##GPS MODEL NUMBER: GPS17X
 ##GPS MIN SAMPLES FOR AVG: 3
 GPS AVERAGING TIME: 120
-	# MOSS BAY
-GPS FIXED LATITUDE: 38.7828
-GPS FIXED LONGITUDE: -75.1212
+	# UWDock
+GPS FIXED LATITUDE: 47.64962
+GPS FIXED LONGITUDE: -122.31312
 		Magnetic variation, + = East of true
 GPS FIXED VARIATION: 
 GPS DEAD TIME ALARM SECS: 60

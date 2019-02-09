@@ -1,5 +1,5 @@
 THIS FILE: su2c.txt
-Editdate: 20180814T190317Z
+Editdate: 20190205T033855Z
 DAQ PASSWORD: r0srr0sr
 ROSR SERIAL NUMBER: 2
 	!!
@@ -9,7 +9,7 @@ FIXED TILT FLAG: 0
 SSST SLOPE : 1
 SSST OFFSET: 0
 	# (bb1, bb2, sky, sea)
-SCAN VIEW ANGLES: 265 325 45 135
+SCAN VIEW ANGLES: 265 325 45 90
 KT15 SERIAL NUMBER: 11733
 KT15 FILTER FILE: kt15/kt1585_sn11733.txt
 
@@ -21,13 +21,13 @@ NETWORK
 	# iboot ip, 0=>not connected
 IBOOT IP: 0
 	# icp-das server  e.g. 192.168.255.1 or /dev/ttyusb0
-SERIAL HUB IP: /dev/ttyS0
+SERIAL HUB IP: 192.168.255.1
 	# rosr hub 10001, simulate 0, rs232 1
-ROSR PORT: 1
+ROSR PORT: 10001
 	# gps hub-10003, rs232 1, Fixed -1, simulate=0
 GPS PORT: -1
 	# iff gps port = 1 specify serial port
-SERIAL GPS: /dev/ttyS1
+SERIAL GPS: na
 	# MODEM -- 10004, Not connected=-1, simulate=0
 SBD PORT: -1
 	# SOCKET SERVER -- KAIMEI 10.198.5.1 4025
@@ -46,7 +46,6 @@ CAL SSST OFFSET: 0
 CAL SCAN VIEW ANGLES: 265 325 45 90
 	# INDEX -- (0,1,...) index.  Use for calibration case
 CALIBRATION VIEW POSITION : 3
-	CAL VIEW ANGLES: 265 325 45 90
 =======================
 	OPERATIONAL PARAMETERS
 =======================
