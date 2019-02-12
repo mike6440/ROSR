@@ -1,9 +1,10 @@
 THIS FILE: su3.txt
-Editdate: 190129
+Editdate: 190212
+EXPERIMENT NAME: saildrone
 DAQ PASSWORD: r0srr0sr
 COMMENTS:
- After rosr3 maintennce. New gold mirror.
- Tilt sensor is reversed
+ After rosr3 maintennce 12/2018. New gold mirror.
+ Checkout before saildrone validation cruise.
 END
 ROSR SERIAL NUMBER: 3
   rosr3 cal 1901
@@ -22,7 +23,7 @@ MISSING VALUE: -999
 	NETWORK
 	=============
 	# iboot ip, 0=>not connected, else 192.168.255.2
-IBOOT IP: 0
+IBOOT IP: 192.168.255.2
 	# icp-das server  e.g. 192.168.255.1 or /dev/ttyusb0
 SERIAL HUB IP: 192.168.255.1
 	# rosr hub 10001, simulate 0, rs232 1
@@ -69,15 +70,14 @@ APPERATURE THERMS REF RESISTANCES: 10000 10000 10000 10000
 	========================
 		EXPERIMENT INFO
 	========================
-EXPERIMENT NAME: test
-GEOGRAPHIC LOCATION: Seattle
+GEOGRAPHIC LOCATION: Gulf Stream
 		two characters for a ship code
-PLATFORM NAME: NA
-LOCATION ON PLATFORM: NA
+PLATFORM NAME: EN
+LOCATION ON PLATFORM: TBD
 HEIGHT ABOVE SEA LEVEL m: 6
 SHIP TYPE: RV
-SHIP NAME: RV NA
-CRUISE NAME: --
+SHIP NAME: RV ENDEAVOR
+CRUISE NAME: EN630
 	port or starboard
 PLATFORM SIDE: PORT
 	========================
@@ -90,8 +90,8 @@ FIXED ROLL: 0
 	========================
 GPS DEAD TIME ALARM SECS: 60 
 GPS AVERAGING TIME: 120
-GPS FIXED LATITUDE: 35
-GPS FIXED LONGITUDE: -122
+GPS FIXED LATITUDE: 38
+GPS FIXED LONGITUDE: -65
 		Magnetic variation, + = East of true
 GPS FIXED VARIATION: 18.1
 MINIMUM EXPECTED LATITUDE: 5
