@@ -1,4 +1,6 @@
 #!/usr/bin/perl -X
+# edit 190222
+# v2--new code
 if($#ARGV<0){
 	print '
 PROGRAM udprx
@@ -7,7 +9,6 @@ where
   perl call the perl program. (\'./\' works also.)
   PORT is the desired port, e.g. 5555
   FILENAME (optional) defines a file where collected data are stored.
-
 Example:
   perl udprx 5555 /tmp/prpdata.txt
 or
@@ -24,13 +25,23 @@ use perltools::MRutilities;
 use IO::Socket;
 
 my $serverport=$ARGV[0];
-
+my ($datfile);
 # SAVE TO FILE
 my $recordflag=0;
 if ($#ARGV >= 1){
-	my $datfile = $ARGV[1];
+	$datfile = $ARGV[1];
+	chomp($datfile);
 	$recordflag=1;
 	print"record data to $datfile\n";
+	open F, ">>$datfile" or die("OPEN $datfile FAILS\n");
+	printf F "Begin udprx %s\n",dtstr(now());
+	close F;
+}
+if(-f $datfile){
+	open F, ">>$datfile" or die("OPEN $datfile FAILS\n");
+	print F "testing datfile\n";
+	print "testing datfile\n";
+	close F;
 }
 
 ##########################
@@ -49,6 +60,11 @@ while ($sock->recv($received_data, 1024)) {
     my($port, $ipaddr) = sockaddr_in($sock->peername);
     $peer_address = $sock->peerhost();
     print "$peer_address $serverport => $received_data";
+    if(-f $datfile){
+    	open F, ">>$datfile" or die("OPEN $datfile FAILS\n");
+    	print F "$received_data";
+    	close F;
+    }
 } 
 die "recv: $!";
 
