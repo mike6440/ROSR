@@ -1,7 +1,6 @@
 THIS FILE: su2.txt
-Editdate: 190208
-  rosr2-5_docktest
-  no gps. Set to simulate.
+Editdate: 190324
+  prep for return operation.
 DAQ PASSWORD: r0srr0sr
 ROSR SERIAL NUMBER: 2
 SIMULATEFLAG: 0
@@ -11,6 +10,7 @@ SSST SLOPE: 0.934
 SSST OFFSET: -.075
 KT15 SERIAL NUMBER: 11733
 KT15 FILTER FILE: kt15/kt1585_sn11733.txt
+  ## must agree with the eeprom
 SCAN VIEW ANGLES: 265 325 45 135
 		DATA FILES ---------------------
 RT OUT PATH: data
@@ -26,14 +26,15 @@ SERIAL HUB IP: 192.168.255.1
 	# rosr hub 10001, simulate 0, rs232 1
 ROSR PORT: 10001
 	# gps hub-10003, rs232 1, Fixed -1, simulate=0
-GPS PORT: -1
+GPS PORT: 10003
 	# iff gps port = 1 specify serial port
 SERIAL GPS: not used
 	# MODEM -- 10004, Not connected=-1, simulate=0
 SBD PORT: -1
 	# SOCKET SERVER -- KAIMEI 10.198.5.1 4025
 	# udptx or socktxx,  ip=0 turns sockett off
-TELNET SERVER IP: 10.1.10.86
+	# 124 = mini in lab
+TELNET SERVER IP: 10.1.10.124
 TELNET PROGRAM: udptx
 TELNET SERVER PORT: 4444
 =============
@@ -65,7 +66,7 @@ APPERATURE THERMS REF RESISTANCES: 10000 10000 10000 10000
 ========================
 		EXPERIMENT INFO
 ========================
-EXPERIMENT NAME: rosr2-5dock
+EXPERIMENT NAME: rosr2-3dock
 GEOGRAPHIC LOCATION: UW dock
 		two characters for a ship code
 PLATFORM NAME: UWDock

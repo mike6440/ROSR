@@ -2,7 +2,7 @@
 #Z_rosr_v6
 
 set PROGRAMNAME Z_rosr
-set VERSION 9.4
+set VERSION 9.5
 set EDITDATE 181004;
 # 
 # V1 FROM Z_ROSR V20
@@ -19,7 +19,7 @@ set EDITDATE 181004;
 puts "
 RUN PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE"
 
-set loguser 1;		#   test 0-quiet, 1=verbose
+set loguser 0;		#   v9.5 set to 0test 0-quiet, 1=verbose
 log_user $loguser;
 
 		# SETUP FILE DEFINED
