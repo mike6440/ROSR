@@ -1,8 +1,8 @@
 THIS FILE: su2c.txt
-Editdate: 20190205T033855Z
+Editdate: 20190518T142555Z
+	Removed some unnec lines. see !!
 DAQ PASSWORD: r0srr0sr
 ROSR SERIAL NUMBER: 2
-	!!
 SIMULATEFLAG: 0
     !! see fixed pitch and fixed roll if == 1
 FIXED TILT FLAG: 0
@@ -12,14 +12,13 @@ SSST OFFSET: 0
 SCAN VIEW ANGLES: 265 325 45 90
 KT15 SERIAL NUMBER: 11733
 KT15 FILTER FILE: kt15/kt1585_sn11733.txt
-
-		DATA FILES ---------------------
+	--- DATA FILES ----
 RT OUT PATH: data
 =============
 NETWORK
 =============
 	# iboot ip, 0=>not connected
-IBOOT IP: 0
+IBOOT IP: 192.168.255.2
 	# icp-das server  e.g. 192.168.255.1 or /dev/ttyusb0
 SERIAL HUB IP: 192.168.255.1
 	# rosr hub 10001, simulate 0, rs232 1
@@ -44,10 +43,10 @@ CAL SSST SLOPE: 1
 CAL SSST OFFSET: 0
 	# CAL VIEW ANGLES (SAME AS ROSR EEPROM) -- (0,1,2,3)=(bb1, bb2, sky, sea)
 CAL SCAN VIEW ANGLES: 265 325 45 90
-	# INDEX -- (0,1,...) index.  Use for calibration case
+	# INDEX -- (0,1,2,3) index.  Use for calibration case
 CALIBRATION VIEW POSITION : 3
 =======================
-	OPERATIONAL PARAMETERS
+	OTHER PARAMETERS
 =======================
 NO DATA WAIT TIME: 3600
 MISSING VALUE: -999
@@ -71,14 +70,12 @@ APPERATURE THERMS REF RESISTANCES: 10000 10000 10000 10000
 		EXPERIMENT INFO
 	========================
 EXPERIMENT NAME: ROSR2 CALIBRATION
-
 	========================
 		COMMENTS/LOG
 	========================
 COMMENTS:
  Calibration at UW APL
 END
-
 	========================
 		GPS SETUP
 		NOTE: Use the Garmin-supplied Windows program to set the 17x for
@@ -87,9 +84,9 @@ END
 ##GPS MODEL NUMBER: GPS17X
 ##GPS MIN SAMPLES FOR AVG: 3
 GPS AVERAGING TIME: 120
-	# MOSS BAY
-GPS FIXED LATITUDE: 35.00000
-GPS FIXED LONGITUDE: -122.00000
+	# This is the position of RMRCO
+GPS FIXED LATITUDE: 47.60328
+GPS FIXED LONGITUDE: -122.28793
 		Magnetic variation, + = East of true
 GPS FIXED VARIATION: 18.1
 GPS DEAD TIME ALARM SECS: 60
@@ -98,14 +95,14 @@ GPS DEAD TIME ALARM SECS: 60
 	========================
 		Verbose mode prints out test messages and data.  VERBOSE = 1, NOT VERBOSE = 0
 		avgrosr.pl makes a file called data/tmp.txt.
-VERBOSE MODE: 0
+	!! remove VERBOSE MODE: 0
 		## Specifics on the Instrument
 ROSR AVERAGING TIME (sec): 600
 SEA EMISSIVITY (UNCORRECTED): 0.9870975
 APERATURE EMISSIVITY : 0.95
 ##MAXIMUM NUMBER OF AVERAGES (Set to 1e20 for final run) : 1e20
 MIN SAMPLES FOR AVG: 2
-SELF-HEAT FLAG: 1
+	!! remove SELF-HEAT FLAG: 1
 FIXED PITCH: 0
 FIXED ROLL: 0
 	========================
