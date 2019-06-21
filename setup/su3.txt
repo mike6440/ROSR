@@ -1,6 +1,6 @@
 THIS FILE: su3.txt
-Editdate: 190212
-EXPERIMENT NAME: saildrone
+Editdate: 190620
+EXPERIMENT NAME: Endeavor
 DAQ PASSWORD: r0srr0sr
 COMMENTS:
  After rosr3 maintennce 12/2018. New gold mirror.
@@ -10,8 +10,12 @@ ROSR SERIAL NUMBER: 3
   rosr3 cal 1901
 SSST SLOPE : 1.0092
 SSST OFFSET: .129
+ ==================
     # see fixed pitch and fixed roll if == 1
 FIXED TILT FLAG: 0
+FIXED PITCH: 0
+FIXED ROLL: 0
+===================
 KT15 SERIAL NUMBER: 11935
 KT15 FILTER FILE: kt15/kt1585_sn11935.txt
 SCAN VIEW ANGLES: 265 325 45 135
@@ -34,11 +38,39 @@ GPS PORT: 10003
 SERIAL GPS: not used
 	# MODEM -- 10004, Not connected=-1, simulate=0
 SBD PORT: -1
+ =========================
 	# SOCKET SERVER -- KAIMEI 10.198.5.1 4025
 	# udptx or socktxx
+ ===========================
 TELNET PROGRAM: udptx
 TELNET SERVER IP: 10.1.10.86
 TELNET SERVER PORT: 4444
+	========================
+		EXPERIMENT INFO
+	========================
+GEOGRAPHIC LOCATION: Gulf Stream
+		two characters for a ship code
+PLATFORM NAME: EN
+LOCATION ON PLATFORM: TBD
+HEIGHT ABOVE SEA LEVEL m: 6
+SHIP TYPE: RV
+SHIP NAME: RV ENDEAVOR
+CRUISE NAME: EN630
+	port or starboard
+PLATFORM SIDE: PORT
+	========================
+		GPS
+	========================
+GPS DEAD TIME ALARM SECS: 60 
+GPS AVERAGING TIME: 120
+GPS FIXED LATITUDE: 38
+GPS FIXED LONGITUDE: -65
+		Magnetic variation, + = East of true
+GPS FIXED VARIATION: 18.1
+MINIMUM EXPECTED LATITUDE: 5
+MAXIMUM EXPECTED LATITUDE: 90
+MINIMUM EXPECTED LONGITUDE: -180
+MAXIMUM EXPECTED LONGITUDE: 360
 	=============
 	MISC
 	=============
@@ -67,37 +99,6 @@ BB RESISTORS: 10000, 10000, 10000, 10000, 10000, 10000
 APPERATURE THERM REF RESISTOR: 10000
 REF VOLTAGE FOR 12 BIT ADC: 4.0928
 APPERATURE THERMS REF RESISTANCES: 10000 10000 10000 10000
-	========================
-		EXPERIMENT INFO
-	========================
-GEOGRAPHIC LOCATION: Gulf Stream
-		two characters for a ship code
-PLATFORM NAME: EN
-LOCATION ON PLATFORM: TBD
-HEIGHT ABOVE SEA LEVEL m: 6
-SHIP TYPE: RV
-SHIP NAME: RV ENDEAVOR
-CRUISE NAME: EN630
-	port or starboard
-PLATFORM SIDE: PORT
-	========================
-		TILT
-	========================
-FIXED PITCH: 0
-FIXED ROLL: 0
-	========================
-		GPS
-	========================
-GPS DEAD TIME ALARM SECS: 60 
-GPS AVERAGING TIME: 120
-GPS FIXED LATITUDE: 38
-GPS FIXED LONGITUDE: -65
-		Magnetic variation, + = East of true
-GPS FIXED VARIATION: 18.1
-MINIMUM EXPECTED LATITUDE: 5
-MAXIMUM EXPECTED LATITUDE: 90
-MINIMUM EXPECTED LONGITUDE: -180
-MAXIMUM EXPECTED LONGITUDE: 360
 	========================
 		END SETUP FILE
 	========================

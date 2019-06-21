@@ -18,7 +18,7 @@ RT OUT PATH: data
 NETWORK
 =============
 	# iboot ip, 0=>not connected
-IBOOT IP: 192.168.255.2
+IBOOT IP: 0
 	# icp-das server  e.g. 192.168.255.1 or /dev/ttyusb0
 SERIAL HUB IP: 192.168.255.1
 	# rosr hub 10001, simulate 0, rs232 1
