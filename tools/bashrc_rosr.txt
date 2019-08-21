@@ -2,6 +2,11 @@
 # edit 20180901T212832Z
 # NOTE: chmod 755 bashrc_rosr.txt ## make this executable 
 
+# basic PATH
+#. /etc/environment
+# special user
+#. ~/.profile
+
 export EDITOR="vim"
 alias Top="top -u -s5"
 alias Date='date -u "+%Y %m %d %H %M %S Z"'
