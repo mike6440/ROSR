@@ -911,7 +911,7 @@ sub MakeRadTable_planck
 	my $i;
 	my $str;
 	# -- OPEN THE FILTER FILE ---
-	#writeTMP(sprintf "Filter file = $fnm");
+	#writeT(sprintf "Filter file = $fnm");
 	open(FILTER, "< $fnm") or die "Open filter file fails\n";
 	printf "Filter file open: %s\n", $fnm;
 	# --- READ EACH LINE, skip header lines ---
