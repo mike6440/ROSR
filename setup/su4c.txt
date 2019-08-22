@@ -1,32 +1,32 @@
-THIS FILE: su4c.txt
-Editdate: 180708
+THIS FILE: su2c.txt
+Editdate: 190821
+	Removed some unnec lines. see !!
 DAQ PASSWORD: r0srr0sr
-COMMENTS:
- rosr4 calibration
-END
 ROSR SERIAL NUMBER: 4
+========================
+	COMMENTS/LOG
+========================
+COMMENTS:
+ Calibration at UW APL
+END
+SIMULATEFLAG: 0
+    !! see fixed pitch and fixed roll if == 1
+FIXED TILT FLAG: 0
 SSST SLOPE : 1
 SSST OFFSET: 0
-SIMULATEFLAG: 0
-    see fixed pitch and fixed roll if == 1
-FIXED TILT FLAG: 0
+	# (bb1, bb2, sky, sea)
+SCAN VIEW ANGLES: 265 325 45 90
 KT15 SERIAL NUMBER: 12228
 KT15 FILTER FILE: kt15/kt1585_sn12228.txt
-SCAN VIEW ANGLES: 265 325 45 90
-		DATA FILES ---------------------
+	--- DATA FILES ----
 RT OUT PATH: data
-NO DATA WAIT TIME: 3600
-=============
-NETWORK
-=============
-	# iboot ip, 0=>not connected
-IBOOT IP: 192.168.255.2
-SPARE IP: 0
-PC IP:  192.168.255.10
-Gateway: 0
-DNS: 0
+ =========================
+	NETWORK
+ =========================
+	# iboot ip, 0=>not connected, else 192.168.255.2
+IBOOT IP: 10.43.12.72
 	# icp-das server  e.g. 192.168.255.1 or /dev/ttyusb0
-SERIAL HUB IP: 192.168.255.1
+SERIAL HUB IP: 10.43.12.71
 	# rosr hub 10001, simulate 0, rs232 1
 ROSR PORT: 10001
 	# gps hub-10003, rs232 1, Fixed -1, simulate=0
@@ -35,30 +35,37 @@ GPS PORT: -1
 SERIAL GPS: not used
 	# MODEM -- 10004, Not connected=-1, simulate=0
 SBD PORT: -1
+ =========================
 	# SOCKET SERVER -- KAIMEI 10.198.5.1 4025
 	# udptx or socktxx
+ ===========================
 TELNET PROGRAM: udptx
-TELNET SERVER IP: 10.1.10.86
-TELNET SERVER PORT: 4444
+  !! TELNET SERVER IP: 10.43.12.12
+TELNET SERVER IP: 10.1.10.124
+TELNET SERVER PORT: 33333
 =============
 CALIBRATION
 =============
-	#CAL EMIS: 0 = field use, compute e from angle,  ~=1 = calibration mode
+	#CAL EMIS: 0 = field use, compute e from tilt,  ~=1 = calibration mode
 CALIBRATION EMISSIVITY: 1
 CAL SSST SLOPE: 1
 CAL SSST OFFSET: 0
+	# CAL VIEW ANGLES (SAME AS ROSR EEPROM) -- (0,1,2,3)=(bb1, bb2, sky, sea)
 CAL SCAN VIEW ANGLES: 265 325 45 90
-		# INDEX -- (0,1,...) index.  Use for calibration case
+	# INDEX -- (0,1,2,3) index.  Use for calibration case
 CALIBRATION VIEW POSITION : 3
-
-	=======================
-		BLACK BODY
-	=======================
+=======================
+	OTHER PARAMETERS
+=======================
+NO DATA WAIT TIME: 3600
+MISSING VALUE: -999
+=======================
+	BLACK BODY
+=======================
 BLACK BODY EMISSIVITY : 1.0
 		## set Vref to 0 and the values from the 2*adc12-7 will be used.
 BB THERM VREF: 0
 BB TEMP Ref R: 10000
-!!! calibration coefs
 		Resistances from testing with precision resistances. See notes 090909.
 BB RESISTORS: 10000, 10000, 10000, 10000, 10000, 10000
 		# Rref for wintemp and tt8temp
@@ -68,40 +75,10 @@ REF VOLTAGE FOR 12 BIT ADC: 4.0928
 		## ROSR-01: 9995 9984 9997 9997
 		## ROSR-04: 10000 10000 10000 10000
 APPERATURE THERMS REF RESISTANCES: 10000 10000 10000 10000
-
 	========================
 		EXPERIMENT INFO
 	========================
-EXPERIMENT NAME: burn in and test
-GEOGRAPHIC LOCATION: Seattle
-		two characters for a ship code
-PLATFORM NAME: tbd
-LOCATION ON PLATFORM: tbd
-HEIGHT ABOVE SEA LEVEL m: 6
-SHIP TYPE: RV
-SHIP NAME: JOHN MARTIN
-CRUISE NAME: --
-	port or starboard
-PLATFORM SIDE: PORT
-
-	========================
-		QUALITY ERROR CHECK
-	========================
-MINIMUM EXPECTED LATITUDE: 5
-MAXIMUM EXPECTED LATITUDE: 90
-MINIMUM EXPECTED LONGITUDE: -180
-MAXIMUM EXPECTED LONGITUDE: 360
-MISSING VALUE: -999
-
-
-	========================
-		COMMENTS/LOG
-	========================
-COMMENTS:
- ROSR4 initial setup
- First bath cal
-END
-
+EXPERIMENT NAME: ROSR4 CALIBRATION
 	========================
 		GPS SETUP
 		NOTE: Use the Garmin-supplied Windows program to set the 17x for
@@ -110,23 +87,25 @@ END
 ##GPS MODEL NUMBER: GPS17X
 ##GPS MIN SAMPLES FOR AVG: 3
 GPS AVERAGING TIME: 120
-	# MOSS BAY
-GPS FIXED LATITUDE: 35
-GPS FIXED LONGITUDE: -122
+	# This is the position of RMRCO
+GPS FIXED LATITUDE: 47.60328
+GPS FIXED LONGITUDE: -122.28793
 		Magnetic variation, + = East of true
 GPS FIXED VARIATION: 18.1
-
+GPS DEAD TIME ALARM SECS: 60
 	========================
 		ROSR
 	========================
 		Verbose mode prints out test messages and data.  VERBOSE = 1, NOT VERBOSE = 0
 		avgrosr.pl makes a file called data/tmp.txt.
-VERBOSE MODE: 0
+	!! remove VERBOSE MODE: 0
+		## Specifics on the Instrument
 ROSR AVERAGING TIME (sec): 600
-SEA EMISSIVITY: 0.9870975
+SEA EMISSIVITY (UNCORRECTED): 0.9870975
 APERATURE EMISSIVITY : 0.95
+##MAXIMUM NUMBER OF AVERAGES (Set to 1e20 for final run) : 1e20
 MIN SAMPLES FOR AVG: 2
-	!! see FIXED TILT FLAG
+	!! remove SELF-HEAT FLAG: 1
 FIXED PITCH: 0
 FIXED ROLL: 0
 	========================
