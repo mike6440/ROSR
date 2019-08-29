@@ -1,15 +1,19 @@
 THIS FILE: su4.txt
-Editdate: 190820
+Editdate: 190829
 EXPERIMENT NAME: Thomas G Thompson
 DAQ PASSWORD: r0srr0sr
 COMMENTS:
  After rosr4 service: rebuilt HE circuit, new mirror
  190820-reverse tilt sensor. It is now correct.
+ 190827-rosr4cal nearly identical to 2017 cal.
 END
 ROSR SERIAL NUMBER: 4
+	190827_rosr4cal
+SSST SLOPE : 0.9994
+SSST OFFSET: 1.111
 	170801_rosr4cal
-SSST SLOPE : 1.0039
-SSST OFFSET: 1.1022
+  SSST SLOPE : 1.0039
+  SSST OFFSET: 1.1022
  ==================
     # see fixed pitch and fixed roll if == 1
 FIXED TILT FLAG: 0
