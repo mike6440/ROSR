@@ -6,6 +6,7 @@ COMMENTS:
  After rosr4 service: rebuilt HE circuit, new mirror
  190820-reverse tilt sensor. It is now correct.
  190827-rosr4cal nearly identical to 2017 cal.
+ 190829-rosr4cal a second time
 END
 ROSR SERIAL NUMBER: 4
 	190827_rosr4cal
@@ -44,11 +45,11 @@ SBD PORT: -1
 	# SOCKET SERVER -- KAIMEI 10.198.5.1 4025
 	# udptx or socktxx
  ===========================
-TELNET PROGRAM: socktxx
+TELNET PROGRAM: udptx
 TELNET SERVER IP: 10.43.12.12
 TELNET SERVER PORT: 33333
  =========================
-		EXPERIMENT INFO
+  EXPERIMENT INFO
  =========================
 GEOGRAPHIC LOCATION: TGT manuevers
 		two characters for a ship code
