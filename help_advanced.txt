@@ -1,22 +1,18 @@
+##### edit 191020
+Enter "helpa<cr>" to see the advanced help file.
+  Note: This is a linux "less" display. Press 'q' to quit.
+
+#--OTHER HELP FILES-----------
+  "help<cr>" for basic help.
 The sw folder contains all rosr software. It is located at
    /home/oper/swmain/apps/ROSR/sw
 "gtdaq" (go to daq) goes to the  sw folder.
 
---- SCREEN ---
-The "start" command begins a background data collection using the screen 
-software. All data collection is out of view but can be seen by using screen
-commands. These are customized commands for viewing.  
-  "iss" or "isscreen" -- Checks to see if the DAQ screen is on.
-  "gtscreen" -- opens the DAQ screen (careful!), "^a d" to end screen session.
-  "^a 1" -- go to screen 1. ROSR data acquition.
-  "^a 2" -- go to screen 2. GPS data acquition.
-  "^a d" -- end the screen session; disconnect from screen.
-  
 
 #-----------------------------
 #--ROSR OUTPUT PACKETS 
 #-----------------------------
-#-RAW-----------          (rosrraw)  2 sec output from ROSR
+#-Raw-----------          2 sec output from ROSR
   $WIssf,vv,etime,drum,RAD,REF,adc0,adc1,adc2,adc3,adc4,adc5,adc6,adc7,
   adc8,adc9,adc10,adc11,vref,t11,t12,t21,t22,pit,rol,Tanalog,Tktcase,Twindow,
   Tpwr,Vin,vrain,sec*chk<cr><lf>
@@ -26,7 +22,7 @@ commands. These are customized commands for viewing.
   ,0.815,0.564,-0.001,2.679,4.933,19.74,19.76,38.45,38.49,-0.0,-0.8,-57.10,20.76,20.18,
   33.88, 2.8,-0.0,  0*78
 
-#-Av-----------            (rosrav) 280 sec output from ROSR
+#-Av-----------            280 sec output from ROSR
   $WIRAV,etime,vav0,vav1,vav2,vav3,k0,ksd0,k1,ksd1,k2,ksd2,k3,ksd3,t11,tsd11,t12,tsd12,
      t21,tsd21,t22,tsd22,T1,T2,pav,psd,rav,rsd,ang,emis*chk
   where
@@ -36,20 +32,33 @@ commands. These are customized commands for viewing.
    t11,tsd11 = mean BB1,thermister1 and stdev.
    ditto for t12, t21, and t22
   
-#-Sst-----------             (rosrst)   280 sec output from ROSR
+#-Sst-----------             280 sec output from ROSR
+The Sst file is computed each 280 sec (approx) after rosr completes the four views
+[BB1,BB2,Sky,Sea] = [vav0,vav1,vav2,vav3] and computes the SSST.
   $WIRST,etime,vav0,vav1,vav2,vav3,k0,k1,k2,k3,T1,T2,ang,emis,ssst*chk
   where
-   vavi, i=0..3 = avg view angle (bb1,bb2,sky,sea)
-   ki, i=0..3 = kt15 avg rad (bb1,bb2,sky,sea)
+   vavi, i=0..3 = avg encoder view angle (bb1,bb2,sky,sea)
+   ki, i=0..3 = kt15 avg radience (bb1,bb2,sky,sea)
 
-#-Avg-----------              (rosravg)  10 min output from DAQ 
-  ix UTC lat lon sog cog ssst ssstu T1 T2 k1 k2 ksea ksky emis pit sdpit rol sdrol rain
-
-#-SBD-----------               (rosrsbd)  10 min output from DAQ 
+#-Avg-----------             10 min output from DAQ 
+The Avg record is computed by the DAQ software each 10 min. The data are accumulated
+over the 10-min period and sorted by view. The record time is the center of the 
+averaging period. 
+  ix UTC lat lon sog cog ssst ssstu T1 T2 k1 k2 ksea ksky emis pit sdpit rol 
+  sdrol rain
+  
+#-Sbd-----------               (rosrsbd)  10 min output from DAQ 
+An SBD record is generated at the time of Avg and is available for telemetry, usually
+by Iridium SBD.
   $WISBD yyyyMMdd hhmmss lat lon sog cog ssst pi sdpi ro sdro emis
       k1 k2 ksky ksea T1 T2 vrain
 
-#-TELNET/UDP-----------          OUTPUT TO SHIP   10 min output from DAQ 
+#-TELNET/UDP-----------          OUTPUT TO SHIP   10 min output from DAQ
+Two programs are provided: "sockrx" opens a telnet socket and "udprx" opens a UDP
+port. Instructions are provided by entering just the program name such as 
+"sockrx<cr>" or "udprx<cr>". 
+The Telnet/UDP record is generated at the time of Avg and is available for network
+distribution on a local area network. 
   $ROSST,yyyyMMdd,hhmmss,V1,lat,lon,sogmps,cogT,V2,ssst*chk
    where
    yyyyMMdd,hhmmss = UTC
@@ -61,6 +70,16 @@ commands. These are customized commands for viewing.
   example: 
     $ROSST,20180203,155000,V,29.99997,-145.42247,7.4,268,V,23.520*71
 
+#-- SCREEN ---
+The "start" command begins a background data collection using the screen 
+software. All data collection is out of view but can be seen by using screen
+commands. These are customized commands for viewing.  
+  "iss<cr>" or "isscreen<cr>" -- Checks to see if the DAQ screen is on.
+  "gtscreen<cr>" -- opens the DAQ screen (careful!), "^a d" to end screen session.
+  "^a 1<cr>" -- go to screen 1. ROSR data acquition.
+  "^a 2<cr>" -- go to screen 2. GPS data acquition.
+  "^a d<cr>" -- end the screen session; disconnect from screen.
+  
   
 #-------------------------------------
 # Ubuntu setup
@@ -95,10 +114,10 @@ https://www.linux.com/learn/how-configure-wireless-any-linux-desktop
 * Get an IP address for the connection
   dhclient wlan0
   A Script
-	#! /bin/bash 
-	ifconfig wlp3s0 
-	iwconfig wlp3s0 essid rmr-5 key s:r0srr0sr
-	dhclient wlp3s0
+    #! /bin/bash 
+    ifconfig wlp3s0 
+    iwconfig wlp3s0 essid rmr-5 key s:r0srr0sr
+    dhclient wlp3s0
 
 * NO PASSWD REQUIRED
   sudo passwd -d oper

@@ -1,0 +1,75 @@
+##### edit 191021
+Enter "helpc<cr>" to see the help_configuration file.
+  Note: This is a linux "less" display. Press 'q' to quit.
+        '^' in the text below means press the <control> key.
+        
+#--OTHER HELP FILES-----------
+  "help"  for basic instructions.
+  "helpa" for advanced help.
+  "helpc" for details on the eeprom and the DAQ setup configuration files.
+#--BASIC--------
+  gtdaq                                       ->  cd ~/swmain/apps/ROSR/sw
+  iss                                         ->  is DAQ running?
+#--STOP DAQ--------
+  Stop                                        ->  stop data collection
+  Archive                                     ->  optional
+  I                                           ->  connect to ROSR
+     You will see raw data lines each 2 sec.
+  t or T                                      ->  switch to ROSR user mode
+     The user mode prompt is '>'. This is repeated
+     each 10 sec of inactivity. After 60 sec of
+     inactivity ROSR switches to run mode.
+#--EEPROM--------
+  e                                           ->  EEPROM MENU (SEE BELOW)
+      To change an eeprom variable enter a string that begins with 'e'
+      and ends with <return> (also written as <cr>). The string characters
+      give the eeprom variable followed by a number  as described in the 
+      examples below.
+#--CALIBRATION MODE--------
+  eE1                                         -> Set calibration flag ON
+  eP90                                        -> Set target angle to 90 deg.
+  eR5                                         -> Disable rain action.
+#--RUN MODE--------
+  eE0                                         -> Cal flag OFF
+  eP135                                       -> Set target angle to 135 deg, downward.
+  eR.5                                        -> Rain action ON.
+#--CHANGE VIEWING ANGLES--------
+       Change nadir angles from 45 deg to 55 deg.
+  ep55                                        -> sky angle set to 55 deg.
+  eP125                                       -> ocean angle set to 125 deg.
+       Change nadir angles back to 45 deg.
+  ep45                                        -> sky angle set to 45 deg.
+  eP135                                       -> ocean angle set to 135 deg.
+
+
+#--EEPROM MENU--------
+  An   n=1..4, BB Ref esistors
+  B    BB view sample count
+  c    BB1 angle
+  C    BB2 angle
+  D    drum zero ref
+  E    Calibration Flag
+  F    Encoder scan tolerance
+  g    Acorr
+  G    Offset
+  Hij  i=0/1,j=1/0,  BB heater configuration
+  h    BB Emis
+  j    pitch correct
+  J    roll correct
+  M    Shutter on/off
+  Nn  n=1..3, Shutter CLOSE params: milliamp limit, msecs timeout, msecs after switch
+   [1] max current limit, milliamps = Serial.println(ee.close_params[0]);
+   [2] timeout, msecs = Serial.println(ee.close_params[1]);
+   [3] msecs after HE switch = Serial.println(ee.close_params[2]);
+  On  n=1..3, Shutter OPEN Params: 
+   [1] max current limit, milliamps = Serial.println(ee.open_params[0]);
+   [2] timeout, msecs = Serial.println(ee.open_params[1]);
+   [3] msecs after HE switch = Serial.println(ee.open_params[2]);
+  p sky angle
+  P ocean angle
+  R Rain threshold
+  r Rain shutter delay
+  T ocean sample count
+  U sky sample count
+  T to B Quadratic
+  B to T Quadratic

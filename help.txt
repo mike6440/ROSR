@@ -1,7 +1,10 @@
-##### edit 180828
-Note: This is a "less" display. Press 'q' to quit.
-Enter "helpa" for advanced help.
-DAQ = data acquisition; real time data collection and processing.
+##### edit 191020
+Enter "help<cr>" to see the help file.
+  Note: This is a linux "less" display. Press 'q' to quit.
+
+#--OTHER HELP FILES-----------
+  "helpa" for advanced help.
+  "helpe" for details on the eeprom and the DAQ setup configuration files.
 #--BASIC--------
   gtdaq                                       ->  cd ~/swmain/apps/ROSR/sw
   iss                                         ->  is DAQ running?
