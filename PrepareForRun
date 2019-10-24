@@ -26,9 +26,15 @@ use perltools::MRutilities;
 $setupfile=$ENV{SETUPFILE};
 $e_cal = FindInfo($setupfile,'CALIBRATION EMISSIVITY', ':');  # black body emissivity
 if($e_cal == 0){
-	print"PrepareForRun: e_cal = $e_cal, RUN.\n";
+	print"PrepareForRun: NORMAL RUN---";
 } else {
-	print"PrepareForRun: e_cal = $e_cal, CALIBRATION.\n";
+	print"PrepareForRun: CALIBRATION RUN---";
+}
+$ksim = FindInfo($setupfile,'ROSR PORT', ':'); 
+if($ksim == 0){
+	print"SIMULATE INPUT.\n";
+} else {
+	print"ROSR INPUT\n";
 }
 
 #=========================

@@ -40,7 +40,6 @@ global infoname
 #========================================================
 proc SpawnRosrSimulate { } {
 	global ROSR ROSRPID infoname
-		# Spawn simulate_prp
 	set ROSRPID [spawn perl simulate_rosr]
 	set ROSR $spawn_id
 	write_info $infoname "SPAWN ROSR SIMULATE, spawn_id = $ROSR, pid = $ROSRPID"
@@ -260,11 +259,6 @@ spawn -noecho getsetupinfo $setupfile "ROSR PORT"
 expect -re "(\.*)(\r)";
 set rosrport $expect_out(1,string)
 write_info $infoname  "ROSR PORT: $rosrport"
-	# SIMULATION ?
-# spawn -noecho getsetupinfo $setupfile "SIMULATEFLAG"
-# expect -re "(\.*)(\r)";
-# set simulateflag $expect_out(1,string)
-
 if { $rosrport == 0 } { 
 	send_user "SIMULATE ROSR...\n";
 	SpawnRosrSimulate;
@@ -337,8 +331,8 @@ while 1 {
 		-i $ROSR
 		-re "\\\$WI...*\\*..\\n?" { 
 			set rawstr [string trimright $expect_out(0,string)]
-			if { [string match {*\$WI0*} $rawstr ] } {
-				set s1 [string first "\$WI0" $rawstr];
+			if { [string match {*\$WI*} $rawstr ] } {
+				set s1 [string first "\$WI" $rawstr];
 				set s2 [string first "\*" $rawstr $s1]
 				set str [string range $rawstr $s1 [expr $s2+2]]
 				# GPS
