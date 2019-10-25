@@ -40,6 +40,7 @@ alias P='cd $DAQSWFOLDER; ./term_to_gps  $SETUPFILE'
 alias Help="help"
 alias help="less help.txt"
 alias helpa="less help_advanced.txt"
+alias helpc="less help_configuration.txt"
 
         # CHECK DATA
 rosravg () {

@@ -1,9 +1,11 @@
 ##### edit 191021
 Enter "helpc<cr>" to see the help_configuration file.
   Note: This is a linux "less" display. Press 'q' to quit.
-        '^' in the text below means press the <control> key.
+        '^' in the text below means press the <control> key. Example:
+        '^c' means press <control> and c keys.
+        "^\ q" means press <control> and backslash, release all, press q.
         
-#--OTHER HELP FILES-----------
+#--HELP FILES-----------
   "help"  for basic instructions.
   "helpa" for advanced help.
   "helpc" for details on the eeprom and the DAQ setup configuration files.
@@ -13,23 +15,25 @@ Enter "helpc<cr>" to see the help_configuration file.
 #--STOP DAQ--------
   Stop                                        ->  stop data collection
   Archive                                     ->  optional
+  Wipe y                                      -> optional clear data folder
+#--DIRECT CONNECT TO ROSR                     -> gtdaq for sw prompt
   I                                           ->  connect to ROSR
      You will see raw data lines each 2 sec.
   t or T                                      ->  switch to ROSR user mode
-     The user mode prompt is '>'. This is repeated
-     each 10 sec of inactivity. After 60 sec of
-     inactivity ROSR switches to run mode.
+     The user mode prompt is '>'. This is repeated each 10 sec of inactivity. 
+     After 60 sec of inactivity ROSR switches to run mode.
+  ?                                           -> USER MENU (SEE BELOW)
 #--EEPROM--------
   e                                           ->  EEPROM MENU (SEE BELOW)
       To change an eeprom variable enter a string that begins with 'e'
       and ends with <return> (also written as <cr>). The string characters
       give the eeprom variable followed by a number  as described in the 
       examples below.
-#--CALIBRATION MODE--------
+#--CHANGE TO CALIBRATION MODE--------
   eE1                                         -> Set calibration flag ON
   eP90                                        -> Set target angle to 90 deg.
   eR5                                         -> Disable rain action.
-#--RUN MODE--------
+#--CHANGE BACK TO RUN MODE--------
   eE0                                         -> Cal flag OFF
   eP135                                       -> Set target angle to 135 deg, downward.
   eR.5                                        -> Rain action ON.
@@ -42,7 +46,9 @@ Enter "helpc<cr>" to see the help_configuration file.
   eP135                                       -> ocean angle set to 135 deg.
 
 
-#--EEPROM MENU--------
+#-------------------------------------------------------------
+#  EEPROM MENU
+#-------------------------------------------------------------
   An   n=1..4, BB Ref esistors
   B    BB view sample count
   c    BB1 angle
@@ -73,3 +79,37 @@ Enter "helpc<cr>" to see the help_configuration file.
   U sky sample count
   T to B Quadratic
   B to T Quadratic
+
+
+#-------------------------------------------------------------
+#  USER MENU
+#-------------------------------------------------------------
+PROGRAM:rosr_main   VERSION:32  EDIT:20171218T170025Z
+E or e       -- show eeprom
+------- FUNCTIONS -----------------------------------
+an -- ADC Chan n                    A      -- ADC all loop
+bn -- BB n heater OFF
+Bn -- BB n heater ON
+C  -- 5REF ON
+c  -- 5REF OFF
+d  -- current drum position
+d[ff.f] -- Point to angle f.f
+Dff.f   -- Set the encoder to ff.f
+fo      -- Shutter Open (CCW)
+fc      -- Shutter Close (CW)
+F       -- Shutter 20x or keystroke
+h       -- HE switch loop
+k       -- KT15 RAD loop
+l       -- Send KT15 command
+m       -- Drum motor CCW
+M       -- Drum motor CW
+p       -- pitch/roll loop
+r       -- Rain check loop
+t       -- Read system clock loop
+T       -- Set default f.p. day
+sn      -- LED test:  1=Heartbeat   2=Drum   3=Shutter/Rain
+wff.f   -- GetEmis(ff.f,MISSING)
+Wff.f   -- GetRadFromTemp(ff.f) --> GetTempFromRad
+x       -- Compute SSST
+v/V     -- Program version
+g/G     -- Continue sampling.
