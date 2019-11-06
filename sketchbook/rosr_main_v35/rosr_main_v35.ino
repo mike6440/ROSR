@@ -29,6 +29,7 @@
 //		TEST mode is sustained permanently if 'fc' is operated in the menu
 //		180917 setup for rosr3
 //		190819 setup for rosr4
+//		In version 35 we fix the menu section so I works with the miniPC.
 //v36 to do
 //		1. T22 error
 
