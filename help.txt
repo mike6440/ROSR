@@ -4,7 +4,7 @@ Enter "help<cr>" to see the help file.
 
 #--OTHER HELP FILES-----------
   "helpa" for advanced help.
-  "helpe" for details on the eeprom and the DAQ setup configuration files.
+  "helpc" for details on the eeprom and the DAQ setup configuration files.
 #--BASIC--------
   gtdaq                                       ->  cd ~/swmain/apps/ROSR/sw
   iss                                         ->  is DAQ running?
