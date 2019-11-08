@@ -86,12 +86,12 @@ commands. These are customized commands for viewing.
 #-------------------------------------
   1. LID CLOSE do not suspend, Ubuntu 18.04 and >
     $ sudo gedit /etc/systemd/logind.conf
-        edit--HandleLidSwitch=ignore (remove comment)
+        edit--HandleLidSwitch=ignore (remove #)
     $ systemctl restart systemd-logind.service
 
   2. TELNET -- install telnet. try man telnet to see if it's there.
-    Ubuntu use apt-get,  Mac use homebrew
-    
+    Ubuntu: sudo apt-get telnet.  Mac use homebrew
+
 LINUX SET WIFI PORT -- configure wifi link
 https://www.linux.com/learn/how-configure-wireless-any-linux-desktop
 
