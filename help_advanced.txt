@@ -88,10 +88,28 @@ commands. These are customized commands for viewing.
     $ sudo gedit /etc/systemd/logind.conf
         edit--HandleLidSwitch=ignore (remove #)
     $ systemctl restart systemd-logind.service
-
   2. TELNET -- install telnet. try man telnet to see if it's there.
     Ubuntu: sudo apt-get telnet.  Mac use homebrew
+  3. sudo apt install ssh
+  4. sudo apt install ckermit
+  5. sudo apt install expect
+  6. cd ~/;  mkdir swmain; mkdir rosrdata; 
+  7. cd swmain; mkdir vim; mkdir perl; mkdir ROSR
+  8. cd perl; mkdir perltools
+  9. ROSR$ mkdir data; mkdir sw
+  FROM MY MAC to PC (IP=10.1.10.98) 
+ 10. swmain$ rsync -at --delete vim oper@10.1.10.98:/home/oper/swmain/.   
+ 11. swmain/perl$ rsync -at --delete perltools oper@10.1.10.98:/home/oper/swmain/perl/.
+ 12. ROSR$ rsync -at --delete sw oper@10.1.10.98:/home/oper/swmain/apps/ROSR/.  
 
+#-------------------------------------
+# Set IP's. Need to set PC#, iboot#, hub#
+# You need 
+#-------------------------------------
+  1.  IBOOT iboot#old --> iboot#new
+    a. http://iboot#old   pw=admin
+  
+  
 LINUX SET WIFI PORT -- configure wifi link
 https://www.linux.com/learn/how-configure-wireless-any-linux-desktop
 
