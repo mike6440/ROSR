@@ -378,7 +378,7 @@ while 1 {
 		#  USER INPUT 
 		#=============
 		-i $user_spawn_id  
-		"q" { exit 0 }
+		expect "q" { exit 0 }
 	}
 }
 

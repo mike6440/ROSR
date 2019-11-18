@@ -1,0 +1,38 @@
+#!/usr/bin/expect --
+
+set PROGRAMNAME Ping
+set VERSION 1
+set EDITDATE 190310
+#puts "RUN PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE"
+
+log_user 1;
+
+		# SETUP FILE DEFINED
+set setupfile "setup/su.txt";
+		## SEE IF THE SETUP FILE EXISTS
+if [catch {open $setupfile} sufile] {
+	puts "Setup file open fails, exit 1"
+	exit 1
+}
+
+	# PDS SERIAL HUB
+spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"
+expect -re "(\.*)(\r)";
+set hubip $expect_out(1,string)
+
+log_user 1
+
+	# bootoff
+set ip [exec getsetupinfo "setup/su.txt" "IBOOT IP"]
+if { $ip == 0 } { 
+	send_user "Hub.\n"
+	puts "ping -c3 $hubip \r\n";
+	send_user "
+	expect "received"
+} else { 
+	send_user "iboot.\n"
+	puts "ping -c3 $ip \r\n";
+}
+
+send_user "FINISHED\n";
+exit 0;

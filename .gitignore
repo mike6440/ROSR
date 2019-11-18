@@ -1,10 +1,13 @@
 .DS_Store
 tmp
-setup/su.txt
+setup/su*.txt*
 setupifconfig
 *-bu
 other
 other/*
 simulate/*
-pingdaq
 Z_4017
+Z_4017t
+Z_4017t1
+kerm232t
+
