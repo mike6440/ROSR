@@ -1,4 +1,4 @@
-##### edit 191021
+##### edit 191203
 Enter "helpc<cr>" to see the help_configuration file.
   Note: This is a linux "less" display. Press 'q' to quit.
         '^' in the text below means press the <control> key. Example:
@@ -113,3 +113,5 @@ Wff.f   -- GetRadFromTemp(ff.f) --> GetTempFromRad
 x       -- Compute SSST
 v/V     -- Program version
 g/G     -- Continue sampling.
+
+---END -----------------

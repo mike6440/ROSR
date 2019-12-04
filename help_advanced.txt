@@ -1,13 +1,14 @@
-##### edit 191020
-Enter "helpa<cr>" to see the advanced help file.
+##### edit 191203
+Enter "helpa<cr>" to see the help_advanced file.
   Note: This is a linux "less" display. Press 'q' to quit.
-
-#--OTHER HELP FILES-----------
-  "help<cr>" for basic help.
-The sw folder contains all rosr software. It is located at
-   /home/oper/swmain/apps/ROSR/sw
-"gtdaq" (go to daq) goes to the  sw folder.
-
+        '^' in the text below means press the <control> key. Example:
+        '^c' means press <control> and c keys.
+        "^\ q" means press <control> and backslash, release all, press q.
+        
+#--HELP FILES-----------
+  "help"  for basic instructions.
+  "helpa" for advanced help.
+  "helpc" for details on the eeprom and the DAQ setup configuration files.
 
 #-----------------------------
 #--ROSR OUTPUT PACKETS 
@@ -150,3 +151,4 @@ move to /usr/local/bin so the command is global.
  git reset --hard origin/master
  git pull origin master
 
+---END -----------------

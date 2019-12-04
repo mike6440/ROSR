@@ -1,8 +1,12 @@
-##### edit 191020
-Enter "help<cr>" to see the help file.
+##### edit 191203
+Enter "helpc<cr>" to see the help_configuration file.
   Note: This is a linux "less" display. Press 'q' to quit.
-
-#--OTHER HELP FILES-----------
+        '^' in the text below means press the <control> key. Example:
+        '^c' means press <control> and c keys.
+        "^\ q" means press <control> and backslash, release all, press q.
+        
+#--HELP FILES-----------
+  "help"  for basic instructions.
   "helpa" for advanced help.
   "helpc" for details on the eeprom and the DAQ setup configuration files.
 #--BASIC--------
@@ -68,10 +72,4 @@ Enter "help<cr>" to see the help file.
   Suspend                           never
   Time zone                         sudo dpkg-reconfigure tzdata
                                     select UTC
-
-       
-  
-  
-  
 ---END -----------------
-
