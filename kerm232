@@ -55,8 +55,8 @@ send "set speed $bd\r"
 send "set duplex full\r"
 expect ">>"
 ## CRLF
-send "set terminal cr-display crlf\r"
-expect ">>"
+# send "set terminal cr-display crlf\r"
+# expect ">>"
 ## LOCAL ECHO
 send "set local-echo off\r"
 expect ">>"

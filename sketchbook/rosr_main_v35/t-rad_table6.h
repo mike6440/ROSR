@@ -1,5 +1,8 @@
 //!! See rmrtools/MakeRadTempTables.m and PlanckFiltered.m to compute these numbers.
 //!! passbandfile='/Users/rmr/Dropbox/instruments/Heitronics_kt15/kt1585-13324_rosr6/kt1585-13324.txt';
+// 1. edit PlanckFiltered by adding the correct passbandfile.
+// 2. cd to rmrtools and run MakeRadTempTables.
+// 3. fill in the coefficients below.
 const double default_pt2b[4] = {
 	-7.05571e-09,  6.95140e-05,  1.20961e-02,  6.54263e-01
 };

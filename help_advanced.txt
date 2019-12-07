@@ -4,15 +4,14 @@ Enter "helpa<cr>" to see the help_advanced file.
         '^' in the text below means press the <control> key. Example:
         '^c' means press <control> and c keys.
         "^\ q" means press <control> and backslash, release all, press q.
-        
 #--HELP FILES-----------
   "help"  for basic instructions.
   "helpa" for advanced help.
   "helpc" for details on the eeprom and the DAQ setup configuration files.
 
-#-----------------------------
+#=============================
 #--ROSR OUTPUT PACKETS 
-#-----------------------------
+#=============================
 #-Raw-----------          2 sec output from ROSR
   $WIssf,vv,etime,drum,RAD,REF,adc0,adc1,adc2,adc3,adc4,adc5,adc6,adc7,
   adc8,adc9,adc10,adc11,vref,t11,t12,t21,t22,pit,rol,Tanalog,Tktcase,Twindow,
@@ -80,11 +79,100 @@ commands. These are customized commands for viewing.
   "^a 1<cr>" -- go to screen 1. ROSR data acquition.
   "^a 2<cr>" -- go to screen 2. GPS data acquition.
   "^a d<cr>" -- end the screen session; disconnect from screen.
+
+#=========================
+#  RAW RECORD DETAIL
+#=========================  
+$WI053,35,00.054324,325.00, 187587, 36.82,2.189,2.189,0.434,2.463,1.488,
+$WIssf,vv,etime,    drum,   RAD,    REF,  adc0, adc1, adc2, adc3, adc4,
+
+1.487,4.096,4.096,4.096,3.499,-0.001,2.059,4.926,30.62,30.64,47.07,47.11,
+adc5, adc6, adc7, adc8, adc9, adc10, adc11,vref, t11,  t12,  t21,  t22
+
+-1.9, 2.7,30.27,  33.40,  200.00,   200.00,14.6,-0.0,  0  *1C
+pit,  rol,Tanalog,Tktcase,Twindow,  Tpwr,  Vin, vrain, sec*chk<cr><lf>
+
+	$WIssf,     [WI] weather instrument, [ss] serial num, [f] packet format no.
+	vv,         software version
+	etime,      dd.hhmmss since last power
+	drum,       drum angle, deg.*
+	RAD,        kt15 RAD reading.*
+	REF,        kt15 REF reading.
+	adc0,       16-bit ADC, bb1 therm 1.
+	adc1,       16-bit ADC, bb1 therm 2.
+	adc2,       16-bit ADC, kt15 analog 0-100 ma
+	adc3,       16-bit ADC, 5v ref / 2.
+	adc4,       16-bit ADC, bb2 therm 1.
+	adc5,       16-bit ADC, bb2 therm 2.
+	adc6,       16-bit ADC, Vpwr from power therm.
+	adc7,       16-bit ADC, Vwin from window therm.
+	adc8,       16-bit ADC, Vkt15 from therm.
+	adc9,       16-bit ADC, Vin/4 input voltage.
+	adc10,      16-bit ADC, Vrain from rain sensor.
+	adc11,      16-bit ADC, Vkt15 from therm on kt15 body.
+	vref,       computed reference voltage from adc3.
+	t11,        computed T11 from adc0, degC.*
+	t12,        computed T12 from adc1, degC.*
+	t21,        computed T21 from adc4, degC.*
+	t22,        computed T22 from adc5, degC.*
+	pit,        pitch, deg.*
+	rol,        roll, deg.*
+	Tanalog,    Temp of pcb, degC.
+	Tktcase,    Temp on kt15 case, degC.
+	Twindow,    Temp of ir window, degC.
+	Tpwr,       Temp on power regulator, degC.
+	Vin,        Input voltage, volts.
+	vrain,      Rain sensor voltage, volts.
+	sec         After closing this is seconds until flap opens.
+	*chk        NMEA checksum.
+	<cr><lf>
+	*--crucial to SST.
+
+#=========================  
+# ADC COMMAND
+# 'I' connect to ROSR OS.  't' for > prompt.
+# "C<rtn>" turns Vref on.   "A<rtn>" begins ADC loop.  <rtn> to stop.
+#=========================  
+    v0    v1    v2    v3    v4    v5    v6    v7    v8    v9    v10   v11
+ 2.900 2.902 0.386 2.498 1.963 1.966 4.096 4.096 4.096 3.635 -0.000 2.763
+ 2.900 2.902 0.386 2.498 1.963 1.966 4.096 4.096 4.096 3.635 -0.000 2.763
   
+   T11(0) T12(1) T21(4) T22(5) TKT(2) TKX(11) TWI(7) TPW(6) VIN(9)
+  16.94  16.92  36.08  36.11  15.80  19.80   200.00  200.00  14.5
+  16.94  16.92  36.09  36.11  15.88  19.80   200.00  200.00  14.5
+    
+    VREF(3) VRA(10)
+    4.997  -0.0
+    4.997  -0.0
+
+ADC 16-bit
+	v0,       16-bit ADC, bb1 therm 1.
+	v1,       16-bit ADC, bb1 therm 2.
+	v2,       16-bit ADC, kt15 analog 0-100 ma
+	v3,       16-bit ADC, 5v ref / 2.
+	v4,       16-bit ADC, bb2 therm 1.
+	v5,       16-bit ADC, bb2 therm 2.
+	v6,       16-bit ADC, Vpwr from power therm.
+	v7,       16-bit ADC, Vwin from window therm.
+	v8,       16-bit ADC, Vkt15 from therm.
+	v9,       16-bit ADC, Vin/4 input voltage.
+	v10,      16-bit ADC, Vrain from rain sensor.
+	v11,      16-bit ADC, Vkt15 from therm on kt15 body.
+	T11,  	  computed T11 from adc0, degC.
+	T12,      computed T12 from adc1, degC.
+	T21,      computed T21 from adc4, degC.
+	T22,      computed T22 from adc5, degC.
+	TKT,	  IRT analog from v2, degC.
+	TKX,      Temp on kt15 case, v11, degC.
+	TWI,      Temp of ir window, v7, degC.
+	TPW,      Temp on power regulator, v6, degC.
+	VIN,      Input voltage, v9*4, volts.
+	VREF,	  Reference voltage, v3*2, volts.
+	VRA,      Rain sensor voltage, v10, volts.
   
-#-------------------------------------
+#=============================
 # Ubuntu setup
-#-------------------------------------
+#=============================
   1. LID CLOSE do not suspend, Ubuntu 18.04 and >
     $ sudo gedit /etc/systemd/logind.conf
         edit--HandleLidSwitch=ignore (remove #)
@@ -103,17 +191,18 @@ commands. These are customized commands for viewing.
  11. swmain/perl$ rsync -at --delete perltools oper@10.1.10.98:/home/oper/swmain/perl/.
  12. ROSR$ rsync -at --delete sw oper@10.1.10.98:/home/oper/swmain/apps/ROSR/.  
 
-#-------------------------------------
+#=============================
 # Set IP's. Need to set PC#, iboot#, hub#
 # You need 
-#-------------------------------------
+#=============================
   1.  IBOOT iboot#old --> iboot#new
     a. http://iboot#old   pw=admin
   
   
+#=============================
 LINUX SET WIFI PORT -- configure wifi link
 https://www.linux.com/learn/how-configure-wireless-any-linux-desktop
-
+#=============================
 * which ifconfig
 * which iwlist
 * which iwconfig
