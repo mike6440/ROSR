@@ -1,5 +1,5 @@
 THIS FILE: 
-Editdate: 180213
+Editdate: 191208
 DAQ PASSWORD: r0srr0sr
 		DATA FILES ---------------------
 RT OUT PATH: data
@@ -50,9 +50,11 @@ TELNET SERVER PORT: 4025
 	=======================
 	# RUN
 	# 
-SSST SLOPE : 1.0098
-SSST OFFSET: -0.035
-    # 2015 cal 1.0106 / -0.043
+SSST SLOPE : 1.0206
+SSST OFFSET: -0.069
+    # 1912 cal 1.0206 / -0.069
+    # 1802 cal 1.0098 / -0.035
+    # 1505 cal 1.0106 / -0.043
 	# !! view angles (same as eeprom) -- (bb1, bb2, sky, sea)
 SCAN VIEW ANGLES: 265 325 45 135
 	# CALIBRATION
@@ -65,16 +67,16 @@ CAL SCAN VIEW ANGLES: 265 325 45 90
 BLACK BODY EMISSIVITY : 1.0
 	## set Vref to 0 and the values from the 2*adc12-7 will be used.
 BB THERM VREF: 0
-BB TEMP Ref R: 10000
+	BB TEMP Ref R: 10000
 	# Resistances from testing with precision resistances. See notes 090909.
-BB RESISTORS: 10000, 10000, 10000, 10000, 10000, 10000
+	BB RESISTORS: 10000, 10000, 10000, 10000, 10000, 10000
 	# Rref for wintemp and tt8temp
-APPERATURE THERM REF RESISTOR: 10000
-REF VOLTAGE FOR 12 BIT ADC: 4.0928
+	APPERATURE THERM REF RESISTOR: 10000
+	REF VOLTAGE FOR 12 BIT ADC: 4.0928
 	# Rref2 for four ysi apperature therms
 	## ROSR-01: 9995 9984 9997 9997
 	## ROSR-04: 10000 10000 10000 10000
-APPERATURE THERMS REF RESISTANCES: 10000 10000 10000 10000
+	APPERATURE THERMS REF RESISTANCES: 10000 10000 10000 10000
 	=======================
 		CALIBRATION PARAMETERS
 	=======================
@@ -101,15 +103,17 @@ PLATFORM SIDE: STARBOARD
 	========================
 		QUALITY ERROR CHECK
 	========================
-MINIMUM EXPECTED LATITUDE: 0
-MAXIMUM EXPECTED LATITUDE: 90
-MINIMUM EXPECTED LONGITUDE: -180
-MAXIMUM EXPECTED LONGITUDE: 360
+	MINIMUM EXPECTED LATITUDE: 0
+	MAXIMUM EXPECTED LATITUDE: 90
+	MINIMUM EXPECTED LONGITUDE: -180
+	MAXIMUM EXPECTED LONGITUDE: 360
 MISSING VALUE: -999
 	========================
 		COMMENTS/LOG
 	========================
 COMMENTS:
+ Returned for service, 2019-10
+  Excellant condition considering.
  RETURNED TO RMR CO. 2017-12-14
  Excellant condition considering.
 END
