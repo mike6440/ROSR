@@ -1,5 +1,5 @@
 THIS FILE: 
-Editdate: 191208
+Editdate: 191211
 DAQ PASSWORD: r0srr0sr
 		DATA FILES ---------------------
 RT OUT PATH: data
@@ -39,11 +39,13 @@ SBD PORT: -1
 SCS HUB TXD PORT: 10004
 	# SCS INPUT PORT -- receive a string here using TCPIP
 SCS HUB RXD PORT: 10005
-  # 0 if not in use
-TELNET SERVER IP: 0
-  # KAIMEI SOCKet
-TELNET PROGRAM: socktxx
+  ====================
+  TELNET SOCKET
+  ====================
+  # IP = 0 if TELNET not in use
 TELNET SERVER IP: 10.198.5.1
+  # KAIMEI -- IP: 10.198.5.1, socktxx 4025
+TELNET PROGRAM: socktxx
 TELNET SERVER PORT: 4025
 	=======================
 		OPERATIONAL PARAMETERS
@@ -112,10 +114,11 @@ MISSING VALUE: -999
 		COMMENTS/LOG
 	========================
 COMMENTS:
- Returned for service, 2019-10
+ Service #2 --  Returned for service, 2019-10
   Excellant condition considering.
- RETURNED TO RMR CO. 2017-12-14
- Excellant condition considering.
+  Some powdercoat bubbling.
+ Service #1 -- RETURNED TO RMR CO. 2017-12-14
+  Excellant condition considering.
 END
 	========================
 		GPS SETUP
