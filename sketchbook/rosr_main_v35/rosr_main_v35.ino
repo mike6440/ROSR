@@ -51,9 +51,9 @@ Adafruit_ADS1115 ads2(0x4A);    // ad2, u14, construct an ads1115 at address 0x4
 // !! CUSTOMIZE FOR ROSR NUMBER
 // 2a means with swapped bb's
 //==========================
-#include "header6.h"  // !! programname, version, eeprom_id
-#include "t-rad_table6.h"	// !! rad<->temp parameters
-#include "Tcal_rosr6.h"  //!! BB thermistor coefs 
+#include "header7.h"  // !! programname, version, eeprom_id
+#include "t-rad_table7.h"	// !! rad<->temp parameters
+#include "Tcal_rosr7.h"  //!! BB thermistor coefs 
 
 #define YES 1
 #define NO 0
@@ -2838,4 +2838,3 @@ double ThermistorTemp(double v, double Vref, double Rref, unsigned int ntherm) {
 	t = SteinhartHart(a, r);
 	return t;
 }
-

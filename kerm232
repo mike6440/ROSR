@@ -58,7 +58,7 @@ expect ">>"
 # send "set terminal cr-display crlf\r"
 # expect ">>"
 ## LOCAL ECHO
-send "set local-echo off\r"
+send "set local-echo on\r"
 expect ">>"
 ## FLOW CONTROL
 send "set flow none\r"

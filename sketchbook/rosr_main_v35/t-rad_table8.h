@@ -4,7 +4,6 @@
 // 2. cd to rmrtools and run MakeRadTempTables.
 // 3. fill in the coefficients below.
 const double default_pt2b[4] = {
-
 	-6.21851e-09,  6.97884e-05,  1.21077e-02,  6.53788e-01
 };
 const double default_pb2t[4] = {
