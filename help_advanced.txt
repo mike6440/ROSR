@@ -1,4 +1,4 @@
-##### edit 191203
+##### edit 200117
 Enter "helpa<cr>" to see the help_advanced file.
   Note: This is a linux "less" display. Press 'q' to quit.
         '^' in the text below means press the <control> key. Example:
@@ -204,7 +204,7 @@ LINUX SET WIFI PORT -- configure wifi link
 https://www.linux.com/learn/how-configure-wireless-any-linux-desktop
 #=============================
 * which ifconfig
-* which iwlist
+g* which iwlist
 * which iwconfig
 * which dhclient
 * which wpa_supplicant

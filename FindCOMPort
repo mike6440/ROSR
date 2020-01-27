@@ -4,10 +4,10 @@
 # List all com terminals. Argument defines 
 
 @w = `find /dev -maxdepth 1 -iname tty*usb* -print 2>/dev/null`;
-#@x = `find /dev -maxdepth 1 -name ttyS -print 2>/dev/null`;
+#@x = `find /dev -maxdepth 1 -iname tty -print 2>/dev/null`;
 #@x = `ls /dev/tty*PL* 2>/dev/null`;
-@x = `ls /dev/ttyS[0-1] 2>/dev/null`;
-@w=(@w,@x);
+#@x = `ls /dev/ttyS[0-1] 2>/dev/null`;
+#@w=(@w,@x);
 if ( $#w < 0 ){print"0"; exit 1} # no com ports
 if ( $#w == 0 ){				# single com port
 	chomp($str=$w[0]);
