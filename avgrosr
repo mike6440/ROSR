@@ -912,7 +912,7 @@ sub MakeRadTable_planck
 	my $str;
 	# -- OPEN THE FILTER FILE ---
 	#writeT(sprintf "Filter file = $fnm");
-	open(FILTER, "< $fnm") or die "Open filter file fails\n";
+	open(FILTER, "< $fnm") or die "Open filter file fails, $fnm\n";
 	printf "Filter file open: %s\n", $fnm;
 	# --- READ EACH LINE, skip header lines ---
 	# Make a table of @lambda and @response
