@@ -1,6 +1,6 @@
 .DS_Store
 tmp
-setup/su*.txt*
+setup/su.txt
 setupifconfig
 *-bu
 other

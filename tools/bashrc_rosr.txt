@@ -64,14 +64,27 @@ gpsraw () {
     tail $xx
 }
 alias Gps="gpsraw"
+
+# RAW SINGLE
 rosrraw () {
+    cd $DAQSWFOLDER;
+    xx=`LastDataFolder rosr_raw`
+    head -1 $xx
+    tail $xx
+}
+alias Raw="rosrraw";
+
+# RAW CONTINUING
+rosrrawc () {
     cd $DAQSWFOLDER;
     echo "NOTE: ^c to end"
     xx=`LastDataFolder rosr_raw`
     head -1 $xx
     tail -f $xx
 }
-alias Raw="rosrraw";
+alias Rawc="rosrrawc";
+
+
 rosrav () {
     cd $DAQSWFOLDER;
     xx=`LastDataFolder rosr_av`
@@ -79,13 +92,25 @@ rosrav () {
     tail $xx
 }
 alias Av="rosrav";
+
+# CONTINUING
 rosrst () {
     cd $DAQSWFOLDER;
     xx=`LastDataFolder rosr_sst`
+    echo "NOTE: ^c to end"
     head -1 $xx
     tail -f $xx
 }
-alias Sst="rosrst";
+alias Sstc="rosrst";
+
+# ONE TIME
+rosrsst () {
+    cd $DAQSWFOLDER;
+    xx=`LastDataFolder rosr_sst`
+    head -1 $xx
+    tail $xx
+}
+alias Sst="rosrsst";
 
     # SCREEN
 alias isscreen='screen -ls'
@@ -148,6 +173,7 @@ alias Ping="ping -c3 "
 alias Archive="ArchiveRosr";
 alias Wipe="ClearRosrData";
 alias ll="ls -lt";
+alias setup='less setup/su.txt'
 
 cd $DAQSWFOLDER
 

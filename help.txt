@@ -1,11 +1,11 @@
-##### edit 191203
-Enter "helpc<cr>" to see the help_configuration file.
+##### edit 2020-02-01
+#--LINUX-----------
+INTRODUCTION TO LINUX: https://www.youtube.com/watch?v=IVquJh3DXUA
   Note: This is a linux "less" display. Press 'q' to quit.
         '^' in the text below means press the <control> key. Example:
         '^c' means press <control> and c keys.
         "^\ q" means press <control> and backslash, release all, press q.
-        
-#--HELP FILES-----------
+#--ROSR HELP FILES-----------
   "help"  for basic instructions.
   "helpa" for advanced help.
   "helpc" for details on the eeprom and the DAQ setup configuration files.
