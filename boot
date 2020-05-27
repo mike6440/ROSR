@@ -1,6 +1,6 @@
 #!/usr/bin/expect --
 # read the command line and boot accordingly.
-$ans='n';
+set ans 'n';
 set setupfile  [lindex $argv 0]
 
 if($#ARGV >= 0){

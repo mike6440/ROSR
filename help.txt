@@ -1,7 +1,8 @@
-##### edit 2020-02-01
+##### edit 2020-02-17
 #--LINUX-----------
 INTRODUCTION TO LINUX: https://www.youtube.com/watch?v=IVquJh3DXUA
-  Note: This is a linux "less" display. Press 'q' to quit.
+  Note: This file, help, is a linux "less" display. 
+    Press 'q' to quit.
         '^' in the text below means press the <control> key. Example:
         '^c' means press <control> and c keys.
         "^\ q" means press <control> and backslash, release all, press q.
@@ -26,6 +27,7 @@ INTRODUCTION TO LINUX: https://www.youtube.com/watch?v=IVquJh3DXUA
   3. "Raw"                               ->  Confirm data flow  (^c to end)
 #-MIDCRUISE BACKUP -----------
   Remember S-A-W-S daily to weekly
+    Stop;Archive;Wipe y;sleep 1s;Start
   1. "Stop"                             -> stop DAQ.
   2. "Archive"                          -> make a data archive in ~/rosrdata/  
   3. "Wipe y"                           -> erase (wipe) the data folder.

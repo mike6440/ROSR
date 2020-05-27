@@ -1,5 +1,5 @@
 THIS FILE: su4.txt
-Editdate: 190829
+Editdate: 200527
 EXPERIMENT NAME: Thomas G Thompson
 DAQ PASSWORD: r0srr0sr
 COMMENTS:
@@ -7,6 +7,7 @@ COMMENTS:
  190820-reverse tilt sensor. It is now correct.
  190827-rosr4cal nearly identical to 2017 cal.
  190829-rosr4cal a second time
+ 200527-prep after cinco repair.
 END
 ROSR SERIAL NUMBER: 4
 	190827_rosr4cal
@@ -22,7 +23,7 @@ FIXED PITCH: 0
 FIXED ROLL: 0
 ===================
 KT15 SERIAL NUMBER: 12228
-KT15 FILTER FILE: kt15/kt1585_sn12228.txt
+KT15 FILTER FILE: kt15/kt1585_sn12228_rosr4.txt
 SCAN VIEW ANGLES: 265 325 45 135
 =========== DATA FILES ===============
 RT OUT PATH: data
