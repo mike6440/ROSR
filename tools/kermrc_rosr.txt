@@ -1,1 +1,43 @@
 prompt k>>
+set line          /dev/ttyUSB0   
+set speed         9600   
+set carrier-watch off   
+set handshake     none   
+set flow-control none   
+robust   
+set file type     bin   
+set file name     lit   
+set rec pack      1000   
+set send pack     1000   
+set window        5
+
+## OPEN THE PORT
+send "set line $inport\r"
+expect ">>"
+#send_user "set line $inport\n";
+## SPEED
+send "set speed $bd\r"
+## DUPLEX
+send "set duplex full\r"
+expect ">>"
+## CRLF
+# send "set terminal cr-display crlf\r"
+# expect ">>"
+## LOCAL ECHO
+send "set local-echo on\r"
+expect ">>"
+## FLOW CONTROL
+send "set flow none\r"
+expect ">>"
+## CARRIER WATCH
+send "set carrier-watch off\r"
+expect ">>"
+## LOG
+send "log session ../data/capture.txt append\r"
+expect ">>"
+## CONNECT 
+send "connect\r"
+expect {
+	"Conn*---"  {send_user "TTY CONNECTED\n"}
+	timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
+}

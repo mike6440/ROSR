@@ -23,8 +23,8 @@ if {$argc == 0} {
 	set inport [lindex $argv 0]
 	set bd [lindex $argv 1]
 }
-#puts "INPUT PORT $inport"
-#puts "INPUT BAUD $bd"
+puts "INPUT PORT $inport"
+puts "INPUT BAUD $bd"
 
 
 # START PROCESS -- KERMIT FOR ISAR MODEM
