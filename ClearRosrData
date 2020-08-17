@@ -33,7 +33,7 @@ Call \"Archive\" to backup all collected data.
     print"You entered $ans\n";
 }
 if($ans =~ /y/i){
-	print"ClearRosrData\n";
+	#print"ClearRosrData\n";
 	my $cmd="rm -rf $datapath/*";
 	#print"cmd=$cmd\n";
 	system $cmd;
