@@ -1,0 +1,105 @@
+THIS FILE: susimulate.txt
+Editdate: 200817
+EXPERIMENT NAME: simulate
+DAQ PASSWORD: r0srr0sr
+COMMENTS:
+	Testing software
+END
+  !! head simulate/rosr.txt to determine the SN
+ROSR SERIAL NUMBER: 5
+	Default
+SSST SLOPE : 1.000
+SSST OFFSET: 0
+ ==================
+    # see fixed pitch and fixed roll if == 1
+FIXED TILT FLAG: 0
+FIXED PITCH: 0
+FIXED ROLL: 0
+===================
+KT15 SERIAL NUMBER: 12763
+KT15 FILTER FILE: kt15/kt1585_sn12763_rosr5.txt
+  !! verify with simulate file
+SCAN VIEW ANGLES: 265 325 45 135
+=========== DATA FILES ===============
+RT OUT PATH: data
+ =========================
+	NETWORK
+ =========================
+	# iboot ip, 0=>not connected, else 192.168.255.2
+IBOOT IP: 192.168.255.2
+	# icp-das server  e.g. 192.168.255.1 or /dev/ttyusb0
+SERIAL HUB IP: 192.168.255.1
+	# rosr hub 10001, simulate 0, rs232 1
+ROSR PORT: 0
+	# gps hub-10003, rs232 1, Fixed -1, simulate=0
+GPS PORT: 0
+	# iff gps port = 1 specify serial port, e.g. /dev/ttyS1
+SERIAL GPS: not used
+	# MODEM -- 10004, Not connected=-1, simulate=0
+SBD PORT: 0
+ =========================
+	# SOCKET SERVER -- KAIMEI 10.198.5.1 4025
+	# udptx or socktxx
+ ===========================
+TELNET PROGRAM: udptx
+TELNET SERVER IP: 10.1.10.162
+TELNET SERVER PORT: 33333
+ =========================
+  EXPERIMENT INFO
+ =========================
+GEOGRAPHIC LOCATION: rosr simulate
+		two characters for a ship code
+PLATFORM NAME: R/V
+LOCATION ON PLATFORM: TBD
+HEIGHT ABOVE SEA LEVEL m: 16
+SHIP TYPE: RV
+SHIP NAME: R/V SIMULATE
+CRUISE NAME: tbd
+	port or starboard
+PLATFORM SIDE: PORT
+ =========================
+		GPS
+ =========================
+GPS DEAD TIME ALARM SECS: 60 
+GPS AVERAGING TIME: 120
+GPS FIXED LATITUDE: 38
+GPS FIXED LONGITUDE: -122
+		Magnetic variation, + = East of true
+GPS FIXED VARIATION: 18.1
+MINIMUM EXPECTED LATITUDE: -90
+MAXIMUM EXPECTED LATITUDE: 90
+MINIMUM EXPECTED LONGITUDE: -180
+MAXIMUM EXPECTED LONGITUDE: 360
+ =========================
+	MISC
+ =========================
+VERBOSE MODE: 0
+ROSR AVERAGING TIME (sec): 600
+SEA EMISSIVITY: 0.9870975
+APERATURE EMISSIVITY : 0.95
+MIN SAMPLES FOR AVG: 2
+NO DATA WAIT TIME: 3600
+MISSING VALUE: -999
+ =========================
+	CALIBRATION
+ =========================
+		#CAL EMIS: 0 = field use, compute e from angle,  ~=1 = calibration mode
+CALIBRATION EMISSIVITY: 0
+CAL SSST SLOPE: 1
+CAL SSST OFFSET: 0
+CAL SCAN VIEW ANGLES: 265 325 45 90
+		# INDEX -- (0,1,...) index.  Use for calibration case
+CALIBRATION VIEW POSITION : 3
+BLACK BODY EMISSIVITY : 1.0
+		## set Vref to 0 and the values from the 2*adc12-7 will be used.
+BB THERM VREF: 0
+BB TEMP Ref R: 10000
+		Resistances from testing with precision resistances. See notes 090909.
+BB RESISTORS: 10000, 10000, 10000, 10000, 10000, 10000
+		# Rref for wintemp and tt8temp
+APPERATURE THERM REF RESISTOR: 10000
+REF VOLTAGE FOR 12 BIT ADC: 4.0928
+APPERATURE THERMS REF RESISTANCES: 10000 10000 10000 10000
+	========================
+		END SETUP FILE
+	========================
