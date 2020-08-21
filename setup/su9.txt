@@ -1,5 +1,5 @@
 THIS FILE: su9.txt
-Editdate: 200807
+Editdate: 200819
 EXPERIMENT NAME: ROSR9
 DAQ PASSWORD: r0srr0sr
 COMMENTS:
@@ -16,8 +16,8 @@ FIXED PITCH: 0
 FIXED ROLL: 0
 ===================
   !! new kt15 is on order
-KT15 SERIAL NUMBER: 13326
-KT15 FILTER FILE: kt15/kt1585_sn13326_rosr8.txt
+KT15 SERIAL NUMBER: 11971
+KT15 FILTER FILE: kt15/kt1585_sn11971_rosr9.txt
 SCAN VIEW ANGLES: 265 325 45 135
 =========== DATA FILES ===============
 RT OUT PATH: data
@@ -29,13 +29,13 @@ IBOOT IP: 192.168.255.2
 	# icp-das server  e.g. 192.168.255.1 or /dev/ttyusb0
 SERIAL HUB IP: 192.168.255.1
 	# rosr hub 10001, simulate 0, rs232 1
-ROSR PORT: 0
-	# gps hub-10003, rs232 1, Fixed -1, simulate=0
-GPS PORT: 0
+ROSR PORT: 10001
+	# gps hub-10002, rs232 1, Fixed -1, simulate=0
+GPS PORT: 10002
 	# iff gps port = 1 specify serial port, e.g. /dev/ttyS1
 SERIAL GPS: not used
 	# MODEM -- 10004, Not connected=-1, simulate=0
-SBD PORT: 0
+SBD PORT: 10003
  =========================
 	# SOCKET SERVER -- KAIMEI 10.198.5.1 4025
 	# udptx or socktxx

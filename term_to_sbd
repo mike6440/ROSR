@@ -39,9 +39,7 @@ send_user "SERIAL HUB IP: $hubip\n"
 spawn -noecho getsetupinfo $setupfile "SBD PORT"
 expect -re "(\.*)(\r)";
 set portnumber $expect_out(1,string)
-send_user "RAD PORT: $portnumber\n"
-
-# 111221-remove ping as unnecessary.
+send_user "SBD PORT: $portnumber\n"
 
 # START PROCESS
 spawn kermit
@@ -53,7 +51,6 @@ expect {
 	timeout {"KERMIT FAILS TO OPEN\n"; exit 1}
 	">>"
 }
-
 ## OPEN THE PORT
 send "set host $hubip $portnumber\r"
 expect ">>"

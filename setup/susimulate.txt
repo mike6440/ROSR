@@ -42,7 +42,7 @@ SBD PORT: 0
 	# udptx or socktxx
  ===========================
 TELNET PROGRAM: udptx
-TELNET SERVER IP: 10.1.10.162
+TELNET SERVER IP: 10.1.10.172
 TELNET SERVER PORT: 33333
  =========================
   EXPERIMENT INFO

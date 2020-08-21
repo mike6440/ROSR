@@ -44,7 +44,7 @@ proc SpawnGps { hubip gpsport gpscomport} {
 		set str [spawn_kermit $hubip $gpsport]
 		set GPS [lindex $str 0];    
 		set GPSPID [lindex $str 1];
-		send_user "SPAWN GPS KERMIT: IP=$hubip, port=$gpsport, spawn_id=$GPS, pid=$GPSPID\n"
+		# send_user "SPAWN GPS KERMIT: IP=$hubip, port=$gpsport, spawn_id=$GPS, pid=$GPSPID\n"
 	} else {
 		set str [spawn_kermit232 $gpscomport]
 		set GPS [lindex $str 0];

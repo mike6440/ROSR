@@ -10,7 +10,7 @@ if { $ip == 0 } {
 	send_user "1";
 	exit 1
 }
-send_user "Boot IP $ip\n";
+# send_user "Boot IP $ip\n";
 
 # START PROCESS -- KERMIT FOR MODEM
 spawn telnet $ip
