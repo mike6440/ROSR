@@ -1,7 +1,7 @@
 #!/usr/bin/expect --
 #kermit_serial_connect.ex
 #Note: the file .kermrc has the command "prompt k>>"
-
+# edit 200821
 log_user 0
 
 ## DEFINE THE PORTS
