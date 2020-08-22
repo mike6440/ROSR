@@ -1,8 +1,8 @@
 #!/usr/bin/expect --
 #kermit_serial_connect.ex
 #Note: the file .kermrc has the command "prompt k>>"
-# edit 200821
-log_user 0
+# edit 200822, 1110
+log_user 0  ;# !!
 
 ## DEFINE THE PORTS
 set argc [llength $argv]
@@ -23,8 +23,8 @@ if {$argc == 0} {
 	set inport [lindex $argv 0]
 	set bd [lindex $argv 1]
 }
-puts "INPUT PORT $inport"
-puts "INPUT BAUD $bd"
+puts "PORT $inport"
+puts "BAUD $bd"
 
 
 # START PROCESS -- KERMIT FOR ISAR MODEM
@@ -33,18 +33,26 @@ expect {
 	"assword" {
 		send "r0srr0sr\n"
 	}
-	">>" { send "\n" }
+	">>" { }
+	"C-Kermit>" { 
+		send "prompt k>>\n" ;
+		send_user "39 snd prompt\n" ; 
+	}
 }
 set ISAR $spawn_id
-set timeout 4
+set timeout 3
 
+send "prompt k>>\n" ;
 expect {
 	-i ISAR
-	timeout {"KERMIT FAILS TO OPEN\n"; exit 1}
-	">>"
+	timeout {send_user "KERMIT FAILS TO OPEN\n"; exit 1}
+	"C-Kermit>" { 
+		send "prompt k>>\n" ;
+		send_user "snd prompt again\n" ;
+		#exit 1; 
+	}
+	">>" { }
 }
-
-set timeout 3
 ## OPEN THE PORT
 send "set line $inport\r"
 expect ">>"
@@ -55,8 +63,8 @@ send "set speed $bd\r"
 send "set duplex full\r"
 expect ">>"
 ## CRLF
-# send "set terminal cr-display crlf\r"
-# expect ">>"
+#send "set terminal cr-display crlf\r"
+#expect ">>"
 ## LOCAL ECHO
 send "set local-echo on\r"
 expect ">>"
@@ -69,6 +77,7 @@ expect ">>"
 ## LOG
 send "log session ../data/capture.txt append\r"
 expect ">>"
+send_user "Session Log \"../data/capture.txt append\"\n";
 ## CONNECT 
 send "connect\r"
 expect {
