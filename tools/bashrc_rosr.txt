@@ -83,7 +83,7 @@ rosrrawc () {
     tail -f $xx
 }
 alias Rawc="rosrrawc";
-
+alias lesssu="less `lastDataFolder`/su_*.txt";
 
 rosrav () {
     cd $DAQSWFOLDER;
