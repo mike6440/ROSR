@@ -3,6 +3,8 @@
 
 # v3 141016 
 # v4 180523 -- include COM1 to mini PC
+# v5 200826 -- apt install kermit fail because of an upgrade in apt. I
+#              got a new version from Cruz but it is buggy. 
 
 log_user 0
 set setupfile "$env(DAQSWFOLDER)/setup/su.txt"
@@ -17,14 +19,14 @@ send_user "SERIAL HUB IP: $hubip\n"
 
 ## SERIAL SERVER VIA ETHERNET
 if { [string first "dev" $hubip] == -1 } {
-	send_user "serial server hub\n"
+	#send_user "serial server hub\n"
 	#==============
 	## READ SETUP FILE FOR PORT NUMBER
 	#==============
 	spawn -noecho getsetupinfo $setupfile "ROSR PORT"
 	expect -re "(\.*)(\r)";
 	set portnumber $expect_out(1,string)
-	send_user "ROSR PORT: $portnumber\n"
+	#send_user "ROSR PORT: $portnumber\n"
 
 
 	# START PROCESS -- KERMIT FOR MODEM
@@ -33,14 +35,24 @@ if { [string first "dev" $hubip] == -1 } {
 		"assword" {
 			send "r0srr0sr\n"
 		}
-		">>" { send "\n" }
+		">>" { }
+		"C-Kermit>" { 
+			send "prompt k>>\n" ;
+			send_user "39 snd prompt\n" ; 
+		}
 	}
 	set PDS $spawn_id
-	set timeout 4
+	set timeout 3
 
+	send "prompt k>>\n" ;
 	expect {
-		timeout {"KERMIT FAILS TO OPEN\n"; exit 1}
-		">>"
+		-i PDS
+		timeout {send_user "KERMIT FAILS TO OPEN\n"; exit 1}
+		"C-Kermit>" { 
+			send "prompt k>>\n" ;
+			#send_user "snd prompt again\n" ;
+		}
+		">>" { }
 	}
 
 	## OPEN THE PORT
@@ -76,7 +88,6 @@ if { [string first "dev" $hubip] == -1 } {
 		"Conn*---"  {send_user "CONNECTED\r\n"}
 		timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
 	}
-
 
 	set spawn_id $PDS
 	interact

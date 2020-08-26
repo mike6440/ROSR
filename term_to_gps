@@ -62,12 +62,33 @@ proc SpawnGps { hubip gpsport gpscomport} {
 proc spawn_kermit {hubip portnumber} {
 	global GPS GPSPID
 			# START PROCESS -- KERMIT
-	set GPSPID [spawn kermit]
+	set GPSID [spawn sudo kermit]
+	expect {
+		"assword" {
+			send "r0srr0sr\n"
+		}
+		">>" { }
+		"C-Kermit>" { 
+			send "prompt k>>\n" ;
+			send_user "39 snd prompt\n" ; 
+		}
+	}
+	send "prompt k>>\n" ;
+	expect {
+		-i GPSID
+		timeout {send_user "79 KERMIT FAILS TO OPEN\n"; exit 1}
+		"C-Kermit>" { 
+			send "prompt k>>\n" ;
+			send_user "snd prompt again\n" ;
+		}
+		">>" { }
+	}
+	#set GPSPID [spawn kermit]
 	set GPS $spawn_id;
 	send_user "test GPS=$GPS, GPSPID=$GPSPID\n";
 	set timeout 4	
 	expect {
-		timeout {send_user "KERMIT FAILS TO OPEN\n"; exit 1}
+		timeout {send_user "91 KERMIT FAILS TO OPEN\n"; exit 1}
 		">>"
 	}
 			# OPEN THE PORT
