@@ -2,218 +2,93 @@
 #Note: the file .kermrc has the command "prompt k>>"
 
 # v3 141016 
-# v4 180523 -- include COM2 to mini PC
-# 20180524T030502Z
-log_user 0;
+# v4 180523 -- include COM1 to mini PC
+# v5 200826 -- apt install kermit fail because of an upgrade in apt. I
+#              got a new version from Cruz but it is buggy. 
 
+log_user 0
 set setupfile "$env(DAQSWFOLDER)/setup/su.txt"
 
 #==============
-## PASSWORD
+## READ SETUP FILE FOR IP ADDRESS
 #==============
-spawn -noecho getsetupinfo $setupfile "DAQ PASSWORD"
+spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP";
 expect -re "(\.*)(\r)";
-set password $expect_out(1,string)
-#send_user "DAQ PASSWORD: $password\n";
+set hubip $expect_out(1,string) ;
+#send_user "SERIAL HUB IP: $hubip\n";
 
-global GPS GPSPID
-#========================================================
-#		FIXED GPS #v10
-#========================================================
-proc SpawnGpsFixed { } {
-	global GPS GPSPID
-		# Spawn simulate_gps
-	set GPSPID [spawn perl fixed_gps]
-	set GPS $spawn_id
-}
-#========================================================
-#		PROCEDURE TO SIMULATE GPS #v9
-#========================================================
-proc SpawnGpsSimulate { } {
-	global GPS GPSPID
-		# Spawn simulate_gps
-	set GPSPID [spawn perl simulate_gps]
-	set GPS $spawn_id
-}
-#========================================================
-		# PROCEDURE TO CONNECT TO GPS  v3
-#============================================================
-proc SpawnGps { hubip gpsport gpscomport} {
-	global GPS GPSPID
-	if { [string first "dev" $hubip] == -1 } {
-		set str [spawn_kermit $hubip $gpsport]
-		set GPS [lindex $str 0];    
-		set GPSPID [lindex $str 1];
-		# send_user "SPAWN GPS KERMIT: IP=$hubip, port=$gpsport, spawn_id=$GPS, pid=$GPSPID\n"
-	} else {
-		set str [spawn_kermit232 $gpscomport]
-		set GPS [lindex $str 0];
-		set GPSPID [lindex $str 1];
-		send_user "SPAWN KERMIT232, IP=$hubip, spawn_id=$GPS, pid=$GPSPID\n"
-	}
-}
-#===========================================================================
-# PROCEDURE TO CONNECT TO A SERVER PORT USING KERMIT
-# input
-#	hubip = ip#
-#   portnumber
-#Note: .kermrc file line = prompt k>>
-#============================================
-proc spawn_kermit {hubip portnumber} {
-	global GPS GPSPID
-			# START PROCESS -- KERMIT
-	set GPSID [spawn sudo kermit]
-	expect {
-		"assword" {
-			send "r0srr0sr\n"
-		}
-		">>" { }
-		"C-Kermit>" { 
-			send "prompt k>>\n" ;
-			send_user "39 snd prompt\n" ; 
-		}
-	}
-	send "prompt k>>\n" ;
-	expect {
-		-i GPSID
-		timeout {send_user "79 KERMIT FAILS TO OPEN\n"; exit 1}
-		"C-Kermit>" { 
-			send "prompt k>>\n" ;
-			send_user "snd prompt again\n" ;
-		}
-		">>" { }
-	}
-	#set GPSPID [spawn kermit]
-	set GPS $spawn_id;
-	send_user "test GPS=$GPS, GPSPID=$GPSPID\n";
-	set timeout 4	
-	expect {
-		timeout {send_user "91 KERMIT FAILS TO OPEN\n"; exit 1}
-		">>"
-	}
-			# OPEN THE PORT
-	send "set host $hubip $portnumber\r"
-	expect ">>"
-	send "set tcp keepalive on 0\r\n"
-	expect ">>"
-	send "set tcp linger OFF\r\n"
-	expect ">>"
-	send "set tcp nodelay on\r\n"
-	expect ">>"
-	send "set telnet echo local\r\n"
-	expect ">>"
-			# this is important for using the rsr menu
-			# raw means send CR by itself, not CRLF and NOT CRNul
-	send "set telnet newline-mode nvt raw\r\n"
-	expect ">>"
-			# CONNECT 
-	send "connect\r"
-	expect {
-		"Conn*---"  {send_user "PORT $portnumber CONNECTED\n"; return $spawn_id;}
-		timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
-	}
-}
-#===========================================================================
-# PROCEDURE TO CONNECT RS232 TO A PORT USING KERMIT
-# input
-#	serialport = full path name for the serial port, e.g. /dev/tty.usbserial0
-#   baud = desired baud rate, e.g. 9600
-#============================================
-proc spawn_kermit232 {hubip} {
-			# START PROCESS -- KERMIT
-	set pid [spawn sudo kermit]
-	expect {
-		"assword" {
-			send "r0srr0sr\n"
-		}
-		">>" { send "\n" }
-	}
-	send_user "!> pid = $pid\n";
-	set timeout 4
-	expect {
-		timeout {"KERMIT FAILS TO OPEN\n"; exit 1}
-		">>"
-	}
-			# OPEN THE PORT
-	## OPEN THE PORT
-	send "set line $hubip\r"
-	expect ">>"
-	#send_user "set line $hubip\n";
-	## SPEED
-	send "set speed 9600\r"
-	## DUPLEX
-	send "set duplex full\r"
-	expect ">>"
-	## LOCAL ECHO
-	send "set local-echo on\r"
-	expect ">>"
-	## FLOW CONTROL
-	send "set flow none\r"
-	expect ">>"
-	## CARRIER WATCH
-	send "set carrier-watch off\r"
-	expect ">>"
-	## LOG
-	send "log session ../data/capture.txt append\r"
-	expect ">>"
-	## CONNECT 
-	send "connect\r"
-	expect {
-		"Conn*---"  {send_user "232 CONNECTED\n"}
-		timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
-	}
-	set out $spawn_id;
-	lappend out $pid
-	return $out
-}
-#==================== END PROCEDURES =============================================
-
-
+## SERIAL SERVER VIA ETHERNET
+#send_user "serial server hub\n"
 #==============
-# PORT
+## READ SETUP FILE FOR PORT NUMBER
 #==============
 spawn -noecho getsetupinfo $setupfile "GPS PORT"
 expect -re "(\.*)(\r)";
-set gpsport $expect_out(1,string)
-send_user "GPS PORT: $gpsport\n";
-#====================
-# GPS INPUT OPTION
-#====================
-if { $gpsport == 0 } { 
-	# SIMULATE
-	send_user "SIMULATE GPS\n";
-	SpawnGpsSimulate;
-} elseif {$gpsport == 1} {
-	# GPS CONNECTION
-	spawn -noecho getsetupinfo $setupfile "SERIAL GPS"
-	expect -re "(\.*)(\r)";
-	set gpscom $expect_out(1,string)
-	send_user  "GPS 232COM: $gpscom\n"
-	set hubip "rs232 device";
-	SpawnGps $hubip $gpsport $gpscom
-} elseif {$gpsport == -1} {
-	# FIXED
-	send_user "FIXED GPS.\n";
-	SpawnGpsFixed;
-} else {
-	# HUB SERIAL SERVER
-	spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"
-	expect -re "(\.*)(\r)";
-	set hubip $expect_out(1,string)
-	set gpscom 0
-	send_user "SERIAL HUB IP: $hubip, GPS PORT: $gpsport\n"
-	SpawnGps $hubip $gpsport $gpscom
-}
+set portnumber $expect_out(1,string)
 
-while 1 {
-	expect {
-		-i $GPS
-		"\\\$GPRMC*\\*??"  {
-			set rawstr $expect_out(0,string);
-			set rawstr [string trim $rawstr ]
-			set timegps [timestamp] ;# record the time of the last gps
-			set rawstr [timestamp -gmt -format "%Y %m %d %H %M %S " -seconds $timegps]$rawstr
-			send_user "$rawstr\n"
-		}
+# START PROCESS -- KERMIT FOR MODEM
+spawn sudo kermit
+expect {
+	"assword" {
+		send "r0srr0sr\n"
+	}
+	">>" { }
+	"C-Kermit>" { 
+		send "prompt k>>\n" ;
+		#send_user "39 snd prompt\n" ; 
 	}
 }
+set PDS $spawn_id
+set timeout 3
+
+send "prompt k>>\n" ;
+expect {
+	-i PDS
+	timeout {send_user "47 KERMIT FAILS TO OPEN\n"; exit 1}
+	"C-Kermit>" { 
+		send "prompt k>>\n" ;
+		#send_user "50 snd prompt again\n" ;
+	}
+	">>" { }
+}
+
+## OPEN THE PORT
+send "set host $hubip $portnumber\r"
+expect ">>"
+send_user "set host $hubip $portnumber\n";
+
+## FINE TUNING TCP/IP
+send "set tcp keepalive on\r\n"
+expect ">>"
+send "set tcp linger\r\n"
+expect ">>"
+send "set tcp nodelay on\r\n"
+expect ">>"
+		# v2 
+send "set telnet echo local\r\n"
+expect ">>"
+
+## this is important for using the rsr menu
+## raw means send CR by itself, not CRLF and NOT CRNul
+send "set telnet newline-mode nvt raw\r\n"
+expect ">>"
+
+# LOG THE SESSION
+set logpath "$env(DAQDATAFOLDER)/capture_gps.txt"
+#send_user "log to $logpath\n";
+send "log session $logpath append\r\n"
+expect ">>"
+
+## CONNECT 
+send "connect\r"
+expect {
+	"Conn*---"  {send_user "GPS CONNECTED\r\n"}
+	timeout {send_user "86 GPS TIMEOUT, NO CONNECT"; exit 1}
+}
+
+set spawn_id $PDS
+interact
+
+exit; 
+
+exit 0

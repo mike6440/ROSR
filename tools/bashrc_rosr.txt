@@ -84,6 +84,7 @@ rosrrawc () {
 }
 alias Rawc="rosrrawc";
 alias lesssu="less `lastDataFolder`/su_*.txt";
+alias vimsu="vim setup/su.txt";
 
 rosrav () {
     cd $DAQSWFOLDER;

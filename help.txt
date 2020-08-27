@@ -1,4 +1,4 @@
-##### edit 2020-02-17
+##### edit 2020-08-27
 #--LINUX-----------
 INTRODUCTION TO LINUX: https://www.youtube.com/watch?v=IVquJh3DXUA
   Note: This file, help, is a linux "less" display. 
@@ -11,7 +11,7 @@ INTRODUCTION TO LINUX: https://www.youtube.com/watch?v=IVquJh3DXUA
   "helpa" for advanced help.
   "helpc" for details on the eeprom and the DAQ setup configuration files.
 #--BASIC--------
-  gtdaq                                       ->  cd ~/swmain/apps/ROSR/sw
+  gtdaq                                       ->  Go to 'sw' folder
   iss                                         ->  is DAQ running?
 #--TIME !! always UTC -----
   Date                                        ->  2018 10 19 18 03 57 Z
@@ -27,7 +27,6 @@ INTRODUCTION TO LINUX: https://www.youtube.com/watch?v=IVquJh3DXUA
   3. "Raw"                               ->  Confirm data flow  (^c to end)
 #-MIDCRUISE BACKUP -----------
   Remember S-A-W-S daily to weekly
-    Stop;Archive;Wipe y;sleep 1s;Start
   1. "Stop"                             -> stop DAQ.
   2. "Archive"                          -> make a data archive in ~/rosrdata/  
   3. "Wipe y"                           -> erase (wipe) the data folder.
@@ -36,10 +35,10 @@ INTRODUCTION TO LINUX: https://www.youtube.com/watch?v=IVquJh3DXUA
   1. "Stop"                             -> stop DAQ.
   2. "Archive"                          -> make a data archive in ~/rosrdata/  
   3. "Wipe y"                           -> erase (wipe) the data folder.
-  4. "Shutdown"                     -> Close shutter and go to standby.
+  4. "Shutdown"                         -> Close shutter and go to standby.
 #-TELNET SOCKET OR UDP -----
   1. Identify target computer IP and port.
-  2. Modify setup/su.txt.
+  2. Modify setup/su.txt. 
 
 #-MISC COMMANDS
 #-POWER (only if iBoot) ------
@@ -48,10 +47,12 @@ INTRODUCTION TO LINUX: https://www.youtube.com/watch?v=IVquJh3DXUA
   bootstatus                            ->  Current power status, ON or OFF.
   Bat                                   ->  Laptop PC battery status
 #--VIEW DATA-----------
-  Raw                                   ->  $WIROS raw data, 2 sec, ^c to end
-  Avg                                   ->  PC avg file, 10 min, (5,15,25,...,55)
-  Sst                                   ->  $WIRST packets, 280 sec, ^c to end
-  Sbd                                   ->  $WISBD packets, 280 sec, ^c to end
+  Raw                                   ->  raw data, last 10 lines
+  Rawc                                  ->  raw data continuous, ^c to end
+  Avg                                   ->  PC avg file, update 10 min, (5,15,25,...,55)
+  Sst                                   ->  $WIRST, 280 sec, last 10 lines
+  Sstc                                  ->  $WIRST, continuous, ^c to end
+  Sbd                                   ->  Last $WISBD record. Update 10 min.
   Av                                    ->  $WIRAV packets, 280 sec, ^c to end
 #-GPS DIRECT CONNECT---------
   P                                     -> direct connect to GPS

@@ -920,10 +920,10 @@ sub MakeRadTable_planck
 	while ( <FILTER> )
 	{
 		chomp($str = $_);
-		#if ( $iline < 2 ) { printf("%6d: %s\n", $iline, $str); }
-		if ( $iline >= 7 )
+		@w=split;
+		if($#w==1 && $w[0]>6 && $w[0]<14)
 		{
-			@w = split;
+			#print"$w[0]  $w[1]\n";
 			push ( @lambda, $w[0]);  # test
 			push ( @resp, $w[1]  * $w[0]/10);
 		}
