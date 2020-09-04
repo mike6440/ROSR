@@ -16,8 +16,8 @@ FIXED PITCH: 0
 FIXED ROLL: 0
 ===================
   !! new kt15 is on order
-KT15 SERIAL NUMBER: 11971
-KT15 FILTER FILE: kt15/kt1585_sn11971_rosr9.txt
+KT15 SERIAL NUMBER: 13639
+KT15 FILTER FILE: kt15/kt15_13639_rosr9.txt
 SCAN VIEW ANGLES: 265 325 45 135
 =========== DATA FILES ===============
 RT OUT PATH: data

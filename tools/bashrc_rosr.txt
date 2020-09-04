@@ -83,7 +83,7 @@ rosrrawc () {
     tail -f $xx
 }
 alias Rawc="rosrrawc";
-alias lesssu="less `lastDataFolder`/su_*.txt";
+alias lesssu="less `LastDataFolder`/su_*.txt";
 alias vimsu="vim setup/su.txt";
 
 rosrav () {
