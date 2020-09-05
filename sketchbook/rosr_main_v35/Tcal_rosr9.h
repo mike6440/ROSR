@@ -6,6 +6,6 @@ double Tcal[5][3] = {
 	{1.075075E-03,	2.309455E-04,	1.949239E-07 },
 	{1.184923E-03,	2.122126E-04,	2.753530E-07 },
  	{1.025579E-03,	2.397338E-04,	1.542038E-07 }
-	//Note, the 4th set of coefs is bad and the YSI coefs are used.
+	//Note, the 5th (last) set of coefs is bad and the YSI coefs are used.
 };
 
