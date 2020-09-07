@@ -39,8 +39,8 @@ if ($#ARGV >= 1){
 }
 if(-f $datfile){
 	open F, ">>$datfile" or die("OPEN $datfile FAILS\n");
-	print F "testing datfile\n";
-	print "testing datfile\n";
+	print F "open $datfile\n";
+	print "open $datfile\n";
 	close F;
 }
 
