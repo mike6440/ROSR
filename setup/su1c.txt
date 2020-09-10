@@ -1,5 +1,5 @@
 THIS FILE: su1c.txt
-Editdate: 180205
+Editdate: 180205 (testing git)
 #CALIBRATION FILE
 DAQ PASSWORD: r0srr0sr
 		DATA FILES ---------------------
