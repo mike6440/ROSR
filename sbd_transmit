@@ -17,7 +17,7 @@ log_user 0
 
 		# SETUP FILE DEFINED
 set Date [exec date -u "+%Y%m%dT%H%M%SZ"];
-set setupfile "$env(HOME)/swmain/apps/ISAR3/sw/setup/su.txt"
+set setupfile "$env(HOME)/swmain/apps/ROSR/sw/setup/su.txt"
 		## SEE IF THE SETUP FILE EXISTS
 if [catch {open $setupfile} sufile] {
 	puts "Setup file, $setupfile, open fails, exit 1"
