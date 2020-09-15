@@ -176,16 +176,14 @@ proc sbdi {str sbdid ntries} {
 spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"
 expect -re "(\.*)(\r)";
 set hub_ip $expect_out(1,string)
-send_user "IP = $hub_ip\n"; exit;
 
 
 		## SBDPORT
 spawn -noecho getsetupinfo $setupfile "SBD PORT"
 expect -re "(\.*)(\r)";
 set sbdport $expect_out(1,string)
-
+#send_user "IP=$hub_ip,   Port=$sbdport\n"
 SpawnSBD $hub_ip $sbdport
-
 		#=====================
 		# SEND SIGNON MESSAGE
 		#====================
@@ -193,11 +191,6 @@ set sbdmessage [ exec head -1 /tmp/sbd ]
 
 if { $sbdport >= 0 } { 
 	set SendFlag [sbdi $sbdmessage $SBD 2]
-#	if {$SendFlag == 0 } {
-#		 send_user "TX SIGNON SBD FAILS\n";
-#	} else {
-#		send_user "TX SIGNON SBD SUCCESS\n"
-#	}
 }
 
-
+exit 0;
