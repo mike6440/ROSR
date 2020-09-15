@@ -28,9 +28,9 @@ global SBD SBDPID
 #===================================
 # PROCEDURE TO CONNECT TO SBD  v13
 #===================================
-proc SpawnSBD { hub_url sbdport }  {
+proc SpawnSBD { hub_ip sbdport }  {
 	global SBD SBDPID
-	set str [spawn_kermit $hub_url $sbdport]
+	set str [spawn_kermit $hub_ip $sbdport]
 	set SBD [lindex $str 0];    set SBDPID [lindex $str 1];
 }
 
@@ -40,7 +40,7 @@ proc SpawnSBD { hub_url sbdport }  {
 #	serialport = full path name for the serial port, e.g. /dev/tty.usbserial0
 #   baud = desired baud rate, e.g. 9600
 #============================================
-proc spawn_kermit {hub_url portnumber} {
+proc spawn_kermit {hub_ip portnumber} {
 			# START PROCESS -- KERMIT
 	set pid [spawn kermit]
 	expect {
@@ -48,9 +48,9 @@ proc spawn_kermit {hub_url portnumber} {
 		">>"
 	}
 	
-	#send_user "test OPEN PORT $hub_url  $portnumber\n";
+	#send_user "test OPEN PORT $hub_ip  $portnumber\n";
 			# OPEN THE PORT
-	send "set host $hub_url $portnumber\r"
+	send "set host $hub_ip $portnumber\r"
 	expect ">>"
 	send "set tcp keepalive on 0\r\n"
 	expect ">>"
@@ -175,7 +175,8 @@ proc sbdi {str sbdid ntries} {
 		# PDS SERIAL HUB
 spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"
 expect -re "(\.*)(\r)";
-set hub_url $expect_out(1,string)
+set hub_ip $expect_out(1,string)
+send_user "IP = $hub_ip\n"; exit;
 
 
 		## SBDPORT
@@ -183,7 +184,7 @@ spawn -noecho getsetupinfo $setupfile "SBD PORT"
 expect -re "(\.*)(\r)";
 set sbdport $expect_out(1,string)
 
-SpawnSBD $hub_url $sbdport
+SpawnSBD $hub_ip $sbdport
 
 		#=====================
 		# SEND SIGNON MESSAGE
