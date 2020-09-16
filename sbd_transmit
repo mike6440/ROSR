@@ -13,7 +13,7 @@
 #====== END =========================
 
 
-log_user 0
+log_user 1
 
 		# SETUP FILE DEFINED
 set Date [exec date -u "+%Y%m%dT%H%M%SZ"];
@@ -31,14 +31,15 @@ global SBD SBDPID
 proc SpawnSBD { hub_ip sbdport }  {
 	global SBD SBDPID
 	set str [spawn_kermit $hub_ip $sbdport]
-	set SBD [lindex $str 0];    set SBDPID [lindex $str 1];
+	set SBD [lindex $str 0];
+    set SBDPID [lindex $str 1];
 }
 
 #===========================================================================
 # PROCEDURE TO CONNECT TO A PORT USING KERMIT
 # input
 #	serialport = full path name for the serial port, e.g. /dev/tty.usbserial0
-#   baud = desired baud rate, e.g. 9600
+#   baud = desired baud rate, e.g. 19200
 #============================================
 proc spawn_kermit {hub_ip portnumber} {
 			# START PROCESS -- KERMIT
@@ -47,11 +48,11 @@ proc spawn_kermit {hub_ip portnumber} {
 		timeout {send_user "KERMIT FAILS TO OPEN\n"; exit 1}
 		">>"
 	}
-	
 	#send_user "test OPEN PORT $hub_ip  $portnumber\n";
 			# OPEN THE PORT
 	send "set host $hub_ip $portnumber\r"
 	expect ">>"
+
 	send "set tcp keepalive on 0\r\n"
 	expect ">>"
 	send "set tcp linger OFF\r\n"
@@ -64,6 +65,7 @@ proc spawn_kermit {hub_ip portnumber} {
 			# raw means send CR by itself, not CRLF and NOT CRNul
 	send "set telnet newline-mode nvt raw\r\n"
 	expect ">>"
+    #send_user "stop 67\n"; exit;
 			# CONNECT 
 	send "connect\r"
 	expect {
@@ -171,20 +173,20 @@ proc sbdi {str sbdid ntries} {
 }
 #==================== END PROCEDURES =============================================
 
-
 		# PDS SERIAL HUB
 spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"
 expect -re "(\.*)(\r)";
 set hub_ip $expect_out(1,string)
 
-
 		## SBDPORT
 spawn -noecho getsetupinfo $setupfile "SBD PORT"
 expect -re "(\.*)(\r)";
 set sbdport $expect_out(1,string)
-#send_user "IP=$hub_ip,   Port=$sbdport\n"
+send_user "IP=$hub_ip,   Port=$sbdport\n"
+
 SpawnSBD $hub_ip $sbdport
-		#=====================
+send_user "end 186\n"; exit;
+#=====================
 		# SEND SIGNON MESSAGE
 		#====================
 set sbdmessage [ exec head -1 /tmp/sbd ]
@@ -192,5 +194,7 @@ set sbdmessage [ exec head -1 /tmp/sbd ]
 if { $sbdport >= 0 } { 
 	set SendFlag [sbdi $sbdmessage $SBD 2]
 }
+
+        # RETURN TO ROSR
 
 exit 0;
