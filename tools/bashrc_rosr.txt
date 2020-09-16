@@ -43,7 +43,7 @@ I () {
         else
 			cd $DAQSWFOLDER;
 			echo "NOTE: ^\ q to exit";
-			./term_to_sbd  $SETUPFILE
+			./term_to_rosr  $SETUPFILE
         fi
 }
 N () {

@@ -1,5 +1,5 @@
 #!/usr/bin/expect --
-
+# 9/16/2020 16:28
 # === NOTES ======================
 # Modem needs ATE0 command to suppress echo.
 # === end ========================
@@ -185,7 +185,7 @@ set sbdport $expect_out(1,string)
 send_user "IP=$hub_ip,   Port=$sbdport\n"
 
 SpawnSBD $hub_ip $sbdport
-send_user "end 186\n"; exit;
+#send_user "end 186\n"; exit;
 #=====================
 		# SEND SIGNON MESSAGE
 		#====================
@@ -196,5 +196,5 @@ if { $sbdport >= 0 } {
 }
 
         # RETURN TO ROSR
-
+SpawnSBD $hub_ip 10001
 exit 0;
