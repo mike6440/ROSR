@@ -42,7 +42,7 @@ N () {
 			echo "DAQ is already running. Stop first"
         else
 			cd $DAQSWFOLDER;
-			./term_to_sbd  $SETUPFILE'
+			./term_to_sbd  $SETUPFILE
         fi
 }
 
