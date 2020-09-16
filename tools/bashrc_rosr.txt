@@ -34,8 +34,18 @@ export SETUPFILE=$DAQSWFOLDER"/setup/su.txt"
 
 # TEST CALLS
 alias I='cd $DAQSWFOLDER; echo "NOTE: ^\ q to exit"; ./term_to_rosr'
-alias N='cd $DAQSWFOLDER; ./term_to_sbd  $SETUPFILE'
+#alias N='cd $DAQSWFOLDER; ./term_to_sbd  $SETUPFILE'
 alias P='cd $DAQSWFOLDER; ./term_to_gps  $SETUPFILE'
+N () {
+        ps cax | grep Z_rosr > /dev/null   # Z_rosr is the app in question
+        if [ $? -eq 0 ]; then
+			echo "DAQ is already running. Stop first"
+        else
+			cd $DAQSWFOLDER;
+			./term_to_sbd  $SETUPFILE'
+        fi
+}
+
 
 alias Help="help"
 alias help="less help.txt"
