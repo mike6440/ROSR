@@ -1,14 +1,14 @@
 THIS FILE: su9.txt
-Editdate: 200819
+Editdate: 200915
 EXPERIMENT NAME: ROSR9
 DAQ PASSWORD: r0srr0sr
 COMMENTS:
  New unit for NOAA GSM
 END
 ROSR SERIAL NUMBER: 9
-  
-SSST SLOPE : 1.0
-SSST OFFSET: 0
+  # cal 200913 
+SSST SLOPE : 1.0053
+SSST OFFSET: -0.065
  ==================
     # see fixed pitch and fixed roll if == 1
 FIXED TILT FLAG: 0
@@ -17,7 +17,7 @@ FIXED ROLL: 0
 ===================
   !! new kt15 is on order
 KT15 SERIAL NUMBER: 13639
-KT15 FILTER FILE: kt15/kt15_13639_rosr9.txt
+KT15 FILTER FILE: kt15/kt1585_sn13639_rosr9.txt
 SCAN VIEW ANGLES: 265 325 45 135
 =========== DATA FILES ===============
 RT OUT PATH: data

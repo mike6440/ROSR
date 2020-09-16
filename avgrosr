@@ -1,9 +1,7 @@
 #!/usr/bin/perl -X
-#avgrosr_v3
+my $VERSION = '7.2';  
+my $EDITDATE = '200915'; '180604';
 
-my $PROGRAMNAME = 'avgrosr';
-my $VERSION = '7.1';  
-my $EDITDATE = '180604';
 # DAQ PROCESSING OF ROSR DATA 
 #v01 -- taken from avgisar, v17.
 #v01a -- flexible for port and stbd install
@@ -12,7 +10,8 @@ my $EDITDATE = '180604';
 #v4 -- print out avg problem
 #v5 -- used the 'my' statement. I am not sure why.  Also add fixedtiltflag 
 #v6 -- choice of socktxx or udptss
-#v7 tcp/udp header
+#v7 -- tcp/udp header
+#v8 200915 -- sbd edit
 
 # EXAMPLE OF STRING FROM ROSR
 # FORMAT 1/2
@@ -445,10 +444,11 @@ while ( 1 ) {
 	# 			VRAIN	: ($WIROS/03) : %.4f : ORG ADC count, most recent reading.
 	# 			# : END CHARACTER
 	
-	$str = sprintf "\$WISBD,%s", dtstr($dt_samp,'short');
+    my $sstrdt=substr(dtstr($dt_samp,'short'),0,-2);
+	$str = sprintf "%s", $sstrdt;
 	# LAT AND LON
 	if ( $samp_lat{mn} == $missing || $samp_lon{mn} == $missing ) { $str = sprintf("%s,-999,-999", $str) }
-	else { $str = sprintf("%s,%.5f,%.5f", $str, $samp_lat{mn}, $samp_lon{mn}) }
+	else { $str = sprintf("%s,%.4f,%.4f", $str, $samp_lat{mn}, $samp_lon{mn}) }
 	# SOG
 	if ( $samp_sog{mn} == $missing ) { $str = sprintf("%s,-999", $str) }
 	else { $str = sprintf("%s,%.1f", $str,$samp_sog{mn}) }
@@ -463,23 +463,24 @@ while ( 1 ) {
 	if ( $samp_pitch{mn} == $missing || $samp_roll{mn} == $missing ) { $str = sprintf("%s,-999,0,-999,0", $str) }
 	else { $str = sprintf("%s,%.1f,%.1f,%.1f,%.1f",$str, $samp_pitch{mn},$samp_pitch{std}, $samp_roll{mn},$samp_roll{std}) }
 	# EMISSIVITY
-	$str = sprintf("%s,%.5f",$str,$e_sea);
+    #$str = sprintf("%s,%.5f",$str,$e_sea);
 	# KT15 SEAVIEW
 	if ( $samp_kt[$seaview*5] == $missing ) { $str = sprintf("%s,-999", $str) }
-	else { $str = sprintf("%s,%d",$str, 1000*$samp_kt[$seaview*5]) }
+	else { $str = sprintf("%s,%d",$str, $samp_kt[$seaview*5]) }
 	# KT15 SKYVIEW
 	if ( $samp_kt[$skyview*5] == $missing ) { $str = sprintf("%s,-999", $str) }
-	else { $str = sprintf("%s,%d",$str, 1000*$samp_kt[$skyview*5]) }
+	else { $str = sprintf("%s,%d",$str, $samp_kt[$skyview*5]) }
 	# KT15 BB1VIEW
 	if ( $samp_kt[$bb1view*5] == $missing ) { $str = sprintf("%s,-999", $str) }
-	else { $str = sprintf("%s,%d",$str, 1000*$samp_kt[$bb1view*5]) }
+	else { $str = sprintf("%s,%d",$str, $samp_kt[$bb1view*5]) }
 	# KT15 BB2VIEW
 	if ( $samp_kt[$bb2view*5] == $missing ) { $str = sprintf("%s,-999", $str) }
-	else { $str = sprintf("%s,%d",$str, 1000*$samp_kt[$bb2view*5]) }
+	else { $str = sprintf("%s,%d",$str, $samp_kt[$bb2view*5]) }
 	# BB TEMPS
 	$str = sprintf("%s,%.2f,%.2f",$str,$tb1, $tb2);
 	# RAIN and *
-	$str = sprintf("%s,%.2f*",$str,$samp_vrain{mn});
+    my $irain=0; if($samp_vrain{mn}>0.1){$irain=1}
+	$str = sprintf("%s,%1d*",$str,$irain);
 		# CHECK SUM
 	$chksum=NmeaChecksum($str);
 	$str=$str.$chksum;
@@ -488,7 +489,7 @@ while ( 1 ) {
 	print "$str\r\n";	
 	open SBD, ">/tmp/sbd" or die("OPEN SBD FAILS\n");
 	print SBD "$str\n";
-	close SBD;
+    close SBD;
 		# PREPARE FOR THE NEXT AVERAGE
 	ClearAccumulatorArrays();		# Prepare for averaging first record
 	($dt_samp, $dt1, $dt2) = ComputeSampleEndPoints( $record{dt}, $avgsecs, 0);	#increment $dt1 and $dt2 
