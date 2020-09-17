@@ -336,7 +336,7 @@ while 1 {
 			#=====================
 			# QUIT & SEND SIGNOFF MESSAGE
 			#====================
-			if {[string match "*quit*" "<[string tolower $userstr]>"]} {
+			if {[string match "*qu*" "<[string tolower $userstr]>"]} {
 				write_info $infoname "USER QUIT\n";
 				exit 0;
 			}
