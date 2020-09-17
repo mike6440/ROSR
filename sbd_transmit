@@ -1,5 +1,5 @@
 #!/usr/bin/expect --
-# 9/16/2020 16:28
+# 20200916,165026 L
 # === NOTES ======================
 # Modem needs ATE0 command to suppress echo.
 # === end ========================
@@ -13,11 +13,11 @@
 #====== END =========================
 
 
-log_user 1
+log_user 0
 
 		# SETUP FILE DEFINED
 set Date [exec date -u "+%Y%m%dT%H%M%SZ"];
-set setupfile "$env(HOME)/swmain/apps/ROSR/sw/setup/su.txt"
+set setupfile "$env(HomePath)/swmain/apps/ROSR/sw/setup/su.txt"
 		## SEE IF THE SETUP FILE EXISTS
 if [catch {open $setupfile} sufile] {
 	puts "Setup file, $setupfile, open fails, exit 1"
@@ -53,7 +53,7 @@ proc spawn_kermit {hub_ip portnumber} {
 	send "set host $hub_ip $portnumber\r"
 	expect ">>"
 
-	send "set tcp keepalive on 0\r\n"
+	send "set tcp keepalive on\r\n"
 	expect ">>"
 	send "set tcp linger OFF\r\n"
 	expect ">>"
@@ -72,7 +72,7 @@ proc spawn_kermit {hub_ip portnumber} {
 		timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
 		"Conn*---"  { }  #v15
 	}
-	#send_user "spawn_kermit spawn_id = $spawn_id,   pid = $pid\n";
+	send_user "STOP 75\n"; exit;
 	set out $spawn_id;
 	lappend out $pid
 	return $out
@@ -182,10 +182,9 @@ set hub_ip $expect_out(1,string)
 spawn -noecho getsetupinfo $setupfile "SBD PORT"
 expect -re "(\.*)(\r)";
 set sbdport $expect_out(1,string)
-send_user "IP=$hub_ip,   Port=$sbdport\n"
+#send_user "IP=$hub_ip,   Port=$sbdport\n"
 
 SpawnSBD $hub_ip $sbdport
-#send_user "end 186\n"; exit;
 #=====================
 		# SEND SIGNON MESSAGE
 		#====================
@@ -196,5 +195,4 @@ if { $sbdport >= 0 } {
 }
 
         # RETURN TO ROSR
-SpawnSBD $hub_ip 10001
 exit 0;
