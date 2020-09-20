@@ -3,7 +3,7 @@
 
 set PROGRAMNAME Z_rosr
 set VERSION 10
-set EDITDATE 20200919;
+set EDITDATE 20200920,11;
 # 
 # V1 FROM Z_ROSR V20
 #v4 use getgpsraw program 
@@ -404,7 +404,7 @@ while 1 {
 		if {$sbdtxflag > 0 && ($minute == $txmin1 || $minute == $txmin2) } {
 # 			write_info $infoname " 407 set sbdtxflag" ;
 			set sbdmessage [ exec head -1 /tmp/sbd ]
-			write_info $infoname $sbdmessage
+			#write_info $infoname $sbdmessage
 			if { $sbdport > 0 } { 
 				# v10
 				SpawnSBD $hubip $sbdport
