@@ -1,4 +1,5 @@
 #!/usr/bin/expect --
+#200917,1033
 
 set PROGRAMNAME Z_gps
 set VERSION 10
@@ -336,7 +337,7 @@ while 1 {
 			#=====================
 			# QUIT & SEND SIGNOFF MESSAGE
 			#====================
-			if {[string match "*qu*" "<[string tolower $userstr]>"]} {
+			if {[string match "*q*" "<[string tolower $userstr]>"]} {
 				write_info $infoname "USER QUIT\n";
 				exit 0;
 			}
@@ -347,6 +348,12 @@ while 1 {
 				send_user "PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE\n";
 						#  >20101226,195812,  41,0,1, -2.5,-1.5, 125,  514,3393,3394,3392,2340,2340,2355, 47.603,-122.288, 0.1,   0
 				send_user " yyyyMMdd,hhmmss ormv sw0 sw1  ptch roll fgaz  kt b11mv b12  b13  b21  b22  b23   lat     lon     sog  cog \n";
+			}
+			#=====================
+			# SBD TRANSMIT
+			#====================
+			if {[string match "*sbd*" "<[string tolower $userstr]>"]} {
+				send_user "SBD TRANSMIT\n";
 			}
 		}
 	}

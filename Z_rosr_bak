@@ -2,8 +2,8 @@
 #Z_rosr_v6
 
 set PROGRAMNAME Z_rosr
-set VERSION 10
-set EDITDATE 20200919;
+set VERSION 9.5
+set EDITDATE 181004;
 # 
 # V1 FROM Z_ROSR V20
 #v4 use getgpsraw program 
@@ -15,7 +15,6 @@ set EDITDATE 20200919;
 #v9.1 -- trying to get it to work
 #v9.2 -- debug. Fix wirav and wirst files
 #v9.4 -- debug mystery crash at new day -- see line 346
-#v10 -- add sbdtx for iridium, see Z_rosr_bak
 
 puts "
 RUN PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE"
@@ -137,8 +136,6 @@ proc spawn_kermit {hubip portnumber} {
 	lappend out $pid
 	return $out
 }
-
-
 #===========================================================================
 # PROCEDURE TO CONNECT RS232 TO A PORT USING KERMIT
 # input
@@ -194,114 +191,10 @@ proc spawn_kermit232 {hubip} {
 	return $out
 }
 
-#==================== SBD PROCEDURES v10 sbdtx =============================================
-global SBD SBDPID
-#===================================
-# PROCEDURE TO CONNECT TO SBD  v13
-# NOTE: Check for a valid sbdport before calling this.
-#===================================
-proc SpawnSBD { hubip sbdport }  {
-	global SBD SBDPID
-	set str [spawn_kermit $hubip $sbdport]
-	set SBD [lindex $str 0];
-	set SBDPID [lindex $str 1];
-}
-#v10 sbdi
-#====================================================================
-		# PROCEDURE TO SEND SBD MESSAGE  #v10 sbdtx
-		# input
-		#  str=the string to send
-		#  sbdid = the spawn ID for the sbd modem
-		#  ntries = no. of attempts for a "good" transmission
-#====================================================================
-proc sbdi {str sbdid ntries} {
-	global infoname;
-	set strlen [string length $str] ;
-	## WAKE UP THE MODEM
-	set timeout 1
-	set i 0
-	write_info $infoname "Begin sbdi"
-	#===================
-	# IS MODEM AWAKE?
-	# ==================
-	while {$i < 5} {
-		incr i 1
-		send -i $sbdid "at\r"
-		expect {
-			-i $sbdid "*OK" {
-				write_info $infoname "sbdi-OK received"
-				break
-			}
-			timeout {
-				write_info $infoname  "$i: MODEM DOES NOT RESPOND TO AT";  
-			}
-		}
-	}
-	if { $i >= 5 } {
-		#====================
-		# MODEM FAILS TO RESPOND
-		# ===================
-		write_info $infoname "MODEM FAILS TO RESPOND, SKIP SBDI"
-		return 0
-	}
-
-	set itx 0	;# we try to tx a few times
-	set Ktx 0   ;# initialize the flag to 0
-	set Ntx 0;  set Krx 0;  set Nrx 0;  set Lrx 0;  set Qrx 0;
-	#=====================
-		# KILL ECHO
-	#=====================
-# 	send -i $sbdid "ate0"
-# 	expect {
-# 		-i $sbdid "OK" {
-# 			#send_user "Kill modem echo\n"
-# 		}
-# 	}
-
-	#======================
-	# CLEAR MEMORY
-	#======================
-	send -i $sbdid "at+sbdd2\r"
-	expect {
-		-i $sbdid "OK" {
-		write_info $infoname "sbdi--Clear modem memory"
-		}
-	}
-	
-	#======================
-	# LOAD STRING
-	#=====================
-	send -i $sbdid "at+sbdwt=$str\r"
-	sleep 1
-	#========================
-	# TRANSMIT THE STRING
-	#=======================
-	while { $itx < 2 } {
-		# REPLY: +SBDI: 1, 66, 0, 0, 0, 0
-		# REPLY: +SBDIX:<MO status>,<MOMSN>,<MT status>,<MTMSN>,<MT length>,<MT queued>
-		send -i $sbdid "at+sbdi\r"
-		write_info $infoname "TX $itx: at+sbdi"
-		set timeout 60
-		expect -i $sbdid -re "\\+SBDI:(.*),(.*),(.*),(.*),(.*),(.*)\r\nOK" {
-			set Ktx $expect_out(1,string)
-			set Ntx $expect_out(2,string)
-			set Krx $expect_out(3,string)
-			set Nrx $expect_out(4,string)
-			set Lrx $expect_out(5,string)
-			set Qrx $expect_out(6,string)
-		}
-		set itx [expr $itx + 1]
-		if { $Ktx == 1 } { 
-			break
-		}
-		after 5000     ;# wait one second before retry
-	}
-	write_info $infoname "$str == Stat/#/itx  $Ktx/$Ntx/$itx"
-	set timeout 10
-	return $Ktx
-}
 #==================== END PROCEDURES =============================================
-#!!
+
+exec echo "START ROSR [timestamp -gmt -format "%Y%m%d,%H%M%S"]" > /tmp/sbd
+
 		#============
 		# DATAPATH
 		#==============
@@ -312,10 +205,10 @@ set datapath $expect_out(1,string)
 	# INFONAME
 set infoname "$env(DAQDATAFOLDER)/info.txt";
 send_user "INFONAME: $infoname\n";
-write_info $infoname "\n  ========== BEGIN PROGRAM $PROGRAMNAME ============="
+write_info $infoname "  ========== BEGIN PROGRAM $PROGRAMNAME ============="
 write_info $infoname "PROGRAM $PROGRAMNAME, Version $VERSION, Editdate $EDITDATE, Runtime [timestamp -gmt -format "%Y%m%d,%H%M%S"]"
-# write_info $infoname "INFORMATION FILE: $infoname"
-# write_info $infoname  "RT OUT PATH: $datapath"
+write_info $infoname "INFORMATION FILE: $infoname"
+write_info $infoname  "RT OUT PATH: $datapath"
 
 	# CALIBRATION FLAG
 spawn -noecho getsetupinfo $setupfile "CALIBRATION EMISSIVITY"
@@ -324,34 +217,36 @@ set e_cal $expect_out(1,string)
 
 if { $e_cal == 0 } { 
 	write_info $infoname "RUN MODE."
+	send_user "RUN MODE.\n"
 			## PLATFORM NAME
 	spawn -noecho getsetupinfo $setupfile "PLATFORM NAME"
 	expect -re "(\.*)(\r)";
-# 	write_info $infoname  "PLATFORM NAME: $expect_out(1,string)"
+	write_info $infoname  "PLATFORM NAME: $expect_out(1,string)"
 
 			## LOCATION ON PLATFORM
 	spawn -noecho getsetupinfo $setupfile "LOCATION ON PLATFORM"
 	expect -re "(\.*)(\r)";
-# 	write_info $infoname  "LOCATION ON PLATFORM: $expect_out(1,string)"
+	write_info $infoname  "LOCATION ON PLATFORM: $expect_out(1,string)"
 
 			## HEIGHT ABOVE SEA LEVEL
 	spawn -noecho getsetupinfo $setupfile "HEIGHT ABOVE SEA LEVEL"
 	expect -re "(\.*)(\r)";
-# 	write_info $infoname  "HEIGHT ABOVE SEA LEVEL: $expect_out(1,string)"
+	write_info $infoname  "HEIGHT ABOVE SEA LEVEL: $expect_out(1,string)"
 
 			## EXPERIMENT NAME
 	spawn -noecho getsetupinfo $setupfile "EXPERIMENT NAME"
 	expect -re "(\.*)(\r)";
 	set expname $expect_out(1,string)
-# 	write_info $infoname  "EXPERIMENT NAME: $expname"
+	write_info $infoname  "EXPERIMENT NAME: $expname"
 
 			## GEOGRAPHIC LOCATION
 	spawn -noecho getsetupinfo $setupfile "GEOGRAPHIC LOCATION"
 	expect -re "(\.*)(\r)";
-# 	write_info $infoname  "GEOGRAPHIC LOCATION: $expect_out(1,string)"
+	write_info $infoname  "GEOGRAPHIC LOCATION: $expect_out(1,string)"
 
 } else {
 	write_info $infoname "CAL MODE."
+	send_user "CALIBRATION MODE.\n"
 }
 	# PDS SERIAL HUB IP AND OFFSET
 spawn -noecho getsetupinfo $setupfile "SERIAL HUB IP"
@@ -359,22 +254,16 @@ expect -re "(\.*)(\r)";
 set hubip $expect_out(1,string)
 write_info $infoname  "SERIAL HUB IP: $hubip"
 
-	# SBD PORT $sbdport
-spawn -noecho getsetupinfo $setupfile "SBD PORT"
-expect -re "(\.*)(\r)";
-set sbdport $expect_out(1,string)
-write_info $infoname  "SBD PORT: $sbdport"
-
 	## ROSR PORT
 spawn -noecho getsetupinfo $setupfile "ROSR PORT"
 expect -re "(\.*)(\r)";
 set rosrport $expect_out(1,string)
 write_info $infoname  "ROSR PORT: $rosrport"
 if { $rosrport == 0 } { 
-	write_info $infoname  "SIMULATE ROSR...\n";
+	send_user "SIMULATE ROSR...\n";
 	SpawnRosrSimulate;
 } else {
-	write_info $infoname  "OPEN ROSR SERIAL CONNECTION.";
+	send_user "OPEN ROSR SERIAL CONNECTION...\n";
 	SpawnRosr $hubip $rosrport
 }
 		#=================
@@ -391,37 +280,19 @@ SpawnAvgRosr $setupfile
 		# SET dt0 SO THE FIRST AVG WILL BE TRANSMITTED
 # set dt0 [expr [timestamp -gmt] -100]
 set timeout 30		;# leave enough time for the scan drum to move
-set sbdtxflag 1;
-set txmin1 16;
-set txmin2 46;
+
 		# =====================
 		# MAIN LOOP
 		#======================
 write_info $infoname "===== BEGIN MAIN LOOP ====="
-while 1 {
-#!!     # MINUTES
-		set minute [timestamp -gmt -format "%M"]; 
-		if {$sbdtxflag > 0 && ($minute == $txmin1 || $minute == $txmin2) } {
-# 			write_info $infoname " 407 set sbdtxflag" ;
-			set sbdmessage [ exec head -1 /tmp/sbd ]
-			write_info $infoname $sbdmessage
-			if { $sbdport > 0 } { 
-				# v10
-				SpawnSBD $hubip $sbdport
-				set SendFlag [sbdi $sbdmessage $SBD 2]
-			}
-			set sbdtxflag 0;
-# 			write_info $infoname " 414 clear sbdtxflag" ;
-		} else {
-			if { $sbdtxflag == 0 && $minute != $txmin1 && $minute != $txmin2 } {
-				set sbdtxflag 1;
-# 				write_info $infoname " 418 set sbdtxflag" ;
-			}  
-		}
 
+		#=================
+		# EXPECT LOOP
+		#=================
+while 1 {
 		# LOOP TIME $dt
 	set dt [timestamp -gmt]
-			# NEW DAY
+			# CHECK FOR A NEW DAY -- NEW FILES
 	set day1 [timestamp -gmt -format "%j" -seconds $dt]
 	if {$day1 != $day0} {
 		set day0 $day1
@@ -431,20 +302,17 @@ while 1 {
 		set avname "$datapath/rosr_av_$fname.txt";
 		set sstname "$datapath/rosr_sst_$fname.txt";
 		# v9.4 send_user "NEW DAY $fname\n"
-# 		write_info $infoname "rwname = $rwname"
-# 		write_info $infoname "avname = $avname"
-# 		write_info $infoname "sstname = $sstname"
-		# ROSR HEADER
+		write_info $infoname "rwname = $rwname"
+		write_info $infoname "avname = $avname"
+		write_info $infoname "sstname = $sstname"
 		set str "\$WIssf,vv,etime,drum,RAD,REF,adc0,adc1,adc2,adc3,adc4,adc5,adc6,adc7,adc8,adc9,adc10,adc11,vref,t11,t12,t21,t22,pit,rol,Tanalog,Tktcase,Twindow,Tpwr,Vin,vrain,sec*chk<cr><lf>"
 		set F [open $rwname a 0600]
 		puts $F $str ;
 		close $F
-		# WIRAV HEADER
 		set str "\$WIRAV,etime,vav0,vav1,vav2,vav3,k0,ksd0,k1,ksd1,k2,ksd2,k3,ksd3,t11,tsd11,t12,tsd12,t21,tsd21,t22,tsd22,T1,T2,pav,psd,rav,rsd,ang,emis*chk";
 		set F [open $avname a 0600]
 		puts $F $str  ;
 		close $F
-		#WIRST HEADER
 		set str "\$WIRST,etime,vav0,vav1,vav2,vav3,k0,k1,k2,k3,T1,T2,ang,emis,ssst*chk";
 		set F [open $sstname a 0600]
 		puts $F $str  ;
@@ -474,7 +342,7 @@ while 1 {
 				if {$status > 0} {
 					# handle an error condition ...
 					set gpstr "0,0,0,0,0,0";
-					#write_info $infoname "catch error, gpstr = $gpstr\n";
+					write_info $infoname "catch error, gpstr = $gpstr\n";
 				}
 				set str [timestamp -gmt -format "%Y,%m,%d,%H,%M,%S,"]$gpstr,$rawstr 
 				set F [open $rwname a 0600]
@@ -506,32 +374,11 @@ while 1 {
 				close $F
 			} 
 		}
-		#================== USER INPUT =========================================#
+		#=========== 
+		#  USER INPUT 
+		#=============
 		-i $user_spawn_id  
-		-re ".+" {
-			set userstr $expect_out(0,string)
-			send_user $userstr
-			#=====================
-			# QUIT & SEND SIGNOFF MESSAGE
-			#====================
-			if {[string match "*qu*" "<[string tolower $userstr]>"]} {
-				write_info $infoname "USER QUIT\n==============================\n";
-				exit 0;
-			}
-			#=====================
-			# WRITE A HEADER LINE
-			#====================
-			if {[string match "*h*" "<[string tolower $userstr]>"]} {
-				write_info $infoname "PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE";
-			}
-			#=====================
-			# SBD TRANSMIT
-			#====================
-			if {[string match "*sbd*" "<[string tolower $userstr]>"]} {
-				write_info $infoname "SBD TRANSMIT $hubip, $sbdport";
-				set sbdmessage [ exec head -1 /tmp/sbd ]
-				write_info $infoname "$sbdmessage";
-			}
-		}
+		expect "q" { exit 0 }
 	}
 }
+

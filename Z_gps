@@ -1,4 +1,5 @@
 #!/usr/bin/expect --
+# 200917,0950
 
 set PROGRAMNAME Z_gps
 set VERSION 10

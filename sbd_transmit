@@ -65,14 +65,12 @@ proc spawn_kermit {hub_ip portnumber} {
 			# raw means send CR by itself, not CRLF and NOT CRNul
 	send "set telnet newline-mode nvt raw\r\n"
 	expect ">>"
-    #send_user "stop 67\n"; exit;
 			# CONNECT 
 	send "connect\r"
 	expect {
 		timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
 		"Conn*---"  { }  #v15
 	}
-	send_user "STOP 75\n"; exit;
 	set out $spawn_id;
 	lappend out $pid
 	return $out
