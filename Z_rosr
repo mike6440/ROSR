@@ -3,7 +3,7 @@
 
 set PROGRAMNAME Z_rosr
 set VERSION 10
-set EDITDATE 20200920,11;
+set EDITDATE 20200921,12;
 # 
 # V1 FROM Z_ROSR V20
 #v4 use getgpsraw program 
@@ -220,7 +220,7 @@ proc sbdi {str sbdid ntries} {
 	## WAKE UP THE MODEM
 	set timeout 1
 	set i 0
-	write_info $infoname "Begin sbdi"
+# 	write_info $infoname "Begin sbdi"
 	#===================
 	# IS MODEM AWAKE?
 	# ==================
@@ -264,7 +264,7 @@ proc sbdi {str sbdid ntries} {
 	send -i $sbdid "at+sbdd2\r"
 	expect {
 		-i $sbdid "OK" {
-		write_info $infoname "sbdi--Clear modem memory"
+# 		write_info $infoname "sbdi--Clear modem memory"
 		}
 	}
 	
@@ -385,6 +385,10 @@ set day0 0
 		# OPEN AVG PROGRAMS
 SpawnAvgRosr $setupfile 
 
+if { $sbdport > 0 } { 
+	SpawnSBD $hubip $sbdport  #v10
+}
+
 		#====================
 		# TIMING PARAMETERS
 		#====================
@@ -405,9 +409,7 @@ while 1 {
 # 			write_info $infoname " 407 set sbdtxflag" ;
 			set sbdmessage [ exec head -1 /tmp/sbd ]
 			#write_info $infoname $sbdmessage
-			if { $sbdport > 0 } { 
-				# v10
-				SpawnSBD $hubip $sbdport
+			if { $sbdport > 0 } { #v10
 				set SendFlag [sbdi $sbdmessage $SBD 2]
 			}
 			set sbdtxflag 0;
