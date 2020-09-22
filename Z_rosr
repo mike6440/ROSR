@@ -1,5 +1,5 @@
 #!/usr/bin/expect --
-#Z_rosr v10 200922,13z
+#Z_rosr v10 200922,14z
 
 set PROGRAMNAME Z_rosr
 set VERSION 10
@@ -280,7 +280,7 @@ proc sbdi {str sbdid ntries} {
 		# REPLY: +SBDI: 1, 66, 0, 0, 0, 0
 		# REPLY: +SBDIX:<MO status>,<MOMSN>,<MT status>,<MTMSN>,<MT length>,<MT queued>
 		send -i $sbdid "at+sbdi\r"
-		write_info $infoname "TX $itx: at+sbdi"
+		#write_info $infoname "TX $itx: at+sbdi"
 		set timeout 60
 		expect -i $sbdid -re "\\+SBDI:(.*),(.*),(.*),(.*),(.*),(.*)\r\nOK" {
 			set Ktx $expect_out(1,string)
