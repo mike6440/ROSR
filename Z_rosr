@@ -1,9 +1,9 @@
 #!/usr/bin/expect --
-#Z_rosr_v6
+#Z_rosr v10 200922,13z
 
 set PROGRAMNAME Z_rosr
 set VERSION 10
-set EDITDATE 20200921,17;
+set EDITDATE 20200922
 # 
 # V1 FROM Z_ROSR V20
 #v4 use getgpsraw program 
@@ -371,10 +371,8 @@ expect -re "(\.*)(\r)";
 set rosrport $expect_out(1,string)
 write_info $infoname  "ROSR PORT: $rosrport"
 if { $rosrport == 0 } { 
-	write_info $infoname  "SIMULATE ROSR...\n";
 	SpawnRosrSimulate;
 } else {
-	write_info $infoname  "OPEN ROSR SERIAL CONNECTION.";
 	SpawnRosr $hubip $rosrport
 }
 		#=================
