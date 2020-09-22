@@ -3,7 +3,7 @@
 
 set PROGRAMNAME Z_rosr
 set VERSION 10
-set EDITDATE 20200921,12;
+set EDITDATE 20200921,17;
 # 
 # V1 FROM Z_ROSR V20
 #v4 use getgpsraw program 
@@ -386,7 +386,7 @@ set day0 0
 SpawnAvgRosr $setupfile 
 
 if { $sbdport > 0 } { 
-	SpawnSBD $hubip $sbdport  #v10
+	SpawnSBD $hubip $sbdport ;
 }
 
 		#====================
