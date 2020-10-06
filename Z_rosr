@@ -23,6 +23,9 @@ RUN PROGRAM $PROGRAMNAME, VERSION $VERSION, EDITDATE $EDITDATE"
 set loguser 0;		#   v9.5 set to 0test 0-quiet, 1=verbose
 log_user $loguser;
 
+# NARGV == -1 exit
+# if ARG 0 NOT a file, exit
+
 		# SETUP FILE DEFINED
 set setupfile  [lindex $argv 0]
 		## SEE IF THE SETUP FILE EXISTS

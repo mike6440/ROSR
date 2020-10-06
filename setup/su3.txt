@@ -1,15 +1,18 @@
 THIS FILE: su3.txt
-Editdate: 190620
-EXPERIMENT NAME: Endeavor
+Editdate: 200930
+EXPERIMENT NAME: service
 DAQ PASSWORD: r0srr0sr
 COMMENTS:
- After rosr3 maintennce 12/2018. New gold mirror.
- Checkout before saildrone validation cruise.
+ Service at rmrco
 END
 ROSR SERIAL NUMBER: 3
-  rosr3 cal 1901
-SSST SLOPE : 1.0092
-SSST OFFSET: .129
+  	rosr3 cal 1901
+	SSST SLOPE : 1.0092
+	SSST OFFSET: .129
+  cal 191107 -- 1.0026  0.087
+SSST SLOPE : 1.0026
+SSST OFFSET: .087
+
  ==================
     # see fixed pitch and fixed roll if == 1
 FIXED TILT FLAG: 0
@@ -17,7 +20,7 @@ FIXED PITCH: 0
 FIXED ROLL: 0
 ===================
 KT15 SERIAL NUMBER: 11935
-KT15 FILTER FILE: kt15/kt1585_sn11935.txt
+KT15 FILTER FILE: kt15/kt1585_sn11935_rosr3.txt
 SCAN VIEW ANGLES: 265 325 45 135
 =========== DATA FILES ===============
 RT OUT PATH: data
@@ -31,7 +34,7 @@ SERIAL HUB IP: 192.168.255.1
 	# rosr hub 10001, simulate 0, rs232 1
 ROSR PORT: 10001
 	# gps hub-10003, rs232 1, Fixed -1, simulate=0
-GPS PORT: 10003
+GPS PORT: -1
 	# iff gps port = 1 specify serial port, e.g. /dev/ttyS1
 SERIAL GPS: not used
 	# MODEM -- 10004, Not connected=-1, simulate=0
@@ -41,19 +44,19 @@ SBD PORT: -1
 	# udptx or socktxx
  ===========================
 TELNET PROGRAM: udptx
-TELNET SERVER IP: 10.1.10.86
-TELNET SERVER PORT: 4444
+TELNET SERVER IP: 10.1.10.30
+TELNET SERVER PORT: 
  =========================
 		EXPERIMENT INFO
  =========================
-GEOGRAPHIC LOCATION: Gulf Stream
-		two characters for a ship code
-PLATFORM NAME: EN
-LOCATION ON PLATFORM: TBD
-HEIGHT ABOVE SEA LEVEL m: 6
+GEOGRAPHIC LOCATION: rmrco
+		two characters for a ship code, na=not applicable
+PLATFORM NAME: na
+LOCATION ON PLATFORM: na
+HEIGHT ABOVE SEA LEVEL m: 2
 SHIP TYPE: RV
-SHIP NAME: RV ENDEAVOR
-CRUISE NAME: EN630
+SHIP NAME: RV na
+CRUISE NAME: na
 	port or starboard
 PLATFORM SIDE: PORT
  =========================
@@ -61,8 +64,8 @@ PLATFORM SIDE: PORT
  =========================
 GPS DEAD TIME ALARM SECS: 60 
 GPS AVERAGING TIME: 120
-GPS FIXED LATITUDE: 38
-GPS FIXED LONGITUDE: -65
+GPS FIXED LATITUDE: 47.60332
+GPS FIXED LONGITUDE: -122.28807
 		Magnetic variation, + = East of true
 GPS FIXED VARIATION: 18.1
 MINIMUM EXPECTED LATITUDE: 5
