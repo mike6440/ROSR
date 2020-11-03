@@ -1,12 +1,10 @@
 #!/usr/bin/perl -X
-# edit 180523
+# edit 201031
 
 # List all com terminals. Argument defines 
 
 @w = `find /dev -maxdepth 1 -iname tty*usb* -print 2>/dev/null`;
 @x = `find /dev -maxdepth 1 -iname tty.UC* -print 2>/dev/null`;
-#@x = `ls /dev/tty*PL* 2>/dev/null`;
-#@x = `ls /dev/ttyS[0-1] 2>/dev/null`;
 @w=(@w,@x);
 if ( $#w < 0 ){print"0"; exit 1} # no com ports
 if ( $#w == 0 ){				# single com port
@@ -14,7 +12,7 @@ if ( $#w == 0 ){				# single com port
 	print $str;
 	exit 0;
 }
-#foreach(@w){print"$_"}
+#foreach(@w){print"$_"} ; exit;
 if($#ARGV<0){					# Multiple com ports
 	chomp($str=$w[0]);
 } else {

@@ -3,29 +3,19 @@
 #Note: the file .kermrc has the command "prompt k>>"
 # edit 201031
 
+
+
 log_user 0  ;# !!
+
 
 ## DEFINE THE PORTS
 set argc [llength $argv]
-foreach arg $argv {
-	if { [string match $argv "-h" ] } {
-	  puts "==============
-kerm232 -h
-==============
-  Connect to RS232 via a serial converter such as ATEC-UC232A 
-  CALL: kerm232 \[\[port\] baud\]
-  kerm232 `FindCOMPort` 19200 
-  kerm232 /dev/ttyUSB0
-  kerm232 19200
-
-  CALL:  FindCOMPort -->> looks in /dev/tty*
-    `find /dev -maxdepth 1 -iname tty*usb* -print 2>/dev/null`;
-    `find /dev -maxdepth 1 -iname tty.UC* -print 2>/dev/null`;
---------------------------------";
-		exit;
-	}
-}
-
+#	puts "kerm232 [[port] speed]"
+#	puts "Examples:"
+#	puts "   kerm232 /dev/ttyUSB0 9600"
+#	puts "   kerm232 19200"
+#	puts "   kerm232"
+#	puts "--------------------------------"
 
 if {$argc == 0} {
 	set inport [exec FindCOMPort]
