@@ -17,7 +17,7 @@ VERBOSE MODE: 0
 		## Specifics on the Instrument
 		## rosr01 : kt1585_sn11486.txt
 KT15 SERIAL NUMBER: 11486
-KT15 FILTER FILE: kt15/kt1585_sn11486.txt
+KT15 FILTER FILE: kt15/kt1585_sn11486_rosr1.txt
 	========================
 		HUB ADDRESS AND PORTS
 		PDS default: 192.168.255.1
