@@ -448,7 +448,7 @@ while 1 {
 		puts $F $str  ;
 		close $F
 		#WIRST HEADER
-		set str "\$WIRST,etime,vav0,vav1,vav2,vav3,k0,k1,k2,k3,T1,T2,ang,emis,ssst*chk";
+		set str "\$WIRST,etime,enc0,enc1,enc2,enc3,k0,k1,k2,k3,T1,T2,ang,emis,ssst*chk"; # 2020-11-12
 		set F [open $sstname a 0600]
 		puts $F $str  ;
 		close $F
