@@ -25,12 +25,11 @@
 //v34 180522 --
 //      remove const char 'zero' and const char 'space'
 //		ee.ShutterFlag=0 if open or close current limit
-//v35.1 180610 --
+//v35 180610 --
 //		TEST mode is sustained permanently if 'fc' is operated in the menu
 //		180917 setup for rosr3
 //		190819 setup for rosr4
 //		In version 35 we fix the menu section so I works with the miniPC.
-//v35.2 201113 -- fixed this error while servicing rosr1
 //v36 to do
 //		1. T22 error
 
@@ -1963,7 +1962,7 @@ void EepromPrint()
   Serial.println("EepromPrint: ");
   Serial.print("  ID = ");  Serial.print(ee.id);  Serial.println(" ");
   Serial.print("  An   n=1..4, BB Ref esistors = ");
-  	for (i = 0; i < 7; i++) { Serial.print(ee.Rref[i], 1);    Serial.print("  "); }   Serial.println(""); //v35.2
+  	for (i = 0; i < 7; i++) { Serial.print(ee.Rref[i], 1);    Serial.print("  "); }
   Serial.print("  B    BB view sample count = ");  Serial.print(ee.Nbb);  Serial.println("");
   Serial.print("  c    BB1 angle = ");  Serial.print(ee.abb1, 2);  Serial.println(" deg");
   Serial.print("  C    BB2 angle = ");  Serial.print(ee.abb2, 2); Serial.println(" deg");
