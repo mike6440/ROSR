@@ -9,18 +9,21 @@ log_user 0  ;# !!
 set argc [llength $argv]
 foreach arg $argv {
 	if { [string match $argv "-h" ] } {
-	  puts "==============
-kerm232 -h
+	  puts " 201224
+==============
+CALL : kerm232 -h           -> help display
+       or
+       kerm232 \[\[port\] baud\] 
 ==============
   Connect to RS232 via a serial converter such as ATEC-UC232A 
-  CALL: kerm232 \[\[port\] baud\]
-  kerm232 `FindCOMPort` 19200 
-  kerm232 /dev/ttyUSB0
-  kerm232 19200
-
-  CALL:  FindCOMPort -->> looks in /dev/tty*
-    `find /dev -maxdepth 1 -iname tty*usb* -print 2>/dev/null`;
-    `find /dev -maxdepth 1 -iname tty.UC* -print 2>/dev/null`;
+  examples:
+  kerm232 /dev/ttyUSB0  19200        -> specifies port and speed
+  kerm232 `FindCOMPort` 19200        -> uses FindCOMPort to find the port
+  kerm232 19200                      -> uses FindCOMPort to find the port
+  kerm232                            -> uses FindCOMPort to find the port,  9600 baud
+  
+  Serial data are appended to ../data/capture.txt
+  
 --------------------------------";
 		exit;
 	}

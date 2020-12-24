@@ -31,7 +31,7 @@
 //		190819 setup for rosr4
 //		In version 35 we fix the menu section so I works with the miniPC.
 //v35.2 201113 -- fixed this error while servicing rosr1
-//v36 to do
+//v36dev to do
 //		1. T22 error
 
 
@@ -52,9 +52,9 @@ Adafruit_ADS1115 ads2(0x4A);    // ad2, u14, construct an ads1115 at address 0x4
 // !! CUSTOMIZE FOR ROSR NUMBER
 // 2a means with swapped bb's
 //==========================
-#include "header9.h"  // !! programname, version, eeprom_id
-#include "t-rad_table9.h"	// !! rad<->temp parameters
-#include "Tcal_rosr9.h"  //!! BB thermistor coefs 
+#include "header1.h"  // !! programname, version, eeprom_id
+#include "t-rad_table1.h"	// !! rad<->temp parameters
+#include "Tcal_rosr1.h"  //!! BB thermistor coefs 
 
 #define YES 1
 #define NO 0
@@ -2486,8 +2486,8 @@ void PrintProgramID(void)
 
 
 // !! s/r float ReadEncoder (float ref)
-//#include "readencoder1.h" //rosr1 and rosr2
-#include "readencoder2.h" //rosr3, 4 and above
+#include "readencoder1.h" //rosr1 and rosr2
+//#include "readencoder2.h" //rosr3, 4 and above
 
 //============================================================================
 void        ReadKT15(double *irrad, double *irtemp)

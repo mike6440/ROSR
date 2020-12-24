@@ -1,8 +1,33 @@
 #!/usr/bin/perl -X
-# edit 201031
+# edit 201221
+
+use Getopt::Std;
+# https://alvinalexander.com/perl/perl-getopts-command-line-options-flags-in-perl/
+# declare the perl command line flags/options we want to allow
+my %options;
+getopts("h", \%options);
+if($options{h}){
+	print <<CAT;
+
+201224
+============================================
+  FindCOMPort -- check for default serial port
+============================================
+
+  syntax: FindCOMPort
+
+  Calls "ls /dev/tty*" and looks for a USB name. e.g. /dev/ttyUSBac
+  
+  RETURNS
+    0  If no COM port found
+    or
+    path to the USB port
+    
+CAT
+  exit; 
+}
 
 # List all com terminals. Argument defines 
-
 @w = `find /dev -maxdepth 1 -iname tty*usb* -print 2>/dev/null`;
 @x = `find /dev -maxdepth 1 -iname tty.UC* -print 2>/dev/null`;
 @w=(@w,@x);
@@ -12,7 +37,7 @@ if ( $#w == 0 ){				# single com port
 	print $str;
 	exit 0;
 }
-#foreach(@w){print"$_"} ; exit;
+foreach(@w){print"$_"} ; exit;
 if($#ARGV<0){					# Multiple com ports
 	chomp($str=$w[0]);
 } else {

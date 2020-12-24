@@ -57,6 +57,7 @@ INTRODUCTION TO LINUX: https://www.youtube.com/watch?v=IVquJh3DXUA
 #-GPS DIRECT CONNECT---------
   P                                     -> direct connect to GPS
 #-ROSR DIRECT CONNECT---------
+  FindCOMPort [-h]                      -> Finds valid USB port. -h for help
   I                                     -> direct connect to ROSR, "^\ q" to end
     T                                   -> ROSR test  '>' prompt
       e                                 -> contents of the eeprom
