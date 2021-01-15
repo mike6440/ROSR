@@ -1,0 +1,137 @@
+#!/usr/bin/expect --
+#Note: the file .kermrc has the command "prompt k>>"
+
+# 210109 v0 Copied from term_to_rosr
+
+## HELP
+set argc [llength $argv] ;#page214
+set ip "192.168.255.1"
+set port "10001"
+#puts "argc = $argc"
+
+foreach arg $argv {
+	if { [string match $arg "-h" ] } {
+	  puts "  begin help
+==============
+term2hub -h
+  edit: 210111
+==============
+  Connect to a hub 
+  CALL: term2hub \[-i ipnumber] \[-p portnumber]
+  e.g.
+  term2hub ==>> default -i192.168.255.1  -p10001
+  term2hub -i10.198.3.109 -p10001
+--------------------------------
+  exit help";
+		exit;
+	}
+}
+
+## PARSE ALL COMMANDS
+for {set i 0} {$i<$argc} {incr i} {
+	set str [lindex $argv $i]; # -i or -i192.168.255.1
+	#puts "arg $i: $str";
+	set cmd [string index $str 1];
+	#puts "cmd: $cmd"
+	## parameter if length > 2
+	if {[string length $str] > 2} {
+		set str1 [string range $str 2 end];
+		#puts "str1: $str1";
+	} else {
+		if {[string match $cmd "i"]} {
+			set str1 $ip
+		} elseif { [string match $cmd "p"] } {
+			set str1 $port
+		}
+	}
+	## APPLY TO COMMAND
+	if {[string match $cmd "i"]} { 
+		set ip $str1 
+	} elseif { [string match $cmd "p"] } { 
+		set port $str1 
+	}
+}
+puts "IP: $ip"
+puts "PORT: $port"
+
+log_user 0
+
+#==============
+## READ SETUP FILE FOR IP ADDRESS
+#==============
+set hubip $ip
+send_user "HUB IP: $hubip\n"
+
+#==============
+## READ SETUP FILE FOR PORT NUMBER
+#==============
+set portnumber $port
+send_user "PORT: $portnumber\n"
+
+# START PROCESS -- KERMIT FOR MODEM
+spawn sudo kermit
+expect {
+	"assword" {
+		send "r0srr0sr\n"
+	}
+	">>" { }
+	"C-Kermit>" { 
+		send "prompt k>>\n" ;
+		send_user "39 snd prompt\n" ; 
+	}
+}
+set PDS $spawn_id
+set timeout 3
+
+send "prompt k>>\n" ;
+expect {
+	-i PDS
+	timeout {send_user "KERMIT FAILS TO OPEN\n"; exit 1}
+	"C-Kermit>" { 
+		send "prompt k>>\n" ;
+		#send_user "snd prompt again\n" ;
+	}
+	">>" { }
+}
+
+## OPEN THE PORT
+send "set host $hubip $portnumber\r"
+expect ">>"
+send_user "set host $hubip $portnumber\n";
+
+## FINE TUNING TCP/IP
+send "set tcp keepalive on\r\n"
+expect ">>"
+send "set tcp linger\r\n"
+expect ">>"
+send "set tcp nodelay on\r\n"
+expect ">>"
+		# v2 
+send "set telnet echo local\r\n"
+expect ">>"
+send "set terminal newline-mode on\r\n"
+expect ">>"
+
+## this is important for using the rsr menu
+## raw means send CR by itself, not CRLF and NOT CRNul
+send "set telnet newline-mode nvt raw\r\n"
+expect ">>"
+
+# LOG THE SESSION
+set logpath "$env(DAQDATAFOLDER)/capture_"
+append logpath $portnumber ".txt";
+send_user "append to $logpath\n";
+send "log session $logpath append\r\n"
+expect ">>"
+
+## CONNECT 
+send "connect\r"
+expect {
+	"Conn*---"  {send_user "CONNECTED\r\n"}
+	timeout {send_user "TIMEOUT, NO CONNECT"; exit 1}
+}
+
+set spawn_id $PDS
+interact
+
+exit 0
